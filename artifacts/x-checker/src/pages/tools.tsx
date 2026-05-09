@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useSearchParams } from "@/hooks/use-search-params";
 import { useCheckAccounts } from "@workspace/api-client-react";
 import { AccountCheckResult } from "@workspace/api-client-react/src/generated/api.schemas";
@@ -14,33 +14,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Loader2, Copy, Trash2, CheckCircle2, XCircle, HelpCircle,
   UserX, AlertCircle, BadgeCheck, ExternalLink, Users, Calendar, Link2,
-  Sparkles, RefreshCw, Plus, KeyRound, Eye, EyeOff, ShieldCheck, AtSign,
-  Search, Settings2,
+  Sparkles, RefreshCw, AtSign, Search,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-const STORAGE_KEY = "groq_api_keys";
-const MAX_KEYS = 5;
-
-function loadKeys(): string[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveKeys(keys: string[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(keys));
-}
-
-function maskKey(key: string): string {
-  if (key.length <= 12) return "••••••••••••";
-  return key.slice(0, 8) + "••••••••" + key.slice(-4);
-}
 
 function formatCount(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
@@ -75,53 +51,9 @@ export default function Tools() {
     atMode === "add" ? (u.startsWith("@") ? u : `@${u}`) : u.replace(/^@+/, "")
   );
 
-  const [groqKeys, setGroqKeys] = useState<string[]>(loadKeys);
-  const [newKey, setNewKey] = useState("");
-  const [showNewKey, setShowNewKey] = useState(false);
-  const keyIndexRef = useRef(0);
-
-  const addKey = () => {
-    const trimmed = newKey.trim();
-    if (!trimmed) return;
-    if (groqKeys.length >= MAX_KEYS) {
-      toast({ title: "Max keys reached", description: `You can store up to ${MAX_KEYS} API keys.`, variant: "destructive" });
-      return;
-    }
-    if (groqKeys.includes(trimmed)) {
-      toast({ title: "Duplicate key", description: "This key is already saved.", variant: "destructive" });
-      return;
-    }
-    const updated = [...groqKeys, trimmed];
-    setGroqKeys(updated);
-    saveKeys(updated);
-    setNewKey("");
-    setShowNewKey(false);
-    toast({ title: "Key saved", description: "Groq API key added successfully." });
-  };
-
-  const removeKey = (index: number) => {
-    const updated = groqKeys.filter((_, i) => i !== index);
-    setGroqKeys(updated);
-    saveKeys(updated);
-    keyIndexRef.current = 0;
-    toast({ title: "Key removed" });
-  };
-
-  const pickNextKey = (): string | null => {
-    if (groqKeys.length === 0) return null;
-    const key = groqKeys[keyIndexRef.current % groqKeys.length];
-    keyIndexRef.current = (keyIndexRef.current + 1) % groqKeys.length;
-    return key;
-  };
-
   const handleGenerateBio = async () => {
     if (!bioTopic.trim()) {
       toast({ title: "Enter a topic", description: "Tell us what your bio should be about.", variant: "destructive" });
-      return;
-    }
-    const apiKey = pickNextKey();
-    if (!apiKey) {
-      toast({ title: "No API key", description: "Add a Groq API key in the Settings tab first.", variant: "destructive" });
       return;
     }
     setBioLoading(true);
@@ -130,19 +62,11 @@ export default function Tools() {
       const res = await fetch("/api/generate-bio", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic: bioTopic, tone: bioTone, apiKey }),
+        body: JSON.stringify({ topic: bioTopic, tone: bioTone }),
       });
       const data = await res.json();
-      if (res.status === 401 || data.error === "invalid_api_key") {
-        toast({ title: "Invalid API key", description: "One of your keys is invalid. Check your Settings.", variant: "destructive" });
-        return;
-      }
-      if (res.status === 429 || data.error === "rate_limited") {
-        toast({ title: "Rate limited", description: "This key hit its limit. Trying next key on the next attempt.", variant: "destructive" });
-        return;
-      }
-      if (data.error === "no_api_key") {
-        toast({ title: "No API key sent", description: "Add a Groq API key in Settings.", variant: "destructive" });
+      if (res.status === 429) {
+        toast({ title: "Too many requests", description: data.error ?? "Please try again in a moment.", variant: "destructive" });
         return;
       }
       if (!res.ok) throw new Error(data.error ?? "Failed to generate bio");
@@ -262,15 +186,6 @@ export default function Tools() {
             <TabsTrigger value="at" className="flex-1 flex items-center justify-center gap-2 text-xs font-medium py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground">
               <AtSign className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Formatter</span>
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex-1 flex items-center justify-center gap-2 text-xs font-medium py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground">
-              <Settings2 className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Settings</span>
-              {groqKeys.length > 0 && (
-                <span className="rounded-full bg-primary/20 text-primary text-[10px] font-mono px-1.5 py-0.5 leading-none">
-                  {groqKeys.length}
-                </span>
-              )}
             </TabsTrigger>
           </TabsList>
 
@@ -471,12 +386,6 @@ export default function Tools() {
 
           {/* ── Bio Generator ── */}
           <TabsContent value="bio" className="space-y-5 mt-0">
-            {groqKeys.length === 0 && (
-              <div className="rounded-xl border border-warning/25 bg-warning/5 px-4 py-3.5 flex items-start gap-3 text-sm text-warning">
-                <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-                <span>No Groq API key found. Go to the <strong>Settings</strong> tab to add one before generating bios.</span>
-              </div>
-            )}
             <Card className="border-border/60 bg-card shadow-sm">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-2.5">
@@ -487,7 +396,6 @@ export default function Tools() {
                     <CardTitle className="text-base font-semibold">X Bio Generator</CardTitle>
                     <CardDescription className="text-xs mt-0.5">
                       Describe yourself or your niche and get 3 ready-to-use bios instantly.
-                      {groqKeys.length > 1 && <span className="ml-1 text-primary/80">{groqKeys.length} keys active.</span>}
                     </CardDescription>
                   </div>
                 </div>
@@ -502,7 +410,7 @@ export default function Tools() {
                   <Input value={bioTone} onChange={(e) => setBioTone(e.target.value)} placeholder="e.g. professional, funny, bold, mysterious..." className="font-mono text-sm bg-background/60 border-border/60 focus-visible:ring-primary/40" />
                 </div>
                 <div className="flex justify-end pt-1">
-                  <Button onClick={handleGenerateBio} disabled={bioLoading || !bioTopic.trim() || groqKeys.length === 0} className="text-xs min-w-[150px] shadow-sm shadow-primary/20">
+                  <Button onClick={handleGenerateBio} disabled={bioLoading || !bioTopic.trim()} className="text-xs min-w-[150px] shadow-sm shadow-primary/20">
                     {bioLoading ? <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />Generating...</> : <><Sparkles className="h-3.5 w-3.5 mr-1.5" />Generate Bios</>}
                   </Button>
                 </div>
@@ -597,79 +505,6 @@ export default function Tools() {
             )}
           </TabsContent>
 
-          {/* ── Settings ── */}
-          <TabsContent value="settings" className="space-y-5 mt-0">
-            <Card className="border-border/60 bg-card shadow-sm">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-lg bg-muted/60 border border-border/60 flex items-center justify-center">
-                    <KeyRound className="h-4 w-4 text-foreground/70" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base font-semibold">Groq API Keys</CardTitle>
-                    <CardDescription className="text-xs mt-0.5">
-                      Add up to {MAX_KEYS} keys. They rotate automatically to avoid rate limits.{" "}
-                      <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-0.5">
-                        Get a free key <ExternalLink className="h-2.5 w-2.5" />
-                      </a>
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                {groqKeys.length < MAX_KEYS && (
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
-                      <Input type={showNewKey ? "text" : "password"} value={newKey} onChange={(e) => setNewKey(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addKey()} placeholder="gsk_••••••••••••••••••••••••••••••" className="font-mono text-sm bg-background/60 border-border/60 pr-10 focus-visible:ring-primary/40" />
-                      <button type="button" onClick={() => setShowNewKey((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
-                        {showNewKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </button>
-                    </div>
-                    <Button onClick={addKey} disabled={!newKey.trim()} className="text-xs shrink-0 shadow-sm shadow-primary/20">
-                      <Plus className="h-3.5 w-3.5 mr-1.5" /> Add Key
-                    </Button>
-                  </div>
-                )}
-                {groqKeys.length >= MAX_KEYS && (
-                  <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-primary/80 flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 shrink-0" />
-                    Maximum of {MAX_KEYS} keys reached. Remove one to add another.
-                  </div>
-                )}
-                {groqKeys.length > 0 ? (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Saved Keys ({groqKeys.length}/{MAX_KEYS})</span>
-                      {groqKeys.length > 1 && <span className="text-xs text-muted-foreground flex items-center gap-1"><RefreshCw className="h-3 w-3" /> Round-robin active</span>}
-                    </div>
-                    {groqKeys.map((key, i) => (
-                      <div key={i} className="flex items-center gap-3 rounded-lg border border-border/50 bg-background/50 px-4 py-3 group hover:border-border/80 transition-colors">
-                        <div className="h-7 w-7 rounded-md bg-muted/60 border border-border/50 flex items-center justify-center shrink-0">
-                          <KeyRound className="h-3.5 w-3.5 text-muted-foreground" />
-                        </div>
-                        <span className="flex-1 font-mono text-sm text-foreground/80 truncate">{maskKey(key)}</span>
-                        <Button variant="ghost" size="sm" onClick={() => removeKey(i)} className="h-7 px-2.5 text-xs text-destructive hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Trash2 className="h-3.5 w-3.5 mr-1" /> Remove
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="rounded-xl border border-dashed border-border/50 bg-muted/10 px-6 py-10 text-center space-y-2">
-                    <div className="h-12 w-12 rounded-xl bg-muted/40 border border-border/50 flex items-center justify-center mx-auto">
-                      <KeyRound className="h-5 w-5 text-muted-foreground/50" />
-                    </div>
-                    <p className="text-sm font-medium text-muted-foreground">No API keys saved yet</p>
-                    <p className="text-xs text-muted-foreground/60">Add a Groq API key above to start generating bios.</p>
-                  </div>
-                )}
-                <div className="rounded-lg border border-border/40 bg-muted/10 px-4 py-3.5 text-xs text-muted-foreground space-y-1">
-                  <p className="font-semibold text-foreground/70">How key rotation works</p>
-                  <p className="leading-relaxed">Each bio generation uses the next key in the list (round-robin). If one key hits its rate limit, the next will be used automatically on the next attempt.</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
 
         {/* Bottom ad */}
