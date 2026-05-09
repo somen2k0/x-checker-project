@@ -16,13 +16,29 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
   const [message, setMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async () => {
     if (!message.trim()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    setSubmitted(true);
+    setError("");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message }),
+      });
+      const data = await res.json() as { ok?: boolean; error?: string };
+      if (!res.ok || !data.ok) {
+        setError(data.error ?? "Failed to send. Please try again.");
+        return;
+      }
+      setSubmitted(true);
+    } catch {
+      setError("Network error. Please check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClose = (nextOpen: boolean) => {
@@ -33,6 +49,7 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
         setName("");
         setEmail("");
         setMessage("");
+        setError("");
       }, 300);
     }
   };
@@ -82,6 +99,12 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
                 />
                 <p className="text-[11px] text-muted-foreground/50">{message.length} characters</p>
               </div>
+
+              {error && (
+                <p className="text-xs text-destructive bg-destructive/8 border border-destructive/20 rounded-lg px-3 py-2">
+                  {error}
+                </p>
+              )}
 
               <div className="flex items-center justify-between pt-1">
                 <p className="text-xs text-muted-foreground/60">We typically respond within 24–48 hours.</p>
