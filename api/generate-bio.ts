@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const MODEL = "llama-3.1-8b-instant";
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== "POST") {
@@ -14,7 +15,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  const { topic, tone } = req.body as { topic?: string; tone?: string };
+  const body = req.body as { topic?: string; tone?: string } | undefined;
+  const topic = body?.topic;
+  const tone = body?.tone;
+
   if (!topic || typeof topic !== "string" || !topic.trim()) {
     res.status(400).json({ error: "topic is required" });
     return;
@@ -37,7 +41,7 @@ Rules:
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "llama3-8b-8192",
+        model: MODEL,
         messages: [{ role: "user", content: prompt }],
         max_tokens: 400,
         temperature: 0.85,
@@ -45,7 +49,7 @@ Rules:
     });
 
     if (groqRes.status === 401) {
-      res.status(503).json({ error: "Bio generator configuration error." });
+      res.status(503).json({ error: "Invalid API key — check your GROQ_API_KEY in Vercel settings." });
       return;
     }
 
@@ -55,7 +59,12 @@ Rules:
     }
 
     if (!groqRes.ok) {
-      res.status(502).json({ error: "Failed to generate bios. Please try again." });
+      let detail = `Groq API error (HTTP ${groqRes.status})`;
+      try {
+        const errBody = await groqRes.json() as { error?: { message?: string } };
+        if (errBody?.error?.message) detail = errBody.error.message;
+      } catch { /* ignore parse errors */ }
+      res.status(502).json({ error: detail });
       return;
     }
 
@@ -71,7 +80,8 @@ Rules:
       .slice(0, 3);
 
     res.status(200).json({ bios });
-  } catch {
-    res.status(500).json({ error: "Something went wrong. Please try again." });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).json({ error: `Something went wrong: ${message}` });
   }
 }
