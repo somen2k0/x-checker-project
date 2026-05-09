@@ -28,7 +28,12 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, message }),
       });
-      const data = await res.json() as { ok?: boolean; error?: string };
+      const text = await res.text();
+      let data: { ok?: boolean; error?: string } = {};
+      try { data = JSON.parse(text) as typeof data; } catch {
+        setError("Server error. Please try again later.");
+        return;
+      }
       if (!res.ok || !data.ok) {
         setError(data.error ?? "Failed to send. Please try again.");
         return;
