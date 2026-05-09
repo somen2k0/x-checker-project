@@ -1,5 +1,5 @@
 {
-  "buildCommand": "pnpm install && pnpm --filter @workspace/x-checker run build",
+  "buildCommand": "pnpm --filter @workspace/x-checker run build",
   "outputDirectory": "artifacts/x-checker/dist/public",
   "installCommand": "pnpm install",
   "rewrites": [
