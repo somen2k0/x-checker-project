@@ -58,6 +58,8 @@ Vercel will pre-fill these from `vercel.json` — **no changes needed**:
 | Output Directory | `artifacts/x-checker/dist/public` |
 | Install Command | `pnpm install` |
 
+> These are all set automatically via `vercel.json` — no manual dashboard configuration needed.
+
 ### 2c. Environment variables (optional)
 
 In Vercel → Project Settings → Environment Variables, you can add:

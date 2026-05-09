@@ -1,12 +1,9 @@
 {
-"buildCommand": "pnpm build",
-"outputDirectory": "dist/public",
-"installCommand": "pnpm install",
-"framework": "vite",
-"rewrites": [
-{
-"source": "/((?!api/).*)",
-"destination": "/index.html"
-}
-]
+  "buildCommand": "pnpm install && pnpm --filter @workspace/x-checker run build",
+  "outputDirectory": "artifacts/x-checker/dist/public",
+  "installCommand": "pnpm install",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
 }
