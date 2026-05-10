@@ -1,4 +1,4 @@
-const GA_ID = "G-XXXXXXXXXX";
+const GA_ID = "G-0544DCZ399";
 
 declare global {
   interface Window {
