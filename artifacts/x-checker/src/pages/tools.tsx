@@ -182,6 +182,19 @@ export default function Tools() {
 
         {/* ── Main Tabs ── */}
         <Tabs defaultValue={defaultTab} className="w-full">
+          {/* ── More Tools strip ── */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            <span className="text-xs text-muted-foreground/60 self-center mr-1 shrink-0">More tools:</span>
+            {MINI_TOOLS.map(({ icon: Icon, label, href }) => (
+              <Link key={href} href={href}>
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted/70 border border-border/50 hover:border-border rounded-full px-3 py-1 cursor-pointer transition-all">
+                  <Icon className="h-3 w-3 shrink-0" />
+                  {label}
+                </span>
+              </Link>
+            ))}
+          </div>
+
           <TabsList className="flex w-full h-auto p-1 bg-muted/40 border border-border/60 rounded-xl gap-0.5 mb-6">
             <TabsTrigger value="checker" className="flex-1 flex items-center justify-center gap-2 text-xs font-medium py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground">
               <Search className="h-3.5 w-3.5" />
@@ -525,34 +538,6 @@ export default function Tools() {
         {/* Bottom ad */}
         <div className="mt-8">
           <AdBanner slot="3333333333" format="horizontal" className="rounded-xl overflow-hidden" />
-        </div>
-
-        {/* ── More Tools ── */}
-        <div className="mt-12">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h2 className="text-lg font-semibold tracking-tight">More Tools</h2>
-              <p className="text-sm text-muted-foreground mt-0.5">More free utilities for your X / Twitter workflow.</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            {MINI_TOOLS.map(({ icon: Icon, label, desc, href }) => (
-              <Link key={href} href={href}>
-                <div className="group flex items-start gap-3 rounded-xl border border-border/60 bg-card/60 hover:bg-card hover:border-primary/30 hover:shadow-sm hover:shadow-primary/5 transition-all p-4 cursor-pointer h-full">
-                  <div className="h-8 w-8 rounded-lg bg-muted/60 border border-border/50 group-hover:bg-primary/10 group-hover:border-primary/20 flex items-center justify-center shrink-0 transition-colors mt-0.5">
-                    <Icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-1">
-                      <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{label}</span>
-                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary/60 shrink-0 transition-colors" />
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
         </div>
       </div>
     </Layout>
