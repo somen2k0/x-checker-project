@@ -77,13 +77,13 @@ export function Footer() {
             </div>
 
             {/* Mini Tools */}
-            <div className="space-y-3 col-span-2 md:col-span-1">
+            <div className="space-y-3 col-span-2">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground/60">More Tools</h3>
-              <ul className="grid grid-cols-2 md:grid-cols-1 gap-y-2 gap-x-4">
+              <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-x-4 gap-y-2">
                 {MINI_TOOLS.map(({ icon: Icon, label, href }) => (
                   <li key={label}>
                     <Link href={href}>
-                      <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group">
+                      <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group w-full text-left">
                         <Icon className="h-3.5 w-3.5 opacity-60 group-hover:opacity-100 shrink-0" />
                         <span className="truncate">{label}</span>
                       </button>

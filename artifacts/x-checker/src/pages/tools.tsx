@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { useSearchParams } from "@/hooks/use-search-params";
 import { useCheckAccounts } from "@workspace/api-client-react";
 import { AccountCheckResult } from "@workspace/api-client-react/src/generated/api.schemas";
@@ -14,9 +15,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Loader2, Copy, Trash2, CheckCircle2, XCircle, HelpCircle,
   UserX, AlertCircle, BadgeCheck, ExternalLink, Users, Calendar, Link2,
-  Sparkles, RefreshCw, AtSign, Search,
+  Sparkles, RefreshCw, AtSign, Search, Smile, Briefcase, Palette,
+  Hash, MessageSquare, Type, BarChart2, ChevronRight,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+const MINI_TOOLS = [
+  { icon: Sparkles, label: "Bio Ideas", desc: "Browse 100+ ready-made X bio templates by niche.", href: "/tools/bio-ideas" },
+  { icon: Smile, label: "Funny Bios", desc: "Witty and humorous bio ideas that stand out.", href: "/tools/funny-bios" },
+  { icon: Briefcase, label: "Professional Bios", desc: "Clean, credible bios for business & career profiles.", href: "/tools/professional-bios" },
+  { icon: Palette, label: "Aesthetic Bios", desc: "Minimal and stylish bios for a curated look.", href: "/tools/aesthetic-bios" },
+  { icon: AtSign, label: "Username Generator", desc: "Get unique X handle ideas for any niche.", href: "/tools/username-generator" },
+  { icon: Users, label: "Name Ideas", desc: "Find the perfect display name for your profile.", href: "/tools/name-ideas" },
+  { icon: Hash, label: "Hashtag Formatter", desc: "Clean and format hashtag lists in one click.", href: "/tools/hashtag-formatter" },
+  { icon: MessageSquare, label: "Tweet Formatter", desc: "Format threads and tweets for max readability.", href: "/tools/tweet-formatter" },
+  { icon: Type, label: "Font Preview", desc: "Preview your bio text in stylish Unicode fonts.", href: "/tools/font-preview" },
+  { icon: BarChart2, label: "Character Counter", desc: "Count characters and words to fit X's limits.", href: "/tools/character-counter" },
+];
 
 function formatCount(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
@@ -510,6 +525,34 @@ export default function Tools() {
         {/* Bottom ad */}
         <div className="mt-8">
           <AdBanner slot="3333333333" format="horizontal" className="rounded-xl overflow-hidden" />
+        </div>
+
+        {/* ── More Tools ── */}
+        <div className="mt-12">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-lg font-semibold tracking-tight">More Tools</h2>
+              <p className="text-sm text-muted-foreground mt-0.5">More free utilities for your X / Twitter workflow.</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {MINI_TOOLS.map(({ icon: Icon, label, desc, href }) => (
+              <Link key={href} href={href}>
+                <div className="group flex items-start gap-3 rounded-xl border border-border/60 bg-card/60 hover:bg-card hover:border-primary/30 hover:shadow-sm hover:shadow-primary/5 transition-all p-4 cursor-pointer h-full">
+                  <div className="h-8 w-8 rounded-lg bg-muted/60 border border-border/50 group-hover:bg-primary/10 group-hover:border-primary/20 flex items-center justify-center shrink-0 transition-colors mt-0.5">
+                    <Icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1">
+                      <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{label}</span>
+                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary/60 shrink-0 transition-colors" />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </Layout>
