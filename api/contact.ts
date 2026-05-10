@@ -1,48 +1,46 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+const WEB3FORMS_URL = "https://api.web3forms.com/submit";
+
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse
+) {
   if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed" });
-    return;
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   const accessKey = process.env.WEB3FORMS_KEY;
+
   if (!accessKey) {
-    res.status(503).json({ error: "Contact form is not configured." });
-    return;
-  }
-
-  const body = req.body as { name?: string; email?: string; message?: string } | undefined;
-  const message = body?.message?.trim();
-
-  if (!message) {
-    res.status(400).json({ error: "Message is required." });
-    return;
+    return res.status(500).json({
+      error: "WEB3FORMS_KEY missing",
+    });
   }
 
   try {
-    const web3Res = await fetch("https://api.web3forms.com/submit", {
+    const { name, email, message } = req.body;
+
+    const response = await fetch(WEB3FORMS_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         access_key: accessKey,
-        name: body?.name?.trim() || "Anonymous",
-        email: body?.email?.trim() || "no-reply@x-toolkit.app",
+        name: name || "Anonymous",
+        email: email || "no-reply@xtoolkit.live",
         message,
         subject: "New feedback — X Toolkit",
       }),
     });
 
-    const data = await web3Res.json() as { success?: boolean; message?: string };
+    const data = await response.json();
 
-    if (!web3Res.ok || !data.success) {
-      res.status(502).json({ error: data.message ?? "Failed to send message." });
-      return;
-    }
-
-    res.status(200).json({ ok: true });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "Unknown error";
-    res.status(500).json({ error: `Something went wrong: ${msg}` });
+    return res.status(200).json(data);
+  } catch (error) {
+    return res.status(500).json({
+      error: "Server error",
+    });
   }
 }
