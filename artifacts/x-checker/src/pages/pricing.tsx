@@ -127,6 +127,7 @@ export default function Pricing() {
       <SeoHead
         title="X Toolkit Pricing — Free & Pro Plans"
         description="X Toolkit is free to use. Pro features are coming soon — join the waitlist for early access and 40% off launch pricing."
+        path="/pricing"
       />
       <div className="max-w-5xl mx-auto px-4 md:px-8 py-14 md:py-20 space-y-16">
 

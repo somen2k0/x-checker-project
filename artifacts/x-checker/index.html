@@ -9,21 +9,46 @@
     <meta name="robots" content="index, follow" />
     <meta name="author" content="X Toolkit" />
 
+    <!-- Canonical -->
+    <link rel="canonical" href="https://xtoolkit.live/" />
+
     <!-- Open Graph -->
+    <meta property="og:site_name" content="X Toolkit" />
     <meta property="og:title" content="X Toolkit — Account Checker, Bio Generator & More" />
     <meta property="og:description" content="Check X (Twitter) accounts in bulk — see who's active, suspended, or deleted. Plus: bio generator, profile link generator, and @ formatter." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:url" content="https://xtoolkit.live/" />
+    <meta property="og:image" content="https://xtoolkit.live/opengraph.jpg" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="X Toolkit — Account Checker & Profile Tools" />
     <meta name="twitter:description" content="Bulk-check X account status, generate bios, and create profile links — free and instant." />
+    <meta name="twitter:image" content="https://xtoolkit.live/opengraph.jpg" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- WebSite structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "X Toolkit",
+      "url": "https://xtoolkit.live/",
+      "description": "Free X (Twitter) toolkit: bulk account checker, bio generator, profile link generator, and @ formatter.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://xtoolkit.live/tools"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
 
     <!-- GA4 dataLayer init — script is loaded dynamically after cookie consent -->
     <script>

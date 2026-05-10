@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 
+const SITE_URL = "https://xtoolkit.live";
+
 interface Faq {
   q: string;
   a: string;
@@ -8,11 +10,14 @@ interface Faq {
 interface SeoHeadProps {
   title: string;
   description: string;
+  path?: string;
   faqs?: Faq[];
 }
 
-export function SeoHead({ title, description, faqs }: SeoHeadProps) {
+export function SeoHead({ title, description, path, faqs }: SeoHeadProps) {
   useEffect(() => {
+    const canonicalUrl = path ? `${SITE_URL}${path}` : SITE_URL;
+
     const prev = document.title;
     document.title = title;
 
@@ -28,6 +33,19 @@ export function SeoHead({ title, description, faqs }: SeoHeadProps) {
     const prevOgDesc = metaOgDesc?.getAttribute("content") ?? "";
     metaOgDesc?.setAttribute("content", description);
 
+    const metaOgUrl = document.querySelector('meta[property="og:url"]');
+    const prevOgUrl = metaOgUrl?.getAttribute("content") ?? "";
+    metaOgUrl?.setAttribute("content", canonicalUrl);
+
+    let canonicalEl = document.querySelector('link[rel="canonical"]');
+    const prevCanonical = canonicalEl?.getAttribute("href") ?? "";
+    if (!canonicalEl) {
+      canonicalEl = document.createElement("link");
+      (canonicalEl as HTMLLinkElement).rel = "canonical";
+      document.head.appendChild(canonicalEl);
+    }
+    canonicalEl.setAttribute("href", canonicalUrl);
+
     let scriptEl: HTMLScriptElement | null = null;
     if (faqs && faqs.length > 0) {
       scriptEl = document.createElement("script");
@@ -36,6 +54,7 @@ export function SeoHead({ title, description, faqs }: SeoHeadProps) {
       scriptEl.textContent = JSON.stringify({
         "@context": "https://schema.org",
         "@type": "FAQPage",
+        "@id": canonicalUrl,
         mainEntity: faqs.map(({ q, a }) => ({
           "@type": "Question",
           name: q,
@@ -50,9 +69,11 @@ export function SeoHead({ title, description, faqs }: SeoHeadProps) {
       metaDesc?.setAttribute("content", prevDesc);
       metaOgTitle?.setAttribute("content", prevOgTitle);
       metaOgDesc?.setAttribute("content", prevOgDesc);
+      metaOgUrl?.setAttribute("content", prevOgUrl);
+      canonicalEl?.setAttribute("href", prevCanonical);
       scriptEl?.remove();
     };
-  }, [title, description, faqs]);
+  }, [title, description, path, faqs]);
 
   return null;
 }
