@@ -36,9 +36,11 @@ router.post("/contact", async (req, res) => {
     });
 
     const data = (await web3Res.json()) as { success?: boolean; message?: string };
+    const success =
+      typeof data?.success === "boolean" ? data.success : web3Res.ok;
 
-    if (!web3Res.ok || !data.success) {
-      res.status(502).json({ error: data.message ?? "Failed to send message." });
+    if (!success) {
+      res.status(502).json({ error: data?.message ?? "Failed to send message." });
       return;
     }
 

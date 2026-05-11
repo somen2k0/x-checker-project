@@ -29,13 +29,16 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
         body: JSON.stringify({ name, email, message }),
       });
       const text = await res.text();
-      let data: { ok?: boolean; error?: string } = {};
-      try { data = JSON.parse(text) as typeof data; } catch {
+      let data: { ok?: boolean; success?: boolean; error?: string; message?: string } = {};
+      try {
+        data = JSON.parse(text) as typeof data;
+      } catch {
         setError("Server error. Please try again later.");
         return;
       }
-      if (!res.ok || !data.ok) {
-        setError(data.error ?? "Failed to send. Please try again.");
+      const success = res.ok && (data.ok ?? data.success ?? false);
+      if (!success) {
+        setError(data.error ?? data.message ?? "Failed to send. Please try again.");
         return;
       }
       setSubmitted(true);

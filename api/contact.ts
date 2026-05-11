@@ -21,6 +21,10 @@ export default async function handler(
   try {
     const { name, email, message } = req.body;
 
+    if (!message || typeof message !== "string" || !message.trim()) {
+      return res.status(400).json({ ok: false, error: "Message is required." });
+    }
+
     const response = await fetch(WEB3FORMS_URL, {
       method: "POST",
       headers: {
@@ -36,8 +40,17 @@ export default async function handler(
     });
 
     const data = await response.json();
+    const success =
+      typeof data?.success === "boolean" ? data.success : response.ok;
 
-    return res.status(200).json(data);
+    if (!success) {
+      return res.status(502).json({
+        ok: false,
+        error: data?.message ?? "Failed to send message.",
+      });
+    }
+
+    return res.status(200).json({ ok: true });
   } catch (error) {
     return res.status(500).json({
       error: "Server error",
