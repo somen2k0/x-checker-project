@@ -2,9 +2,15 @@ import { Router } from "express";
 
 const router = Router();
 
-const FORMSUBMIT_EMAIL = "careergrowthremotely@gmail.com";
+const WEB3FORMS_URL = "https://api.web3forms.com/submit";
 
 router.post("/contact", async (req, res) => {
+  const accessKey = process.env.WEB3FORMS_KEY;
+  if (!accessKey) {
+    res.status(503).json({ error: "Contact form is not configured." });
+    return;
+  }
+
   const { name, email, message } = req.body as {
     name?: string;
     email?: string;
@@ -17,34 +23,20 @@ router.post("/contact", async (req, res) => {
   }
 
   try {
-    const formRes = await fetch(
-      `https://formsubmit.co/ajax/${FORMSUBMIT_EMAIL}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          name: name?.trim() || "Anonymous",
-          email: email?.trim() || "no-reply@x-toolkit.app",
-          message: message.trim(),
-          _subject: "New feedback — X Toolkit",
-          _captcha: "false",
-          _template: "table",
-        }),
-      }
-    );
+    const web3Res = await fetch(WEB3FORMS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        access_key: accessKey,
+        name: name?.trim() || "Anonymous",
+        email: email?.trim() || "no-reply@xtoolkit.live",
+        message: message.trim(),
+        subject: "New feedback — X Toolkit",
+      }),
+    });
 
-    const text = await formRes.text();
-    let data: { success?: string; message?: string } = {};
-    try {
-      data = JSON.parse(text);
-    } catch {
-      // Formsubmit.co returns HTML on first activation — treat any 2xx as success
-    }
-
-    const success = data?.success === "true" || formRes.ok;
+    const data = (await web3Res.json()) as { success?: boolean; message?: string };
+    const success = typeof data?.success === "boolean" ? data.success : web3Res.ok;
 
     if (!success) {
       res.status(502).json({ error: data?.message ?? "Failed to send message." });

@@ -10,7 +10,7 @@ interface FeedbackModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const FORMSUBMIT_URL = "https://formsubmit.co/ajax/careergrowthremotely@gmail.com";
+const WEB3FORMS_KEY = "fd2adb78-fc5c-4351-997d-858d9632050f";
 
 export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
   const [name, setName] = useState("");
@@ -25,32 +25,22 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(FORMSUBMIT_URL, {
+      const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          access_key: WEB3FORMS_KEY,
           name: name.trim() || "Anonymous",
           email: email.trim() || "no-reply@xtoolkit.live",
           message: message.trim(),
-          _subject: "New feedback — X Toolkit",
-          _captcha: "false",
-          _template: "table",
+          subject: "New feedback — X Toolkit",
         }),
       });
 
-      const text = await res.text();
-      let data: { success?: string; message?: string } = {};
-      try {
-        data = JSON.parse(text) as typeof data;
-      } catch {
-        // non-JSON response — treat 2xx as success
-      }
+      const data = (await res.json()) as { success?: boolean; message?: string };
 
-      if (!res.ok && data?.success !== "true") {
-        setError(data?.message ?? "Failed to send. Please try again.");
+      if (!data.success) {
+        setError(data.message ?? "Failed to send. Please try again.");
         return;
       }
 
