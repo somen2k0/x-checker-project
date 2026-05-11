@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useLocation, Link } from "wouter";
-import { Home, Wrench, Info, Search, X, ChevronRight, Sparkles, Users, Type, Code2, TrendingUp, AtSign, Smile, Briefcase, Palette, Hash, MessageSquare as MessageSquareIcon, BarChart2, FileJson, Lock, Link2, Globe } from "lucide-react";
+import { Home, Wrench, Info, Search, X, ChevronRight, Sparkles, Users, Type, Code2, TrendingUp, AtSign, Smile, Briefcase, Palette, Hash, MessageSquare as MessageSquareIcon, BarChart2, FileJson, Lock, Link2, Globe, Mail, ShieldCheck, Pencil } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -74,6 +74,18 @@ const TOOL_CATEGORIES = [
       { icon: Globe, label: "Meta Tag Checker", desc: "Optimize meta titles & descriptions", href: "#", badge: "Soon" },
       { icon: TrendingUp, label: "Keyword Density", desc: "Check keyword frequency", href: "#", badge: "Soon" },
       { icon: Link2, label: "URL Slug Generator", desc: "Clean, SEO-friendly slugs", href: "#", badge: "Soon" },
+    ],
+  },
+  {
+    key: "email",
+    label: "Email Tools",
+    icon: Mail,
+    color: "text-cyan-400",
+    bg: "bg-cyan-400/10 border-cyan-400/20",
+    tools: [
+      { icon: Pencil, label: "Subject Line Generator", desc: "AI-powered subject lines", href: "#", badge: "Soon" },
+      { icon: ShieldCheck, label: "Email Validator", desc: "Validate format & MX records", href: "#", badge: "Soon" },
+      { icon: Mail, label: "Plain Text Formatter", desc: "Convert HTML email to plain text", href: "#", badge: "Soon" },
     ],
   },
 ];
