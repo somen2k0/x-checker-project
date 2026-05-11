@@ -7,7 +7,7 @@ import {
   MessageSquare, Home, Info, Menu, X, Layers, ChevronDown,
   Search, Sparkles, Link2, AtSign, Smile, Briefcase, Palette,
   Hash, MessageSquareText, Type, BarChart2, Users, FileJson, Lock,
-  TrendingUp, Globe, Code2, Wrench,
+  TrendingUp, Globe, Code2, Wrench, Mail, ShieldCheck, Pencil,
 } from "lucide-react";
 
 const MEGA_MENU_CATEGORIES = [
@@ -80,6 +80,19 @@ const MEGA_MENU_CATEGORIES = [
       { icon: Link2, label: "URL Slug Generator", desc: "Clean, SEO-friendly slugs", href: "#", badge: "Soon" },
     ],
   },
+  {
+    key: "email",
+    label: "Email",
+    color: "text-cyan-400",
+    bg: "bg-cyan-400/10 border-cyan-400/20",
+    icon: Mail,
+    categoryHref: "/email-tools",
+    tools: [
+      { icon: Pencil, label: "Subject Line Generator", desc: "AI-powered subject lines", href: "#", badge: "Soon" },
+      { icon: ShieldCheck, label: "Email Validator", desc: "Validate format & MX records", href: "#", badge: "Soon" },
+      { icon: Mail, label: "Plain Text Formatter", desc: "Convert HTML email to plain text", href: "#", badge: "Soon" },
+    ],
+  },
 ];
 
 const BADGE_STYLES: Record<string, string> = {
@@ -92,7 +105,7 @@ const BADGE_STYLES: Record<string, string> = {
 function MegaMenu({ onClose }: { onClose: () => void }) {
   return (
     <div
-      className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-[900px] max-w-[calc(100vw-2rem)] z-50
+      className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-[1060px] max-w-[calc(100vw-2rem)] z-50
         rounded-2xl border border-border/60 bg-background/98 backdrop-blur-xl shadow-xl shadow-black/20
         animate-in fade-in slide-in-from-top-2 duration-150"
     >
@@ -112,7 +125,7 @@ function MegaMenu({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Categories grid */}
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-6 gap-4">
           {MEGA_MENU_CATEGORIES.map((cat) => {
             const CatIcon = cat.icon;
             return (

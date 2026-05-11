@@ -1,7 +1,7 @@
 import {
   Search, Link2, AtSign, Sparkles, Smile, Briefcase, Palette,
   Hash, MessageSquare, Type, BarChart2, Users, FileJson, Lock,
-  TrendingUp, Globe, Code2, type LucideIcon,
+  TrendingUp, Globe, Code2, Mail, ShieldCheck, Pencil, type LucideIcon,
 } from "lucide-react";
 
 export type CategoryKey =
@@ -9,7 +9,8 @@ export type CategoryKey =
   | "ai-writing"
   | "text-formatting"
   | "developer"
-  | "seo";
+  | "seo"
+  | "email";
 
 export interface Category {
   key: CategoryKey;
@@ -66,6 +67,15 @@ export const CATEGORIES: Record<CategoryKey, Category> = {
     color: "text-pink-400",
     bg: "bg-pink-400/10 border-pink-400/20",
     description: "Meta tag checkers, keyword tools, and on-page SEO utilities.",
+  },
+  email: {
+    key: "email",
+    label: "Email Tools",
+    shortLabel: "Email",
+    icon: Mail,
+    color: "text-cyan-400",
+    bg: "bg-cyan-400/10 border-cyan-400/20",
+    description: "Email subject line generators, validators, and deliverability utilities.",
   },
 };
 
@@ -239,6 +249,38 @@ export const ALL_TOOLS: Tool[] = [
     icon: Lock,
     badge: "New",
     tags: ["base64", "encode", "decode", "developer", "binary"],
+  },
+
+  // ── Email (coming soon) ───────────────────────────────────────────
+  {
+    id: "subject-line-generator",
+    label: "Subject Line Generator",
+    description: "Generate high-converting email subject lines with AI.",
+    href: "#",
+    category: "email",
+    icon: Pencil,
+    isComingSoon: true,
+    tags: ["email", "subject", "generator", "ai", "marketing"],
+  },
+  {
+    id: "email-validator",
+    label: "Email Address Validator",
+    description: "Validate email address format and check domain MX records.",
+    href: "#",
+    category: "email",
+    icon: ShieldCheck,
+    isComingSoon: true,
+    tags: ["email", "validate", "check", "format", "mx"],
+  },
+  {
+    id: "email-formatter",
+    label: "Plain Text Email Formatter",
+    description: "Format HTML emails as clean, readable plain text.",
+    href: "#",
+    category: "email",
+    icon: Mail,
+    isComingSoon: true,
+    tags: ["email", "plain text", "format", "html", "convert"],
   },
 
   // ── SEO (coming soon) ─────────────────────────────────────────────
