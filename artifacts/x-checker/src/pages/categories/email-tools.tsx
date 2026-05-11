@@ -1,124 +1,127 @@
 import {
-  Mail, Shield, Inbox, AtSign, FilterX, Clock,
+  Mail, Shield, AtSign, FilterX, Clock,
   Zap, Lock, Sparkles, Users, Code2, TrendingUp,
+  Pencil, Hash, FileText,
 } from "lucide-react";
+import { ALL_TOOLS } from "@/lib/tools-registry";
 import { CategoryLandingPage, type CategoryPageConfig } from "./CategoryLandingPage";
+
+const tools = ALL_TOOLS.filter((t) => t.category === "email" && !t.isComingSoon);
 
 const config: CategoryPageConfig = {
   path: "/email-tools",
-  seoTitle: "Free Email Tools — Address Validator, Temp Mail Generator | X Toolkit",
+  seoTitle: "Free Email Tools — Subject Line Generator, Signature Builder, Validator | X Toolkit",
   seoDescription:
-    "Free browser-based email utilities: email address validator, disposable address generator, and email format checker. No signup required.",
+    "Free browser-based email utilities: subject line generator, email signature builder, plain text formatter, character counter, username generator, and address validator. No signup.",
   title: "Email Tools",
-  tagline: "Email utilities that protect your privacy and save your time",
+  tagline: "Email utilities that save time and improve deliverability",
   description:
-    "Browser-based email tools for validating addresses, checking formats, generating disposable addresses for testing, and analyzing email deliverability — all free, with nothing stored on our servers.",
+    "Browser-based email tools for generating subject lines, building professional signatures, formatting plain text emails, counting characters, and validating addresses — all free, no account required, nothing stored.",
   icon: Mail,
   color: "text-cyan-400",
   bg: "bg-cyan-400/10 border-cyan-400/20",
   heroGradient: "bg-gradient-to-br from-cyan-500/8 via-cyan-500/3 to-transparent",
-  tools: [],
-  comingSoon: true,
+  tools,
 
   whatIs:
-    "Email tools are browser-based utilities that help developers, marketers, and regular users work with email addresses more efficiently and safely. An email address validator checks whether an address is syntactically correct and whether the domain has properly configured MX records — preventing sending to obviously invalid addresses before a single email is dispatched. A disposable address generator creates temporary, random email addresses you can use for sign-ups, testing, or one-time registrations without exposing your real inbox. Format checkers ensure lists of addresses follow consistent formatting (lowercase, no leading or trailing spaces) before import into an email service provider. These tools handle the tedious, error-prone parts of email workflow so you can focus on the message.",
+    "Email tools are browser-based utilities that help marketers, developers, and everyday users work with email more efficiently. The Subject Line Generator produces proven subject line templates for promotional, newsletter, welcome, re-engagement, transactional, and announcement campaigns. The Email Signature Generator builds professional HTML and plain text signatures with live preview — ready to paste into Gmail, Outlook, or Apple Mail. The Email Character Counter shows exactly how your subject line and preview text will be truncated in Gmail, Outlook, Apple Mail, and iPhone Mail. The Plain Text Formatter strips HTML email markup into clean, readable plain text for multi-part MIME emails. The Email Address Validator checks format syntax for one or hundreds of addresses at once.",
 
   benefits: [
     {
-      icon: Shield,
-      title: "Protect your real email address",
+      icon: Pencil,
+      title: "Write subject lines that get opened",
       description:
-        "Use a temporary address for sign-ups, free trials, or one-time verifications — keeping your inbox clean and private.",
+        "The subject line generator gives you proven templates for every campaign type — promotional, newsletter, re-engagement, and more.",
     },
     {
       icon: FilterX,
-      title: "Remove invalid addresses before you send",
+      title: "Never get truncated in the inbox again",
       description:
-        "Validate bulk email lists before importing them into your ESP to reduce bounce rates and protect sender reputation.",
+        "The character counter shows exactly how your subject line displays in Gmail, Outlook, Apple Mail, and iPhone Mail before you send.",
     },
     {
       icon: Zap,
-      title: "Instant format checking",
+      title: "Signatures that work everywhere",
       description:
-        "Verify whether an address is structurally valid in milliseconds — no DNS lookup needed for basic format validation.",
+        "Build HTML or plain text signatures with a live preview. Choose minimal, professional, or bold styles — copy and paste in seconds.",
     },
     {
-      icon: Inbox,
-      title: "Better deliverability",
+      icon: Mail,
+      title: "Better deliverability with plain text",
       description:
-        "Cleaner lists mean lower bounce rates, fewer spam complaints, and higher deliverability scores with providers like SendGrid and Mailchimp.",
+        "Most email platforms require a plain text version alongside your HTML. The formatter converts any HTML email to clean plain text instantly.",
     },
     {
       icon: Lock,
-      title: "Privacy-first by design",
+      title: "Validate address lists before sending",
       description:
-        "Email addresses you enter are processed locally or via stateless API calls — never stored, logged, or associated with your identity.",
+        "Catch invalid email syntax before importing lists into your ESP — reducing hard bounces and protecting sender reputation.",
     },
     {
       icon: Clock,
-      title: "Save hours of list cleaning",
+      title: "All tools work in your browser",
       description:
-        "Bulk-validate hundreds of addresses at once rather than manually reviewing each one for obvious formatting errors.",
+        "No uploads, no accounts, no API keys. Everything runs locally in your browser — your email content never touches a server.",
     },
   ],
 
   useCases: [
     {
+      title: "Email marketers writing campaigns",
+      description:
+        "Use the subject line generator and character counter together to write subject lines that display perfectly across every major email client.",
+    },
+    {
       title: "Developers testing email flows",
       description:
-        "Generate disposable addresses to test registration emails, password resets, and transactional notifications without cluttering a real inbox.",
+        "Validate test addresses, format HTML transactional emails as plain text, and generate professional-looking signatures for test accounts.",
+    },
+    {
+      title: "Freelancers setting up their email identity",
+      description:
+        "Use the email username generator to pick the right address format, then the signature generator to build a professional signature for client communications.",
     },
     {
       title: "Marketers cleaning email lists",
       description:
-        "Validate and deduplicate imported lists before a campaign to reduce hard bounces and keep your sender reputation healthy.",
+        "Bulk-validate imported lists before a campaign to remove invalid syntax — catching obvious formatting errors before the first send.",
     },
     {
-      title: "Users signing up for one-time services",
+      title: "Small business owners new to email marketing",
       description:
-        "Use a temporary address for sites you don't fully trust, keeping your primary inbox free from spam and promotional emails.",
+        "Get proven subject line templates for your first campaign, understand preview text, and set up a professional signature — all without paying for a tool.",
     },
     {
-      title: "Freelancers collecting client lists",
+      title: "Content creators building newsletters",
       description:
-        "Run a client's contact list through the validator before importing it into a new email platform to catch obvious errors immediately.",
-    },
-    {
-      title: "QA engineers testing form validation",
-      description:
-        "Use the format checker to generate edge-case email addresses — valid and invalid — for testing your own form validation logic.",
-    },
-    {
-      title: "Journalists protecting their identity",
-      description:
-        "Register for public records, FOIA databases, or research portals using a temporary address that can't be traced back to your primary account.",
+        "Write subject lines with the right character length, ensure your newsletter has a proper plain text version, and track word count for the body.",
     },
   ],
 
   faqs: [
     {
-      q: "When will the email tools be available?",
-      a: "Email tools are currently in development. We'll announce the launch on our homepage and social channels when they're ready.",
+      q: "What subject line length gets the best open rates?",
+      a: "Research consistently shows subject lines of 30–50 characters perform best on mobile, where most email is now read. Short enough to display in full, specific enough to set clear expectations. The Email Character Counter shows exactly where each client truncates.",
     },
     {
-      q: "Will the email tools be free?",
-      a: "Yes — all tools on X Toolkit are 100% free with no account, subscription, or trial required.",
+      q: "Should I use HTML or plain text email signatures?",
+      a: "For most modern email clients (Gmail, Outlook, Apple Mail), HTML signatures render well and look more professional. However, some corporate IT systems strip HTML. Set up an HTML signature as your primary and keep a plain text version as a backup — the signature generator provides both.",
     },
     {
-      q: "What is email address validation?",
-      a: "Email validation checks two things: (1) format validity — does the address have the correct syntax like user@domain.tld? and (2) domain validity — does the domain have MX records that can receive email? Format checking is instant and local; MX checking requires a DNS lookup.",
+      q: "Why do I need a plain text version of my HTML email?",
+      a: "Major email platforms (Mailchimp, Klaviyo, etc.) require a plain text version because some clients and email proxies display plain text only. The presence of a multi-part MIME message (HTML + text) is also a positive spam filter signal.",
     },
     {
-      q: "What is a disposable email address?",
-      a: "A disposable (or temporary) email address is a randomly generated address that forwards messages to a temporary inbox for a limited time. It's useful for sign-ups you don't want associated with your real email, testing scenarios, or one-time verifications.",
+      q: "What is email syntax validation?",
+      a: "Syntax validation checks whether an email address follows the correct format: a valid local part (before @), an @ symbol, a valid domain, and a TLD of at least two characters. It does not verify that the mailbox actually exists or that the domain has MX records.",
     },
     {
-      q: "Will my email addresses be stored or sold?",
-      a: "No. Addresses you enter into the tools are used only for the validation or generation request and are immediately discarded. We do not build contact databases, sell data, or share it with third parties.",
+      q: "What is preview text (preheader) in email?",
+      a: "Preview text is the short snippet shown after the subject line in the inbox list view. It's either a hidden <span> element at the top of your HTML or pulled from the first visible text. Aim for 40–100 characters. The Email Character Counter tracks both subject and preview text limits.",
     },
     {
-      q: "What email tools are planned?",
-      a: "The initial launch will include an email format validator, bulk list cleaner, disposable address generator, and MX record checker. More tools will follow based on user demand.",
+      q: "Are all email tools free?",
+      a: "Yes — all tools on X Toolkit are 100% free with no account, subscription, or trial required. Your email content is processed entirely in your browser and is never stored or transmitted.",
     },
   ],
 
@@ -132,20 +135,20 @@ const config: CategoryPageConfig = {
       bg: "bg-blue-400/10 border-blue-400/20",
     },
     {
-      title: "Developer Tools",
-      href: "/developer-tools",
-      description: "JSON formatter, Base64 encoder, and browser-based dev utilities.",
-      icon: Code2,
-      color: "text-orange-400",
-      bg: "bg-orange-400/10 border-orange-400/20",
-    },
-    {
       title: "SEO Tools",
       href: "/seo-tools",
-      description: "Meta tag analysis, keyword density checking, and URL slug generation.",
+      description: "Meta tag generator, keyword density checker, URL slug generator.",
       icon: TrendingUp,
       color: "text-pink-400",
       bg: "bg-pink-400/10 border-pink-400/20",
+    },
+    {
+      title: "Text & Formatting",
+      href: "/text-format-tools",
+      description: "Character counter, tweet formatter, hashtag formatter.",
+      icon: Hash,
+      color: "text-green-400",
+      bg: "bg-green-400/10 border-green-400/20",
     },
   ],
 };

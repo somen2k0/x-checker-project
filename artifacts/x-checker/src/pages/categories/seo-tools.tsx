@@ -1,30 +1,29 @@
 import {
   TrendingUp, Globe, Link2, Search, BarChart2, FileText,
-  Target, Zap, Users, Sparkles, Type, Code2,
+  Target, Zap, Users, Sparkles, Type, Code2, Shield, Tag,
 } from "lucide-react";
 import { ALL_TOOLS } from "@/lib/tools-registry";
 import { CategoryLandingPage, type CategoryPageConfig } from "./CategoryLandingPage";
 
-const tools = ALL_TOOLS.filter((t) => t.category === "seo");
+const tools = ALL_TOOLS.filter((t) => t.category === "seo" && !t.isComingSoon);
 
 const config: CategoryPageConfig = {
   path: "/seo-tools",
-  seoTitle: "Free SEO Tools — Meta Tag Checker, Keyword Density, URL Slug Generator | X Toolkit",
+  seoTitle: "Free SEO Tools — Meta Tag Generator, Keyword Density, URL Slug, Robots.txt | X Toolkit",
   seoDescription:
-    "Free browser-based SEO tools: meta tag analyzer, keyword density checker, and URL slug generator. Optimize your pages for search without expensive subscriptions.",
+    "Free browser-based SEO tools: meta tag generator with SERP preview, keyword density checker, URL slug generator, robots.txt builder, and sitemap validator. No signup required.",
   title: "SEO Tools",
-  tagline: "On-page SEO analysis tools — free and browser-based",
+  tagline: "On-page SEO tools — free, browser-based, and ready to use",
   description:
-    "Practical SEO utilities for content creators, developers, and marketers. Analyze meta tags, measure keyword density, and generate clean URL slugs — all for free, with no login or expensive tool subscription required.",
+    "Practical SEO utilities for content creators, developers, and marketers. Generate meta tags with live SERP preview, measure keyword density, build clean URL slugs, create robots.txt files, and validate XML sitemaps — all free, no login required.",
   icon: TrendingUp,
   color: "text-pink-400",
   bg: "bg-pink-400/10 border-pink-400/20",
   heroGradient: "bg-gradient-to-br from-pink-500/8 via-pink-500/3 to-transparent",
   tools,
-  comingSoon: true,
 
   whatIs:
-    "SEO tools are utilities that help you audit and optimize the on-page elements that search engines use to understand, rank, and display your content. The Meta Tag Checker analyzes the title and description tags of any page and flags common issues like missing tags, over-length titles, or duplicate descriptions that hurt click-through rates. The Keyword Density Tool measures how frequently a target keyword appears in a piece of content, helping you avoid both under-optimization and keyword stuffing. The URL Slug Generator converts any title or phrase into a clean, hyphenated, lowercase URL slug that follows SEO best practices — removing stop words, replacing special characters, and ensuring the result is both human-readable and search-engine-friendly.",
+    "SEO tools are utilities that help you audit and optimize the on-page elements that search engines use to understand, rank, and display your content. The Meta Tag Generator builds SEO-optimized title tags, meta descriptions, Open Graph tags, and Twitter Card tags with a live SERP preview showing exactly how your page will look in Google results. The Keyword Density Checker measures how frequently a target keyword appears in a piece of content, helping you hit the optimal 1–3% range without keyword stuffing. The URL Slug Generator converts any title or phrase into a clean, hyphenated, lowercase URL slug that follows SEO best practices. The Robots.txt Generator lets you configure crawl rules for any search engine bot, block AI scrapers, and add your sitemap URL. The Sitemap Validator checks your XML sitemap for structural errors, invalid dates, and URL format issues.",
 
   benefits: [
     {
@@ -53,15 +52,15 @@ const config: CategoryPageConfig = {
     },
     {
       icon: BarChart2,
-      title: "Data-driven content decisions",
+      title: "Control how crawlers see your site",
       description:
-        "Make optimization decisions based on numbers, not guesses — see exactly where your content sits versus best-practice benchmarks.",
+        "Generate a robots.txt that allows the right bots, blocks AI scrapers, and points crawlers to your sitemap.",
     },
     {
       icon: FileText,
-      title: "Works on any content",
+      title: "Validate before submitting to Google",
       description:
-        "Paste raw text, HTML, or a URL and analyze blog posts, landing pages, product descriptions, or social content.",
+        "Catch sitemap errors before they cause indexing problems. The validator checks structure, URL formats, and required tags.",
     },
   ],
 
@@ -87,41 +86,41 @@ const config: CategoryPageConfig = {
         "Convert long article titles into SEO-friendly slugs automatically, removing filler words and special characters that weaken URL structure.",
     },
     {
+      title: "Site owners configuring crawl settings",
+      description:
+        "Use the robots.txt generator to block admin pages, set crawl delays, block AI training bots, and reference your sitemap.",
+    },
+    {
       title: "SEO freelancers doing quick audits",
       description:
         "Run fast spot-checks for clients without opening a full audit tool — useful for first-call audits and quick deliverables.",
-    },
-    {
-      title: "Students learning on-page SEO",
-      description:
-        "Analyze real pages and see exactly what each SEO element does, making these tools a hands-on learning companion.",
     },
   ],
 
   faqs: [
     {
-      q: "When will the SEO tools be available?",
-      a: "The Meta Tag Checker, Keyword Density Tool, and URL Slug Generator are currently in development. We'll publish an update on our homepage and social channels when they launch.",
+      q: "What is the ideal meta title length for SEO?",
+      a: "Google typically displays the first 50–60 characters of a page title. Keep meta titles between 50–60 characters for best results. The Meta Tag Generator shows a live SERP preview and flags titles that are too long or too short.",
     },
     {
-      q: "Will the SEO tools be free?",
-      a: "Yes — like all tools on X Toolkit, these will be completely free with no subscription, trial, or account required.",
+      q: "What is keyword density and what range is ideal?",
+      a: "Keyword density is the percentage of times a target keyword appears relative to total word count. The recommended range is 1–3%. Below 1% may not signal relevance strongly enough; above 4% risks a keyword stuffing flag from Google.",
     },
     {
-      q: "What does the Meta Tag Checker analyze?",
-      a: "It checks the meta title (length, presence, uniqueness) and meta description (length, keyword inclusion, readability) of a pasted HTML block or URL. It flags issues with clear explanations and recommended fixes.",
+      q: "Should I use hyphens or underscores in URL slugs?",
+      a: "Always use hyphens. Google treats hyphens as word separators (so 'seo-tools' = two words: 'seo' + 'tools'), but treats underscores as character joiners ('seo_tools' = one word). Hyphens are the universal best practice.",
     },
     {
-      q: "What is keyword density and why does it matter?",
-      a: "Keyword density is the percentage of times a target keyword appears relative to the total word count. The recommended range is 1–3%. Too low and search engines may not associate your page with the keyword; too high and you risk a keyword-stuffing penalty.",
+      q: "Does robots.txt prevent pages from being indexed?",
+      a: "No — robots.txt controls crawling, not indexing. A blocked page can still appear in search results if other pages link to it. To prevent indexing, use a 'noindex' meta tag or X-Robots-Tag HTTP header in addition to or instead of robots.txt.",
     },
     {
-      q: "What makes a good URL slug?",
-      a: "A good slug is lowercase, uses hyphens (not underscores) as separators, omits stop words (the, a, of), removes special characters, and directly reflects the page topic. For example: 'free-seo-tools' is better than 'The-Free-SEO-Tools-Page-2024'.",
+      q: "How many URLs can an XML sitemap contain?",
+      a: "Each sitemap file can contain a maximum of 50,000 URLs and must not exceed 50 MB uncompressed. For larger sites, use a sitemap index file that points to multiple individual sitemaps.",
     },
     {
-      q: "Will the data I enter be stored?",
-      a: "No. Like all X Toolkit tools, the SEO tools will process your input locally in the browser or via a stateless API call. Nothing is stored or logged.",
+      q: "Are all these SEO tools free?",
+      a: "Yes — all SEO tools on X Toolkit are completely free with no subscription, trial, or account required. All processing happens in your browser or via stateless API calls — nothing is stored.",
     },
   ],
 
