@@ -17,6 +17,7 @@ const MEGA_MENU_CATEGORIES = [
     color: "text-purple-400",
     bg: "bg-purple-400/10 border-purple-400/20",
     icon: Sparkles,
+    categoryHref: "/ai-writing-tools",
     tools: [
       { icon: Sparkles, label: "AI Bio Generator", desc: "Generate 3 X bios in seconds", href: "/tools?tab=bio", badge: "AI" },
       { icon: Sparkles, label: "Bio Ideas", desc: "100+ ready-made bio templates", href: "/tools/bio-ideas", badge: "Popular" },
@@ -31,6 +32,7 @@ const MEGA_MENU_CATEGORIES = [
     color: "text-blue-400",
     bg: "bg-blue-400/10 border-blue-400/20",
     icon: Users,
+    categoryHref: "/social-media-tools",
     tools: [
       { icon: Search, label: "Account Checker", desc: "Bulk-check 100 X accounts", href: "/tools?tab=checker", badge: "Popular" },
       { icon: Link2, label: "Profile Link Generator", desc: "Convert usernames to links", href: "/tools?tab=links" },
@@ -45,6 +47,7 @@ const MEGA_MENU_CATEGORIES = [
     color: "text-green-400",
     bg: "bg-green-400/10 border-green-400/20",
     icon: Type,
+    categoryHref: "/text-format-tools",
     tools: [
       { icon: Hash, label: "Hashtag Formatter", desc: "Format & deduplicate hashtags", href: "/tools/hashtag-formatter" },
       { icon: MessageSquareText, label: "Tweet Thread Formatter", desc: "Split text into tweet threads", href: "/tools/tweet-formatter" },
@@ -58,6 +61,7 @@ const MEGA_MENU_CATEGORIES = [
     color: "text-orange-400",
     bg: "bg-orange-400/10 border-orange-400/20",
     icon: Code2,
+    categoryHref: "/developer-tools",
     tools: [
       { icon: FileJson, label: "JSON Formatter", desc: "Format, minify & validate JSON", href: "/tools/json-formatter", badge: "New" },
       { icon: Lock, label: "Base64 Encoder", desc: "Encode/decode with Unicode", href: "/tools/base64", badge: "New" },
@@ -69,6 +73,7 @@ const MEGA_MENU_CATEGORIES = [
     color: "text-pink-400",
     bg: "bg-pink-400/10 border-pink-400/20",
     icon: TrendingUp,
+    categoryHref: "/seo-tools",
     tools: [
       { icon: Globe, label: "Meta Tag Checker", desc: "Optimize meta titles & descs", href: "#", badge: "Soon" },
       { icon: TrendingUp, label: "Keyword Density", desc: "Check keyword frequency", href: "#", badge: "Soon" },
@@ -111,7 +116,7 @@ function MegaMenu({ onClose }: { onClose: () => void }) {
           {MEGA_MENU_CATEGORIES.map((cat) => {
             const CatIcon = cat.icon;
             return (
-              <div key={cat.key}>
+              <div key={cat.key} className="flex flex-col">
                 <div className="flex items-center gap-1.5 mb-2.5">
                   <div className={`h-5 w-5 rounded-md border flex items-center justify-center shrink-0 ${cat.bg}`}>
                     <CatIcon className={`h-3 w-3 ${cat.color}`} />
@@ -120,7 +125,7 @@ function MegaMenu({ onClose }: { onClose: () => void }) {
                     {cat.label}
                   </span>
                 </div>
-                <ul className="space-y-0.5">
+                <ul className="space-y-0.5 flex-1">
                   {cat.tools.map((tool) => {
                     const ToolIcon = tool.icon;
                     const isSoon = tool.badge === "Soon";
@@ -156,6 +161,11 @@ function MegaMenu({ onClose }: { onClose: () => void }) {
                     );
                   })}
                 </ul>
+                <Link href={cat.categoryHref} onClick={onClose}>
+                  <div className={`flex items-center gap-1 mt-2 px-2 py-1 text-[10px] font-medium rounded-md hover:bg-muted/60 transition-colors cursor-pointer ${cat.color} opacity-70 hover:opacity-100`}>
+                    View all {cat.label} →
+                  </div>
+                </Link>
               </div>
             );
           })}

@@ -24,6 +24,12 @@ import FontPreview from "@/pages/tools/font-preview";
 import CharacterCounter from "@/pages/tools/character-counter";
 import JsonFormatter from "@/pages/tools/json-formatter";
 import Base64Tool from "@/pages/tools/base64";
+import AiWritingTools from "@/pages/categories/ai-writing-tools";
+import SocialMediaTools from "@/pages/categories/social-media-tools";
+import TextFormatTools from "@/pages/categories/text-format-tools";
+import DeveloperTools from "@/pages/categories/developer-tools";
+import SeoTools from "@/pages/categories/seo-tools";
+import EmailTools from "@/pages/categories/email-tools";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +55,15 @@ function TrackedRouter() {
       <Route path="/tools/character-counter" component={CharacterCounter} />
       <Route path="/tools/json-formatter" component={JsonFormatter} />
       <Route path="/tools/base64" component={Base64Tool} />
+
+      {/* Category landing pages */}
+      <Route path="/ai-writing-tools" component={AiWritingTools} />
+      <Route path="/social-media-tools" component={SocialMediaTools} />
+      <Route path="/text-format-tools" component={TextFormatTools} />
+      <Route path="/developer-tools" component={DeveloperTools} />
+      <Route path="/seo-tools" component={SeoTools} />
+      <Route path="/email-tools" component={EmailTools} />
+
       <Route component={NotFound} />
     </Switch>
   );

@@ -12,9 +12,10 @@ interface SeoHeadProps {
   description: string;
   path?: string;
   faqs?: Faq[];
+  extraSchemas?: object[];
 }
 
-export function SeoHead({ title, description, path, faqs }: SeoHeadProps) {
+export function SeoHead({ title, description, path, faqs, extraSchemas }: SeoHeadProps) {
   useEffect(() => {
     const canonicalUrl = path ? `${SITE_URL}${path}` : SITE_URL;
 
@@ -46,22 +47,35 @@ export function SeoHead({ title, description, path, faqs }: SeoHeadProps) {
     }
     canonicalEl.setAttribute("href", canonicalUrl);
 
-    let scriptEl: HTMLScriptElement | null = null;
+    const injectedScripts: HTMLScriptElement[] = [];
+
     if (faqs && faqs.length > 0) {
-      scriptEl = document.createElement("script");
-      scriptEl.id = "faq-schema";
-      scriptEl.type = "application/ld+json";
-      scriptEl.textContent = JSON.stringify({
+      const el = document.createElement("script");
+      el.id = "faq-schema";
+      el.type = "application/ld+json";
+      el.textContent = JSON.stringify({
         "@context": "https://schema.org",
         "@type": "FAQPage",
-        "@id": canonicalUrl,
+        "@id": `${canonicalUrl}#faq`,
         mainEntity: faqs.map(({ q, a }) => ({
           "@type": "Question",
           name: q,
           acceptedAnswer: { "@type": "Answer", text: a },
         })),
       });
-      document.head.appendChild(scriptEl);
+      document.head.appendChild(el);
+      injectedScripts.push(el);
+    }
+
+    if (extraSchemas && extraSchemas.length > 0) {
+      extraSchemas.forEach((schema, i) => {
+        const el = document.createElement("script");
+        el.id = `extra-schema-${i}`;
+        el.type = "application/ld+json";
+        el.textContent = JSON.stringify(schema);
+        document.head.appendChild(el);
+        injectedScripts.push(el);
+      });
     }
 
     return () => {
@@ -71,9 +85,9 @@ export function SeoHead({ title, description, path, faqs }: SeoHeadProps) {
       metaOgDesc?.setAttribute("content", prevOgDesc);
       metaOgUrl?.setAttribute("content", prevOgUrl);
       canonicalEl?.setAttribute("href", prevCanonical);
-      scriptEl?.remove();
+      injectedScripts.forEach((el) => el.remove());
     };
-  }, [title, description, path, faqs]);
+  }, [title, description, path, faqs, extraSchemas]);
 
   return null;
 }
