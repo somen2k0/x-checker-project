@@ -24,6 +24,20 @@ import FontPreview from "@/pages/tools/font-preview";
 import CharacterCounter from "@/pages/tools/character-counter";
 import JsonFormatter from "@/pages/tools/json-formatter";
 import Base64Tool from "@/pages/tools/base64";
+// SEO Tools
+import MetaTagGenerator from "@/pages/tools/meta-tag-generator";
+import UrlSlugGenerator from "@/pages/tools/url-slug-generator";
+import KeywordDensity from "@/pages/tools/keyword-density";
+import RobotsTxtGenerator from "@/pages/tools/robots-txt-generator";
+import SitemapValidator from "@/pages/tools/sitemap-validator";
+// Email Tools
+import SubjectLineGenerator from "@/pages/tools/subject-line-generator";
+import EmailUsernameGenerator from "@/pages/tools/email-username-generator";
+import PlainTextFormatter from "@/pages/tools/plain-text-formatter";
+import EmailCharacterCounter from "@/pages/tools/email-character-counter";
+import EmailSignatureGenerator from "@/pages/tools/email-signature-generator";
+import EmailValidator from "@/pages/tools/email-validator";
+// Category pages
 import AiWritingTools from "@/pages/categories/ai-writing-tools";
 import SocialMediaTools from "@/pages/categories/social-media-tools";
 import TextFormatTools from "@/pages/categories/text-format-tools";
@@ -55,6 +69,21 @@ function TrackedRouter() {
       <Route path="/tools/character-counter" component={CharacterCounter} />
       <Route path="/tools/json-formatter" component={JsonFormatter} />
       <Route path="/tools/base64" component={Base64Tool} />
+
+      {/* SEO Tools */}
+      <Route path="/tools/meta-tag-generator" component={MetaTagGenerator} />
+      <Route path="/tools/url-slug-generator" component={UrlSlugGenerator} />
+      <Route path="/tools/keyword-density" component={KeywordDensity} />
+      <Route path="/tools/robots-txt-generator" component={RobotsTxtGenerator} />
+      <Route path="/tools/sitemap-validator" component={SitemapValidator} />
+
+      {/* Email Tools */}
+      <Route path="/tools/subject-line-generator" component={SubjectLineGenerator} />
+      <Route path="/tools/email-username-generator" component={EmailUsernameGenerator} />
+      <Route path="/tools/plain-text-formatter" component={PlainTextFormatter} />
+      <Route path="/tools/email-character-counter" component={EmailCharacterCounter} />
+      <Route path="/tools/email-signature-generator" component={EmailSignatureGenerator} />
+      <Route path="/tools/email-validator" component={EmailValidator} />
 
       {/* Category landing pages */}
       <Route path="/ai-writing-tools" component={AiWritingTools} />

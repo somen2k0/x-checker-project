@@ -8,6 +8,7 @@ import {
   Search, Sparkles, Link2, AtSign, Smile, Briefcase, Palette,
   Hash, MessageSquareText, Type, BarChart2, Users, FileJson, Lock,
   TrendingUp, Globe, Code2, Wrench, Mail, ShieldCheck, Pencil,
+  FileText, Shield, Tag,
 } from "lucide-react";
 
 const MEGA_MENU_CATEGORIES = [
@@ -63,8 +64,8 @@ const MEGA_MENU_CATEGORIES = [
     icon: Code2,
     categoryHref: "/developer-tools",
     tools: [
-      { icon: FileJson, label: "JSON Formatter", desc: "Format, minify & validate JSON", href: "/tools/json-formatter", badge: "New" },
-      { icon: Lock, label: "Base64 Encoder", desc: "Encode/decode with Unicode", href: "/tools/base64", badge: "New" },
+      { icon: FileJson, label: "JSON Formatter", desc: "Format, minify & validate JSON", href: "/tools/json-formatter", badge: "Popular" },
+      { icon: Lock, label: "Base64 Encoder", desc: "Encode/decode with Unicode", href: "/tools/base64" },
     ],
   },
   {
@@ -75,9 +76,11 @@ const MEGA_MENU_CATEGORIES = [
     icon: TrendingUp,
     categoryHref: "/seo-tools",
     tools: [
-      { icon: Globe, label: "Meta Tag Checker", desc: "Optimize meta titles & descs", href: "#", badge: "Soon" },
-      { icon: TrendingUp, label: "Keyword Density", desc: "Check keyword frequency", href: "#", badge: "Soon" },
-      { icon: Link2, label: "URL Slug Generator", desc: "Clean, SEO-friendly slugs", href: "#", badge: "Soon" },
+      { icon: Globe, label: "Meta Tag Generator", desc: "SEO title, OG & Twitter Cards", href: "/tools/meta-tag-generator", badge: "New" },
+      { icon: Link2, label: "URL Slug Generator", desc: "Clean, SEO-friendly slugs", href: "/tools/url-slug-generator", badge: "New" },
+      { icon: TrendingUp, label: "Keyword Density", desc: "Check keyword frequency", href: "/tools/keyword-density", badge: "New" },
+      { icon: Shield, label: "Robots.txt Generator", desc: "Build your robots.txt file", href: "/tools/robots-txt-generator", badge: "New" },
+      { icon: Tag, label: "Sitemap Validator", desc: "Validate XML sitemap structure", href: "/tools/sitemap-validator", badge: "New" },
     ],
   },
   {
@@ -88,9 +91,11 @@ const MEGA_MENU_CATEGORIES = [
     icon: Mail,
     categoryHref: "/email-tools",
     tools: [
-      { icon: Pencil, label: "Subject Line Generator", desc: "AI-powered subject lines", href: "#", badge: "Soon" },
-      { icon: ShieldCheck, label: "Email Validator", desc: "Validate format & MX records", href: "#", badge: "Soon" },
-      { icon: Mail, label: "Plain Text Formatter", desc: "Convert HTML email to plain text", href: "#", badge: "Soon" },
+      { icon: Pencil, label: "Subject Line Generator", desc: "Templates for every campaign", href: "/tools/subject-line-generator", badge: "New" },
+      { icon: Mail, label: "Email Signature Generator", desc: "HTML & plain text signatures", href: "/tools/email-signature-generator", badge: "New" },
+      { icon: Hash, label: "Email Character Counter", desc: "Subject & preview text limits", href: "/tools/email-character-counter", badge: "New" },
+      { icon: ShieldCheck, label: "Email Validator", desc: "Validate email syntax", href: "/tools/email-validator", badge: "New" },
+      { icon: FileText, label: "Plain Text Formatter", desc: "Convert HTML email to text", href: "/tools/plain-text-formatter", badge: "New" },
     ],
   },
 ];
@@ -99,7 +104,6 @@ const BADGE_STYLES: Record<string, string> = {
   Popular: "bg-amber-400/15 text-amber-400 border-amber-400/30",
   New: "bg-emerald-400/15 text-emerald-400 border-emerald-400/30",
   AI: "bg-purple-400/15 text-purple-400 border-purple-400/30",
-  Soon: "bg-muted/60 text-muted-foreground border-border/50",
 };
 
 function MegaMenu({ onClose }: { onClose: () => void }) {
@@ -141,22 +145,15 @@ function MegaMenu({ onClose }: { onClose: () => void }) {
                 <ul className="space-y-0.5 flex-1">
                   {cat.tools.map((tool) => {
                     const ToolIcon = tool.icon;
-                    const isSoon = tool.badge === "Soon";
                     const inner = (
-                      <div
-                        className={`group flex flex-col gap-0.5 px-2 py-1.5 rounded-lg transition-colors ${
-                          isSoon
-                            ? "opacity-50 cursor-default"
-                            : "hover:bg-muted/60 cursor-pointer"
-                        }`}
-                      >
+                      <div className="group flex flex-col gap-0.5 px-2 py-1.5 rounded-lg transition-colors hover:bg-muted/60 cursor-pointer">
                         <div className="flex items-center gap-1.5">
                           <ToolIcon className="h-3 w-3 text-muted-foreground group-hover:text-foreground shrink-0 transition-colors" />
                           <span className="text-xs font-medium leading-snug group-hover:text-primary transition-colors">
                             {tool.label}
                           </span>
                           {tool.badge && (
-                            <span className={`text-[9px] font-semibold px-1 py-px rounded-full border ml-auto shrink-0 ${BADGE_STYLES[tool.badge]}`}>
+                            <span className={`text-[9px] font-semibold px-1 py-px rounded-full border ml-auto shrink-0 ${BADGE_STYLES[tool.badge] ?? ""}`}>
                               {tool.badge}
                             </span>
                           )}
@@ -166,7 +163,6 @@ function MegaMenu({ onClose }: { onClose: () => void }) {
                         </span>
                       </div>
                     );
-                    if (isSoon || tool.href === "#") return <li key={tool.label}>{inner}</li>;
                     return (
                       <li key={tool.label}>
                         <Link href={tool.href} onClick={onClose}>{inner}</Link>
@@ -218,7 +214,7 @@ export function Navbar() {
             </div>
             <span className="font-semibold text-foreground tracking-tight">X Toolkit</span>
             <Badge variant="outline" className="hidden sm:inline-flex text-[10px] font-medium border-primary/30 text-primary bg-primary/8 px-1.5 py-0">
-              16+ Free Tools
+              26+ Free Tools
             </Badge>
           </Link>
 

@@ -1,7 +1,8 @@
 import {
   Search, Link2, AtSign, Sparkles, Smile, Briefcase, Palette,
   Hash, MessageSquare, Type, BarChart2, Users, FileJson, Lock,
-  TrendingUp, Globe, Code2, Mail, ShieldCheck, Pencil, type LucideIcon,
+  TrendingUp, Globe, Code2, Mail, ShieldCheck, Pencil, FileText,
+  Shield, Tag, type LucideIcon,
 } from "lucide-react";
 
 export type CategoryKey =
@@ -66,7 +67,7 @@ export const CATEGORIES: Record<CategoryKey, Category> = {
     icon: TrendingUp,
     color: "text-pink-400",
     bg: "bg-pink-400/10 border-pink-400/20",
-    description: "Meta tag checkers, keyword tools, and on-page SEO utilities.",
+    description: "Meta tag generators, keyword tools, URL slugs, and on-page SEO utilities.",
   },
   email: {
     key: "email",
@@ -75,7 +76,7 @@ export const CATEGORIES: Record<CategoryKey, Category> = {
     icon: Mail,
     color: "text-cyan-400",
     bg: "bg-cyan-400/10 border-cyan-400/20",
-    description: "Email subject line generators, validators, and deliverability utilities.",
+    description: "Subject line generators, email formatters, signatures, and character counters.",
   },
 };
 
@@ -237,7 +238,7 @@ export const ALL_TOOLS: Tool[] = [
     href: "/tools/json-formatter",
     category: "developer",
     icon: FileJson,
-    badge: "New",
+    badge: "Popular",
     tags: ["json", "format", "minify", "validate", "developer", "api"],
   },
   {
@@ -247,77 +248,126 @@ export const ALL_TOOLS: Tool[] = [
     href: "/tools/base64",
     category: "developer",
     icon: Lock,
-    badge: "New",
     tags: ["base64", "encode", "decode", "developer", "binary"],
   },
 
-  // ── Email (coming soon) ───────────────────────────────────────────
+  // ── SEO ──────────────────────────────────────────────────────────
+  {
+    id: "meta-tag-generator",
+    label: "Meta Tag Generator",
+    description: "Generate SEO title, meta description, Open Graph, and Twitter Card tags with live SERP preview.",
+    href: "/tools/meta-tag-generator",
+    category: "seo",
+    icon: Globe,
+    badge: "New",
+    tags: ["seo", "meta", "title", "description", "og", "open graph", "twitter card", "google"],
+  },
+  {
+    id: "url-slug-generator",
+    label: "URL Slug Generator",
+    description: "Convert titles or phrases into clean, SEO-friendly URL slugs instantly.",
+    href: "/tools/url-slug-generator",
+    category: "seo",
+    icon: Link2,
+    badge: "New",
+    tags: ["seo", "slug", "url", "permalink", "hyphen"],
+  },
+  {
+    id: "keyword-density",
+    label: "Keyword Density Checker",
+    description: "Check keyword frequency and density percentages across any article or text.",
+    href: "/tools/keyword-density",
+    category: "seo",
+    icon: TrendingUp,
+    badge: "New",
+    tags: ["seo", "keyword", "density", "frequency", "content"],
+  },
+  {
+    id: "robots-txt-generator",
+    label: "Robots.txt Generator",
+    description: "Build a valid robots.txt file — set crawl rules, block AI bots, add your sitemap.",
+    href: "/tools/robots-txt-generator",
+    category: "seo",
+    icon: Shield,
+    badge: "New",
+    tags: ["seo", "robots", "crawl", "noindex", "bots", "googlebot"],
+  },
+  {
+    id: "sitemap-validator",
+    label: "Sitemap Validator",
+    description: "Paste your XML sitemap to validate structure, URL formats, and check for errors.",
+    href: "/tools/sitemap-validator",
+    category: "seo",
+    icon: Tag,
+    badge: "New",
+    tags: ["seo", "sitemap", "xml", "validate", "google", "indexing"],
+  },
+
+  // ── Email ─────────────────────────────────────────────────────────
   {
     id: "subject-line-generator",
     label: "Subject Line Generator",
-    description: "Generate high-converting email subject lines with AI.",
-    href: "#",
+    description: "Generate high-converting email subject line templates for any campaign type.",
+    href: "/tools/subject-line-generator",
     category: "email",
     icon: Pencil,
-    isComingSoon: true,
-    tags: ["email", "subject", "generator", "ai", "marketing"],
+    badge: "New",
+    tags: ["email", "subject", "generator", "marketing", "open rate"],
+  },
+  {
+    id: "email-username-generator",
+    label: "Email Username Generator",
+    description: "Generate professional email address formats from a name and company.",
+    href: "/tools/email-username-generator",
+    category: "email",
+    icon: AtSign,
+    badge: "New",
+    tags: ["email", "username", "address", "professional", "format"],
+  },
+  {
+    id: "plain-text-formatter",
+    label: "Plain Text Email Formatter",
+    description: "Convert HTML emails to clean, readable plain text with links preserved.",
+    href: "/tools/plain-text-formatter",
+    category: "email",
+    icon: FileText,
+    badge: "New",
+    tags: ["email", "plain text", "html", "convert", "format"],
+  },
+  {
+    id: "email-character-counter",
+    label: "Email Character Counter",
+    description: "Count subject line, preview text, and body characters with per-client limits.",
+    href: "/tools/email-character-counter",
+    category: "email",
+    icon: Hash,
+    badge: "New",
+    tags: ["email", "character", "counter", "subject", "gmail", "outlook"],
+  },
+  {
+    id: "email-signature-generator",
+    label: "Email Signature Generator",
+    description: "Build a professional HTML or plain text email signature in seconds.",
+    href: "/tools/email-signature-generator",
+    category: "email",
+    icon: Mail,
+    badge: "New",
+    tags: ["email", "signature", "html", "professional", "gmail", "outlook"],
   },
   {
     id: "email-validator",
     label: "Email Address Validator",
-    description: "Validate email address format and check domain MX records.",
-    href: "#",
+    description: "Validate email address syntax and format instantly in your browser.",
+    href: "/tools/email-validator",
     category: "email",
     icon: ShieldCheck,
-    isComingSoon: true,
-    tags: ["email", "validate", "check", "format", "mx"],
-  },
-  {
-    id: "email-formatter",
-    label: "Plain Text Email Formatter",
-    description: "Format HTML emails as clean, readable plain text.",
-    href: "#",
-    category: "email",
-    icon: Mail,
-    isComingSoon: true,
-    tags: ["email", "plain text", "format", "html", "convert"],
-  },
-
-  // ── SEO (coming soon) ─────────────────────────────────────────────
-  {
-    id: "meta-checker",
-    label: "Meta Tag Checker",
-    description: "Analyze and optimize meta titles and descriptions for better search rankings.",
-    href: "#",
-    category: "seo",
-    icon: Globe,
-    isComingSoon: true,
-    tags: ["seo", "meta", "title", "description", "google"],
-  },
-  {
-    id: "keyword-density",
-    label: "Keyword Density Tool",
-    description: "Check keyword frequency and density in any block of text.",
-    href: "#",
-    category: "seo",
-    icon: TrendingUp,
-    isComingSoon: true,
-    tags: ["seo", "keyword", "density", "frequency"],
-  },
-  {
-    id: "slug-generator",
-    label: "URL Slug Generator",
-    description: "Convert titles or phrases into clean, SEO-friendly URL slugs.",
-    href: "#",
-    category: "seo",
-    icon: Link2,
-    isComingSoon: true,
-    tags: ["seo", "slug", "url", "permalink"],
+    badge: "New",
+    tags: ["email", "validate", "check", "format", "syntax"],
   },
 ];
 
 export function getToolsByCategory(category: CategoryKey): Tool[] {
-  return ALL_TOOLS.filter((t) => t.category === category);
+  return ALL_TOOLS.filter((t) => t.category === category && !t.isComingSoon);
 }
 
 export function getPopularTools(): Tool[] {
