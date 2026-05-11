@@ -10,6 +10,8 @@ interface FeedbackModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const FORMSUBMIT_URL = "https://formsubmit.co/ajax/careergrowthremotely@gmail.com";
+
 export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -23,24 +25,35 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch(FORMSUBMIT_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, message }),
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          name: name.trim() || "Anonymous",
+          email: email.trim() || "no-reply@xtoolkit.live",
+          message: message.trim(),
+          _subject: "New feedback — X Toolkit",
+          _captcha: "false",
+          _template: "table",
+        }),
       });
+
       const text = await res.text();
-      let data: { ok?: boolean; success?: boolean; error?: string; message?: string } = {};
+      let data: { success?: string; message?: string } = {};
       try {
         data = JSON.parse(text) as typeof data;
       } catch {
-        setError("Server error. Please try again later.");
+        // non-JSON response — treat 2xx as success
+      }
+
+      if (!res.ok && data?.success !== "true") {
+        setError(data?.message ?? "Failed to send. Please try again.");
         return;
       }
-      const success = res.ok && (data.ok ?? data.success ?? false);
-      if (!success) {
-        setError(data.error ?? data.message ?? "Failed to send. Please try again.");
-        return;
-      }
+
       setSubmitted(true);
     } catch {
       setError("Network error. Please check your connection and try again.");
