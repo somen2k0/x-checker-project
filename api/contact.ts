@@ -36,7 +36,14 @@ export default async function handler(
       }
     );
 
-    const data = await formRes.json() as { success?: string; message?: string };
+    const text = await formRes.text();
+    let data: { success?: string; message?: string } = {};
+    try {
+      data = JSON.parse(text);
+    } catch {
+      // Formsubmit.co returns HTML on first activation — treat any 2xx as success
+    }
+
     const success = data?.success === "true" || formRes.ok;
 
     if (!success) {
