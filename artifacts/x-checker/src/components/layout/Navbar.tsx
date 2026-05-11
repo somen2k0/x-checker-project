@@ -11,59 +11,29 @@ import {
   FileText, Shield, Tag,
 } from "lucide-react";
 
-const MEGA_MENU_CATEGORIES = [
+const BADGE_STYLES: Record<string, string> = {
+  Popular: "bg-amber-400/15 text-amber-400 border-amber-400/30",
+  New: "bg-emerald-400/15 text-emerald-400 border-emerald-400/30",
+  AI: "bg-purple-400/15 text-purple-400 border-purple-400/30",
+};
+
+const NAV_CATEGORIES = [
   {
-    key: "ai-writing",
-    label: "AI Writing",
-    color: "text-purple-400",
-    bg: "bg-purple-400/10 border-purple-400/20",
-    icon: Sparkles,
-    categoryHref: "/ai-writing-tools",
-    tools: [
-      { icon: Sparkles, label: "AI Bio Generator", desc: "Generate 3 X bios in seconds", href: "/tools?tab=bio", badge: "AI" },
-      { icon: Sparkles, label: "Bio Ideas", desc: "100+ ready-made bio templates", href: "/tools/bio-ideas", badge: "Popular" },
-      { icon: Smile, label: "Funny Bios", desc: "Witty, humorous bio ideas", href: "/tools/funny-bios" },
-      { icon: Briefcase, label: "Professional Bios", desc: "Bios for career builders", href: "/tools/professional-bios" },
-      { icon: Palette, label: "Aesthetic Bios", desc: "Minimal, stylish profile bios", href: "/tools/aesthetic-bios" },
-    ],
-  },
-  {
-    key: "social-media",
-    label: "Social Media",
+    key: "x-tools",
+    label: "X Tools",
+    icon: Layers,
     color: "text-blue-400",
-    bg: "bg-blue-400/10 border-blue-400/20",
-    icon: Users,
-    categoryHref: "/social-media-tools",
+    href: "/tools",
     tools: [
       { icon: Search, label: "Account Checker", desc: "Bulk-check 100 X accounts", href: "/tools?tab=checker", badge: "Popular" },
+      { icon: Sparkles, label: "AI Bio Generator", desc: "Generate 3 X bios in seconds", href: "/tools?tab=bio", badge: "AI" },
       { icon: Link2, label: "Profile Link Generator", desc: "Convert usernames to links", href: "/tools?tab=links" },
-      { icon: AtSign, label: "@ Formatter", desc: "Add/remove @ prefix in bulk", href: "/tools?tab=at" },
       { icon: AtSign, label: "Username Generator", desc: "Unique X handle ideas", href: "/tools/username-generator" },
-      { icon: Users, label: "Display Name Ideas", desc: "Curated X display names", href: "/tools/name-ideas" },
-    ],
-  },
-  {
-    key: "text-formatting",
-    label: "Text & Format",
-    color: "text-green-400",
-    bg: "bg-green-400/10 border-green-400/20",
-    icon: Type,
-    categoryHref: "/text-format-tools",
-    tools: [
       { icon: Hash, label: "Hashtag Formatter", desc: "Format & deduplicate hashtags", href: "/tools/hashtag-formatter" },
-      { icon: MessageSquareText, label: "Tweet Thread Formatter", desc: "Split text into tweet threads", href: "/tools/tweet-formatter" },
+      { icon: MessageSquareText, label: "Tweet Formatter", desc: "Split text into tweet threads", href: "/tools/tweet-formatter" },
       { icon: Type, label: "Font Preview", desc: "Preview text in Unicode fonts", href: "/tools/font-preview" },
       { icon: BarChart2, label: "Character Counter", desc: "Fit X's 280-char limit", href: "/tools/character-counter" },
-    ],
-  },
-  {
-    key: "developer",
-    label: "Developer",
-    color: "text-orange-400",
-    bg: "bg-orange-400/10 border-orange-400/20",
-    icon: Code2,
-    categoryHref: "/developer-tools",
-    tools: [
+      { icon: Users, label: "Display Name Ideas", desc: "Curated X display names", href: "/tools/name-ideas" },
       { icon: FileJson, label: "JSON Formatter", desc: "Format, minify & validate JSON", href: "/tools/json-formatter", badge: "Popular" },
       { icon: Lock, label: "Base64 Encoder", desc: "Encode/decode with Unicode", href: "/tools/base64" },
     ],
@@ -71,10 +41,9 @@ const MEGA_MENU_CATEGORIES = [
   {
     key: "seo",
     label: "SEO Tools",
-    color: "text-pink-400",
-    bg: "bg-pink-400/10 border-pink-400/20",
     icon: TrendingUp,
-    categoryHref: "/seo-tools",
+    color: "text-pink-400",
+    href: "/seo-tools",
     tools: [
       { icon: Globe, label: "Meta Tag Generator", desc: "SEO title, OG & Twitter Cards", href: "/tools/meta-tag-generator", badge: "New" },
       { icon: Link2, label: "URL Slug Generator", desc: "Clean, SEO-friendly slugs", href: "/tools/url-slug-generator", badge: "New" },
@@ -85,11 +54,10 @@ const MEGA_MENU_CATEGORIES = [
   },
   {
     key: "email",
-    label: "Email",
-    color: "text-cyan-400",
-    bg: "bg-cyan-400/10 border-cyan-400/20",
+    label: "Email Tools",
     icon: Mail,
-    categoryHref: "/email-tools",
+    color: "text-cyan-400",
+    href: "/email-tools",
     tools: [
       { icon: Pencil, label: "Subject Line Generator", desc: "Templates for every campaign", href: "/tools/subject-line-generator", badge: "New" },
       { icon: Mail, label: "Email Signature Generator", desc: "HTML & plain text signatures", href: "/tools/email-signature-generator", badge: "New" },
@@ -100,86 +68,103 @@ const MEGA_MENU_CATEGORIES = [
   },
 ];
 
-const BADGE_STYLES: Record<string, string> = {
-  Popular: "bg-amber-400/15 text-amber-400 border-amber-400/30",
-  New: "bg-emerald-400/15 text-emerald-400 border-emerald-400/30",
-  AI: "bg-purple-400/15 text-purple-400 border-purple-400/30",
-};
-
-function MegaMenu({ onClose }: { onClose: () => void }) {
+function NavDropdown({
+  category,
+  isActive,
+  onClose,
+}: {
+  category: typeof NAV_CATEGORIES[number];
+  isActive: boolean;
+  onClose: () => void;
+}) {
+  const CatIcon = category.icon;
   return (
     <div
-      className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-[1060px] max-w-[calc(100vw-2rem)] z-50
-        rounded-2xl border border-border/60 bg-background/98 backdrop-blur-xl shadow-xl shadow-black/20
+      className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-72 z-50
+        rounded-xl border border-border/60 bg-background/98 backdrop-blur-xl shadow-xl shadow-black/20
         animate-in fade-in slide-in-from-top-2 duration-150"
     >
-      <div className="p-5">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-border/40">
-          <div className="flex items-center gap-2">
-            <Wrench className="h-4 w-4 text-primary" />
-            <span className="text-sm font-semibold">All Tools</span>
-            <span className="text-xs text-muted-foreground">— free, no signup required</span>
+      <div className="p-2">
+        <Link href={category.href} onClick={onClose}>
+          <div className={`flex items-center gap-2 px-3 py-2 mb-1 rounded-lg hover:bg-muted/60 transition-colors cursor-pointer border-b border-border/30 pb-2 mb-2`}>
+            <CatIcon className={`h-3.5 w-3.5 ${category.color}`} />
+            <span className="text-xs font-semibold text-foreground">Browse all {category.label}</span>
+            <span className="ml-auto text-xs text-muted-foreground">→</span>
           </div>
-          <Link href="/tools" onClick={onClose}>
-            <Button variant="outline" size="sm" className="text-xs h-7 border-border/60 hover:bg-muted/50">
-              Browse all →
-            </Button>
-          </Link>
-        </div>
-
-        {/* Categories grid */}
-        <div className="grid grid-cols-6 gap-4">
-          {MEGA_MENU_CATEGORIES.map((cat) => {
-            const CatIcon = cat.icon;
+        </Link>
+        <ul className="space-y-0.5">
+          {category.tools.map((tool) => {
+            const ToolIcon = tool.icon;
             return (
-              <div key={cat.key} className="flex flex-col">
-                <div className="flex items-center gap-1.5 mb-2.5">
-                  <div className={`h-5 w-5 rounded-md border flex items-center justify-center shrink-0 ${cat.bg}`}>
-                    <CatIcon className={`h-3 w-3 ${cat.color}`} />
-                  </div>
-                  <span className={`text-[11px] font-semibold uppercase tracking-wide ${cat.color}`}>
-                    {cat.label}
-                  </span>
-                </div>
-                <ul className="space-y-0.5 flex-1">
-                  {cat.tools.map((tool) => {
-                    const ToolIcon = tool.icon;
-                    const inner = (
-                      <div className="group flex flex-col gap-0.5 px-2 py-1.5 rounded-lg transition-colors hover:bg-muted/60 cursor-pointer">
-                        <div className="flex items-center gap-1.5">
-                          <ToolIcon className="h-3 w-3 text-muted-foreground group-hover:text-foreground shrink-0 transition-colors" />
-                          <span className="text-xs font-medium leading-snug group-hover:text-primary transition-colors">
-                            {tool.label}
-                          </span>
-                          {tool.badge && (
-                            <span className={`text-[9px] font-semibold px-1 py-px rounded-full border ml-auto shrink-0 ${BADGE_STYLES[tool.badge] ?? ""}`}>
-                              {tool.badge}
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[10px] text-muted-foreground leading-snug pl-4.5">
-                          {tool.desc}
-                        </span>
-                      </div>
-                    );
-                    return (
-                      <li key={tool.label}>
-                        <Link href={tool.href} onClick={onClose}>{inner}</Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-                <Link href={cat.categoryHref} onClick={onClose}>
-                  <div className={`flex items-center gap-1 mt-2 px-2 py-1 text-[10px] font-medium rounded-md hover:bg-muted/60 transition-colors cursor-pointer ${cat.color} opacity-70 hover:opacity-100`}>
-                    View all {cat.label} →
+              <li key={tool.label}>
+                <Link href={tool.href} onClick={onClose}>
+                  <div className="group flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-muted/60 transition-colors cursor-pointer">
+                    <ToolIcon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground shrink-0 transition-colors" />
+                    <span className="text-xs font-medium group-hover:text-primary transition-colors flex-1">{tool.label}</span>
+                    {tool.badge && (
+                      <span className={`text-[9px] font-semibold px-1.5 py-px rounded-full border shrink-0 ${BADGE_STYLES[tool.badge] ?? ""}`}>
+                        {tool.badge}
+                      </span>
+                    )}
                   </div>
                 </Link>
-              </div>
+              </li>
             );
           })}
-        </div>
+        </ul>
       </div>
+    </div>
+  );
+}
+
+function NavItem({
+  category,
+  currentPath,
+}: {
+  category: typeof NAV_CATEGORIES[number];
+  currentPath: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const Icon = category.icon;
+
+  const handleMouseEnter = useCallback(() => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setOpen(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    closeTimer.current = setTimeout(() => setOpen(false), 120);
+  }, []);
+
+  const close = useCallback(() => setOpen(false), []);
+
+  const isActive =
+    currentPath === category.href ||
+    currentPath.startsWith(category.href + "/") ||
+    open;
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <button
+        className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
+          isActive
+            ? "bg-muted text-foreground"
+            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+        }`}
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="true"
+      >
+        <Icon className="h-3.5 w-3.5" />
+        {category.label}
+        <ChevronDown className={`h-3 w-3 transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && <NavDropdown category={category} isActive={isActive} onClose={close} />}
     </div>
   );
 }
@@ -188,19 +173,7 @@ export function Navbar() {
   const [location] = useLocation();
   const [showFeedback, setShowFeedback] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [megaOpen, setMegaOpen] = useState(false);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const handleMouseEnter = useCallback(() => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    setMegaOpen(true);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    closeTimer.current = setTimeout(() => setMegaOpen(false), 120);
-  }, []);
-
-  const closeMega = useCallback(() => setMegaOpen(false), []);
+  const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
 
   return (
     <>
@@ -231,29 +204,9 @@ export function Navbar() {
               </button>
             </Link>
 
-            {/* Tools with mega menu */}
-            <div
-              className="relative"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-            >
-              <button
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1 ${
-                  location === "/tools" || megaOpen
-                    ? "bg-muted text-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                }`}
-                onClick={() => setMegaOpen((v) => !v)}
-                aria-expanded={megaOpen}
-                aria-haspopup="true"
-              >
-                <Wrench className="h-3.5 w-3.5" />
-                Tools
-                <ChevronDown className={`h-3 w-3 transition-transform duration-150 ${megaOpen ? "rotate-180" : ""}`} />
-              </button>
-
-              {megaOpen && <MegaMenu onClose={closeMega} />}
-            </div>
+            {NAV_CATEGORIES.map((cat) => (
+              <NavItem key={cat.key} category={cat} currentPath={location} />
+            ))}
 
             <Link href="/about">
               <button className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
@@ -295,23 +248,66 @@ export function Navbar() {
         {/* Mobile dropdown menu */}
         {menuOpen && (
           <div className="md:hidden border-t border-border/60 bg-background/95 backdrop-blur-md px-4 py-3 space-y-1">
-            {[
-              { href: "/", label: "Home", icon: Home },
-              { href: "/tools", label: "Tools", icon: Wrench },
-              { href: "/about", label: "About", icon: Info },
-            ].map(({ href, label, icon: Icon }) => {
-              const isActive = location === href;
+            <Link href="/" onClick={() => setMenuOpen(false)}>
+              <button className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
+                location === "/" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              }`}>
+                <Home className="h-4 w-4" />
+                Home
+              </button>
+            </Link>
+
+            {NAV_CATEGORIES.map((cat) => {
+              const Icon = cat.icon;
+              const expanded = mobileExpanded === cat.key;
               return (
-                <Link key={href} href={href} onClick={() => setMenuOpen(false)}>
-                  <button className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
-                    isActive ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  }`}>
+                <div key={cat.key}>
+                  <button
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors text-left"
+                    onClick={() => setMobileExpanded(expanded ? null : cat.key)}
+                  >
                     <Icon className="h-4 w-4" />
-                    {label}
+                    {cat.label}
+                    <ChevronDown className={`h-3.5 w-3.5 ml-auto transition-transform ${expanded ? "rotate-180" : ""}`} />
                   </button>
-                </Link>
+                  {expanded && (
+                    <div className="ml-4 mt-0.5 space-y-0.5 border-l border-border/40 pl-3">
+                      <Link href={cat.href} onClick={() => setMenuOpen(false)}>
+                        <button className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors text-left">
+                          Browse all {cat.label} →
+                        </button>
+                      </Link>
+                      {cat.tools.map((tool) => {
+                        const TIcon = tool.icon;
+                        return (
+                          <Link key={tool.label} href={tool.href} onClick={() => setMenuOpen(false)}>
+                            <button className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors text-left">
+                              <TIcon className="h-3.5 w-3.5 shrink-0" />
+                              {tool.label}
+                              {tool.badge && (
+                                <span className={`text-[9px] font-semibold px-1.5 py-px rounded-full border ml-auto ${BADGE_STYLES[tool.badge] ?? ""}`}>
+                                  {tool.badge}
+                                </span>
+                              )}
+                            </button>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               );
             })}
+
+            <Link href="/about" onClick={() => setMenuOpen(false)}>
+              <button className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
+                location === "/about" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              }`}>
+                <Info className="h-4 w-4" />
+                About
+              </button>
+            </Link>
+
             <button
               onClick={() => { setShowFeedback(true); setMenuOpen(false); }}
               className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
