@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CookieBanner } from "@/components/CookieBanner";
+import { MobileNav } from "@/components/layout/MobileNav";
 import { usePageTracking } from "@/hooks/use-track";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
@@ -60,6 +61,7 @@ function App() {
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <TrackedRouter />
           <CookieBanner />
+          <MobileNav />
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

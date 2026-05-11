@@ -128,12 +128,12 @@ export function MiniToolLayout({
         {/* CTA */}
         <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <h3 className="font-semibold mb-1">Need the full toolkit?</h3>
-            <p className="text-sm text-muted-foreground">Check accounts, generate bios, create profile links, and format usernames — all in one place.</p>
+            <h3 className="font-semibold mb-1">Explore all tools</h3>
+            <p className="text-sm text-muted-foreground">16+ free tools — X tools, AI writing, developer utilities, and more. No signup required.</p>
           </div>
           <Link href="/tools">
             <Button className="shrink-0 shadow-sm shadow-primary/20 whitespace-nowrap">
-              Open X Toolkit <ArrowRight className="h-4 w-4 ml-2" />
+              Browse All Tools <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </Link>
         </div>

@@ -16,6 +16,7 @@ export function CookieBanner() {
     if (status === "accepted") {
       loadGA();
     }
+    return undefined;
   }, []);
 
   const accept = () => {

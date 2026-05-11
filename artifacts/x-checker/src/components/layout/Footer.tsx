@@ -132,7 +132,7 @@ export function Footer() {
             </div>
 
             {/* Company */}
-            <div className="space-y-3">
+            <div className="col-span-2 md:col-span-1 space-y-3">
               <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground/60">Company</h3>
               <ul className="space-y-2">
                 {[

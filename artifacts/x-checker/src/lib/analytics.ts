@@ -34,7 +34,12 @@ export type EventName =
   | "encode_base64"
   | "decode_base64"
   | "copy_base64"
-  | "download_base64";
+  | "download_base64"
+  | "tool_search"
+  | "category_click"
+  | "related_tool_click"
+  | "popular_tool_click"
+  | "new_tool_click";
 
 export interface TrackParams {
   tool?: string;

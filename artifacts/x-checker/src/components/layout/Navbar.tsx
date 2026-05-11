@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FeedbackModal } from "@/components/FeedbackModal";
-import { MessageSquare, Wrench, Home, Info, Menu, X } from "lucide-react";
+import { MessageSquare, Wrench, Home, Info, Menu, X, Layers } from "lucide-react";
 
 const navLinks = [
   { href: "/", label: "Home", icon: Home },
@@ -22,13 +22,13 @@ export function Navbar() {
         <div className="max-w-6xl mx-auto px-4 md:px-8 h-14 flex items-center justify-between gap-4">
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 shrink-0">
+          <Link href="/" className="flex items-center gap-2 shrink-0">
             <div className="h-7 w-7 rounded-md bg-primary flex items-center justify-center shadow-md shadow-primary/30">
-              <span className="text-white font-bold text-sm leading-none">XT</span>
+              <Layers className="h-4 w-4 text-white" />
             </div>
             <span className="font-semibold text-foreground tracking-tight">X Toolkit</span>
             <Badge variant="outline" className="hidden sm:inline-flex text-[10px] font-medium border-primary/30 text-primary bg-primary/8 px-1.5 py-0">
-              Free
+              16+ Free Tools
             </Badge>
           </Link>
 
@@ -62,7 +62,7 @@ export function Navbar() {
             </Button>
             <Link href="/tools">
               <Button size="sm" className="hidden md:flex text-xs shadow-sm shadow-primary/20">
-                Try Tools →
+                Browse Tools →
               </Button>
             </Link>
             {/* Mobile menu toggle */}
