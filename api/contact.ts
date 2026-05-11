@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 
-const WEB3FORMS_URL = "https://api.web3forms.com/submit";
+const FORMSUBMIT_EMAIL = "careergrowthremotely@gmail.com";
 
 export default async function handler(
   req: VercelRequest,
@@ -10,14 +10,6 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const accessKey = process.env.WEB3FORMS_KEY;
-
-  if (!accessKey) {
-    return res.status(500).json({
-      error: "WEB3FORMS_KEY missing",
-    });
-  }
-
   try {
     const { name, email, message } = req.body;
 
@@ -25,23 +17,27 @@ export default async function handler(
       return res.status(400).json({ ok: false, error: "Message is required." });
     }
 
-    const response = await fetch(WEB3FORMS_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        access_key: accessKey,
-        name: name || "Anonymous",
-        email: email || "no-reply@xtoolkit.live",
-        message,
-        subject: "New feedback — X Toolkit",
-      }),
-    });
+    const formRes = await fetch(
+      `https://formsubmit.co/ajax/${FORMSUBMIT_EMAIL}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          name: name || "Anonymous",
+          email: email || "no-reply@xtoolkit.live",
+          message: message.trim(),
+          _subject: "New feedback — X Toolkit",
+          _captcha: "false",
+          _template: "table",
+        }),
+      }
+    );
 
-    const data = await response.json();
-    const success =
-      typeof data?.success === "boolean" ? data.success : response.ok;
+    const data = await formRes.json() as { success?: string; message?: string };
+    const success = data?.success === "true" || formRes.ok;
 
     if (!success) {
       return res.status(502).json({
@@ -53,7 +49,7 @@ export default async function handler(
     return res.status(200).json({ ok: true });
   } catch (error) {
     return res.status(500).json({
-      error: "Server error",
+      error: "Something went wrong. Please try again.",
     });
   }
 }
