@@ -30,7 +30,11 @@ export type EventName =
   | "format_json"
   | "validate_json"
   | "copy_json"
-  | "download_json";
+  | "download_json"
+  | "encode_base64"
+  | "decode_base64"
+  | "copy_base64"
+  | "download_base64";
 
 export interface TrackParams {
   tool?: string;

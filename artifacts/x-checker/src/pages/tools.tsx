@@ -16,7 +16,7 @@ import {
   Loader2, Copy, Trash2, CheckCircle2, XCircle, HelpCircle,
   UserX, AlertCircle, BadgeCheck, ExternalLink, Users, Calendar, Link2,
   Sparkles, RefreshCw, AtSign, Search, Smile, Briefcase, Palette,
-  Hash, MessageSquare, Type, BarChart2, ChevronRight, Code2,
+  Hash, MessageSquare, Type, BarChart2, ChevronRight, Code2, Lock,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -32,6 +32,7 @@ const MINI_TOOLS = [
   { icon: Type, label: "Font Preview", desc: "Preview your bio text in stylish Unicode fonts.", href: "/tools/font-preview" },
   { icon: BarChart2, label: "Character Counter", desc: "Count characters and words to fit X's limits.", href: "/tools/character-counter" },
   { icon: Code2, label: "JSON Formatter", desc: "Format, minify, and validate JSON instantly.", href: "/tools/json-formatter" },
+  { icon: Lock, label: "Base64 Encoder", desc: "Encode and decode Base64 strings instantly.", href: "/tools/base64" },
 ];
 
 function formatCount(n: number): string {
