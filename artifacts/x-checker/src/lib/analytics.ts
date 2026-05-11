@@ -26,7 +26,11 @@ export type EventName =
   | "upgrade_click"
   | "affiliate_click"
   | "cookie_accept"
-  | "cookie_decline";
+  | "cookie_decline"
+  | "format_json"
+  | "validate_json"
+  | "copy_json"
+  | "download_json";
 
 export interface TrackParams {
   tool?: string;

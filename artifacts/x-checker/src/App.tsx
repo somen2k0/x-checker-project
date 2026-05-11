@@ -21,6 +21,7 @@ import HashtagFormatter from "@/pages/tools/hashtag-formatter";
 import TweetFormatter from "@/pages/tools/tweet-formatter";
 import FontPreview from "@/pages/tools/font-preview";
 import CharacterCounter from "@/pages/tools/character-counter";
+import JsonFormatter from "@/pages/tools/json-formatter";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ function TrackedRouter() {
       <Route path="/tools/tweet-formatter" component={TweetFormatter} />
       <Route path="/tools/font-preview" component={FontPreview} />
       <Route path="/tools/character-counter" component={CharacterCounter} />
+      <Route path="/tools/json-formatter" component={JsonFormatter} />
       <Route component={NotFound} />
     </Switch>
   );

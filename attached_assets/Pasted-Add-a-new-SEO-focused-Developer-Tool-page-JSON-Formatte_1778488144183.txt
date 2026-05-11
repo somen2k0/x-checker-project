@@ -1,0 +1,95 @@
+Add a new SEO-focused Developer Tool page: JSON Formatter & Validator.
+
+Goal:
+Build this tool for both user utility and Google SEO traffic growth.
+
+Route:
+
+* /tools/json-formatter
+
+Core Features:
+
+* Paste JSON input
+* Format / prettify JSON
+* Minify JSON
+* Validate JSON with detailed error messages
+* Copy formatted JSON button
+* Download JSON button
+* Clear input button
+* Auto-detect invalid JSON
+* Real-time validation while typing
+
+UI/UX:
+
+* Match existing Tailwind + shadcn/ui design
+* Responsive layout
+* Professional editor-style interface
+* Two-panel layout (input/output)
+* Syntax highlighting
+* Beautiful empty states
+* Mobile optimized
+
+SEO Optimization:
+
+* Create fully SEO-optimized page
+* Meta title targeting:
+  "JSON Formatter & Validator Online Free"
+* SEO meta description
+* Canonical URL
+* Open Graph tags
+* Twitter Card tags
+* FAQ JSON-LD schema
+* Breadcrumb schema
+* Proper H1/H2/H3 structure
+* Internal links to related tools
+* Add to sitemap.xml
+* Add to robots indexing flow
+
+Content Sections (important for SEO):
+
+* What is JSON Formatter
+* How JSON validation works
+* Common JSON syntax errors
+* Why developers use JSON formatters
+* JSON formatting examples
+* FAQ accordion with SEO-rich questions
+
+Target keywords naturally:
+
+* json formatter
+* json validator
+* json beautifier
+* format json online
+* validate json online
+* json parser
+* prettify json
+
+Performance:
+
+* Fully client-side
+* No backend needed
+* Fast load time
+* Lazy load heavy components if needed
+
+Analytics:
+Track events:
+
+* format_json
+* validate_json
+* copy_json
+* download_json
+
+Navigation:
+
+* Add tool to tools grid
+* Add related tools section
+* Add breadcrumbs
+* Add footer internal links
+
+Monetization:
+
+* Include responsive AdSense placeholders
+* Include upgrade CTA section
+* Include affiliate/recommended developer tools section
+
+Ensure this page is production-ready and optimized for long-term organic Google traffic.
