@@ -16,23 +16,44 @@ import {
   Loader2, Copy, Trash2, CheckCircle2, XCircle, HelpCircle,
   UserX, AlertCircle, BadgeCheck, ExternalLink, Users, Calendar, Link2,
   Sparkles, RefreshCw, AtSign, Search, Smile, Briefcase, Palette,
-  Hash, MessageSquare, Type, BarChart2, ChevronRight, Code2, Lock,
+  Hash, MessageSquare, Type, BarChart2, ArrowRight, Code2, Lock, FileJson,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const MINI_TOOLS = [
-  { icon: Sparkles, label: "Bio Ideas", desc: "Browse 100+ ready-made X bio templates by niche.", href: "/tools/bio-ideas" },
-  { icon: Smile, label: "Funny Bios", desc: "Witty and humorous bio ideas that stand out.", href: "/tools/funny-bios" },
-  { icon: Briefcase, label: "Professional Bios", desc: "Clean, credible bios for business & career profiles.", href: "/tools/professional-bios" },
-  { icon: Palette, label: "Aesthetic Bios", desc: "Minimal and stylish bios for a curated look.", href: "/tools/aesthetic-bios" },
-  { icon: AtSign, label: "Username Generator", desc: "Get unique X handle ideas for any niche.", href: "/tools/username-generator" },
-  { icon: Users, label: "Name Ideas", desc: "Find the perfect display name for your profile.", href: "/tools/name-ideas" },
-  { icon: Hash, label: "Hashtag Formatter", desc: "Clean and format hashtag lists in one click.", href: "/tools/hashtag-formatter" },
-  { icon: MessageSquare, label: "Tweet Formatter", desc: "Format threads and tweets for max readability.", href: "/tools/tweet-formatter" },
-  { icon: Type, label: "Font Preview", desc: "Preview your bio text in stylish Unicode fonts.", href: "/tools/font-preview" },
-  { icon: BarChart2, label: "Character Counter", desc: "Count characters and words to fit X's limits.", href: "/tools/character-counter" },
-  { icon: Code2, label: "JSON Formatter", desc: "Format, minify, and validate JSON instantly.", href: "/tools/json-formatter" },
-  { icon: Lock, label: "Base64 Encoder", desc: "Encode and decode Base64 strings instantly.", href: "/tools/base64" },
+const MORE_TOOL_SECTIONS = [
+  {
+    label: "Content & Writing",
+    color: "text-purple-400",
+    bg: "bg-purple-400/10 border-purple-400/20",
+    tools: [
+      { icon: Sparkles, label: "Bio Ideas", desc: "100+ ready-made X bio templates by niche.", href: "/tools/bio-ideas" },
+      { icon: Smile, label: "Funny Bios", desc: "Witty and humorous bio ideas that stand out.", href: "/tools/funny-bios" },
+      { icon: Briefcase, label: "Professional Bios", desc: "Clean, credible bios for business & career profiles.", href: "/tools/professional-bios" },
+      { icon: Palette, label: "Aesthetic Bios", desc: "Minimal and stylish bios for a curated look.", href: "/tools/aesthetic-bios" },
+      { icon: AtSign, label: "Username Generator", desc: "Unique X handle ideas for any niche.", href: "/tools/username-generator" },
+      { icon: Users, label: "Name Ideas", desc: "Perfect display names for your X profile.", href: "/tools/name-ideas" },
+    ],
+  },
+  {
+    label: "Formatting & Text",
+    color: "text-green-400",
+    bg: "bg-green-400/10 border-green-400/20",
+    tools: [
+      { icon: Hash, label: "Hashtag Formatter", desc: "Clean and format hashtag lists in one click.", href: "/tools/hashtag-formatter" },
+      { icon: MessageSquare, label: "Tweet Formatter", desc: "Split long text into numbered tweet threads.", href: "/tools/tweet-formatter" },
+      { icon: Type, label: "Font Preview", desc: "Preview bio text in stylish Unicode fonts.", href: "/tools/font-preview" },
+      { icon: BarChart2, label: "Character Counter", desc: "Count characters and words to fit X's limits.", href: "/tools/character-counter" },
+    ],
+  },
+  {
+    label: "Developer Tools",
+    color: "text-orange-400",
+    bg: "bg-orange-400/10 border-orange-400/20",
+    tools: [
+      { icon: FileJson, label: "JSON Formatter", desc: "Format, minify, and validate JSON with real-time error detection.", href: "/tools/json-formatter" },
+      { icon: Lock, label: "Base64 Encoder", desc: "Encode and decode Base64 strings with full Unicode support.", href: "/tools/base64" },
+    ],
+  },
 ];
 
 function formatCount(n: number): string {
@@ -175,28 +196,19 @@ export default function Tools() {
 
         {/* Page header */}
         <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-1.5">X Toolkit</h1>
-          <p className="text-muted-foreground text-sm">Four free tools for X / Twitter power users. No signup required.</p>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-1.5">All Tools</h1>
+          <p className="text-muted-foreground text-sm">Everything in one place — X tools, content tools, and developer utilities. No signup required.</p>
         </div>
 
-        {/* Top ad */}
-        <AdBanner slot="1111111111" format="horizontal" className="rounded-xl overflow-hidden mb-8" />
-
-        {/* ── Main Tabs ── */}
-        <Tabs defaultValue={defaultTab} className="w-full">
-          {/* ── More Tools strip ── */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            <span className="text-xs text-muted-foreground/60 self-center mr-1 shrink-0">More tools:</span>
-            {MINI_TOOLS.map(({ icon: Icon, label, href }) => (
-              <Link key={href} href={href}>
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted/70 border border-border/50 hover:border-border rounded-full px-3 py-1 cursor-pointer transition-all">
-                  <Icon className="h-3 w-3 shrink-0" />
-                  {label}
-                </span>
-              </Link>
-            ))}
+        {/* ── X Account Tools (Tabs) ── */}
+        <div className="mb-2">
+          <div className="flex items-center gap-3 mb-5">
+            <h2 className="text-sm font-semibold text-foreground/70 shrink-0">X Account Tools</h2>
+            <div className="flex-1 h-px bg-border/50" />
           </div>
+        </div>
 
+        <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="flex w-full h-auto p-1 bg-muted/40 border border-border/60 rounded-xl gap-0.5 mb-6">
             <TabsTrigger value="checker" className="flex-1 flex items-center justify-center gap-2 text-xs font-medium py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:text-foreground">
               <Search className="h-3.5 w-3.5" />
@@ -537,8 +549,39 @@ export default function Tools() {
 
         </Tabs>
 
+        {/* ── More Tools Directory ── */}
+        <div className="mt-14 space-y-10">
+          {MORE_TOOL_SECTIONS.map(({ label, color, bg, tools }) => (
+            <div key={label} className="space-y-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-sm font-semibold text-foreground/70 shrink-0">{label}</h2>
+                <div className="flex-1 h-px bg-border/50" />
+                <span className="text-xs text-muted-foreground/50 shrink-0">{tools.length} tools</span>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {tools.map(({ icon: Icon, label: toolLabel, desc, href }) => (
+                  <Link key={href} href={href}>
+                    <div className="group flex items-start gap-3 rounded-xl border border-border/60 bg-card/50 p-4 hover:border-primary/30 hover:bg-card hover:shadow-sm transition-all duration-200 cursor-pointer">
+                      <div className={`h-8 w-8 rounded-lg border flex items-center justify-center shrink-0 ${bg}`}>
+                        <Icon className={`h-4 w-4 ${color}`} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <h3 className="text-sm font-semibold group-hover:text-primary transition-colors truncate">{toolLabel}</h3>
+                          <ArrowRight className="h-3 w-3 text-primary/40 group-hover:text-primary transition-colors shrink-0 opacity-0 group-hover:opacity-100" />
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed mt-0.5">{desc}</p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
         {/* Bottom ad */}
-        <div className="mt-8">
+        <div className="mt-10">
           <AdBanner slot="3333333333" format="horizontal" className="rounded-xl overflow-hidden" />
         </div>
       </div>

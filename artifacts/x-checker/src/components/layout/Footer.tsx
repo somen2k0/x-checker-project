@@ -3,26 +3,34 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FeedbackModal } from "@/components/FeedbackModal";
-import { Search, Sparkles, Link2, AtSign, Mail, CheckCheck, Hash, MessageSquare, Type, BarChart2, Users, Smile, Briefcase, Palette } from "lucide-react";
+import { Search, Sparkles, Link2, AtSign, Mail, CheckCheck, Hash, MessageSquare, Type, BarChart2, Users, Smile, Briefcase, Palette, FileJson, Lock } from "lucide-react";
 
-const CORE_TOOLS = [
-  { icon: Search, label: "Account Checker", href: "/tools" },
-  { icon: Sparkles, label: "Bio Generator", href: "/tools" },
-  { icon: Link2, label: "Profile Links", href: "/tools" },
-  { icon: AtSign, label: "@ Formatter", href: "/tools" },
+const X_TOOLS = [
+  { icon: Search, label: "Account Checker", href: "/tools?tab=checker" },
+  { icon: Sparkles, label: "Bio Generator", href: "/tools?tab=bio" },
+  { icon: Link2, label: "Profile Links", href: "/tools?tab=links" },
+  { icon: AtSign, label: "@ Formatter", href: "/tools?tab=at" },
 ];
 
-const MINI_TOOLS = [
+const CONTENT_TOOLS = [
   { icon: Sparkles, label: "Bio Ideas", href: "/tools/bio-ideas" },
   { icon: Smile, label: "Funny Bios", href: "/tools/funny-bios" },
   { icon: Briefcase, label: "Professional Bios", href: "/tools/professional-bios" },
   { icon: Palette, label: "Aesthetic Bios", href: "/tools/aesthetic-bios" },
   { icon: AtSign, label: "Username Generator", href: "/tools/username-generator" },
   { icon: Users, label: "Name Ideas", href: "/tools/name-ideas" },
+];
+
+const FORMATTING_TOOLS = [
   { icon: Hash, label: "Hashtag Formatter", href: "/tools/hashtag-formatter" },
   { icon: MessageSquare, label: "Tweet Formatter", href: "/tools/tweet-formatter" },
   { icon: Type, label: "Font Preview", href: "/tools/font-preview" },
   { icon: BarChart2, label: "Character Counter", href: "/tools/character-counter" },
+];
+
+const DEV_TOOLS = [
+  { icon: FileJson, label: "JSON Formatter", href: "/tools/json-formatter" },
+  { icon: Lock, label: "Base64 Encoder", href: "/tools/base64" },
 ];
 
 export function Footer() {
@@ -40,18 +48,18 @@ export function Footer() {
     <>
       <footer className="border-t border-border/50 bg-card/30 mt-16">
         <div className="max-w-6xl mx-auto px-4 md:px-8 pt-12 pb-8">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-8 md:gap-6">
 
             {/* Brand */}
-            <div className="col-span-2 md:col-span-1 space-y-4">
+            <div className="col-span-2 md:col-span-2 space-y-4">
               <div className="flex items-center gap-2.5">
                 <div className="h-7 w-7 rounded-md bg-primary flex items-center justify-center shadow-md shadow-primary/30">
-                  <span className="text-white font-bold text-sm leading-none">X</span>
+                  <span className="text-white font-bold text-sm leading-none">XT</span>
                 </div>
                 <span className="font-semibold text-foreground">X Toolkit</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Free tools for X / Twitter power users. No signup, no data stored.
+                Free tools for creators and developers. X tools, content generators, and developer utilities — no signup, no data stored.
               </p>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <div className="h-1.5 w-1.5 rounded-full bg-success" />
@@ -59,15 +67,15 @@ export function Footer() {
               </div>
             </div>
 
-            {/* Core Tools */}
+            {/* X Tools */}
             <div className="space-y-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground/60">Core Tools</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground/60">X Tools</h3>
               <ul className="space-y-2">
-                {CORE_TOOLS.map(({ icon: Icon, label, href }) => (
+                {X_TOOLS.map(({ icon: Icon, label, href }) => (
                   <li key={label}>
                     <Link href={href}>
                       <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group">
-                        <Icon className="h-3.5 w-3.5 opacity-60 group-hover:opacity-100" />
+                        <Icon className="h-3.5 w-3.5 opacity-60 group-hover:opacity-100 shrink-0" />
                         {label}
                       </button>
                     </Link>
@@ -76,11 +84,41 @@ export function Footer() {
               </ul>
             </div>
 
-            {/* Mini Tools */}
-            <div className="space-y-3 col-span-2 md:col-span-1">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground/60">More Tools</h3>
-              <ul className="grid grid-cols-2 md:grid-cols-1 gap-y-2 gap-x-4">
-                {MINI_TOOLS.map(({ icon: Icon, label, href }) => (
+            {/* Content Tools */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground/60">Content</h3>
+              <ul className="space-y-2">
+                {CONTENT_TOOLS.map(({ icon: Icon, label, href }) => (
+                  <li key={label}>
+                    <Link href={href}>
+                      <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group">
+                        <Icon className="h-3.5 w-3.5 opacity-60 group-hover:opacity-100 shrink-0" />
+                        <span className="truncate">{label}</span>
+                      </button>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Formatting + Dev Tools */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground/60">Formatting</h3>
+              <ul className="space-y-2">
+                {FORMATTING_TOOLS.map(({ icon: Icon, label, href }) => (
+                  <li key={label}>
+                    <Link href={href}>
+                      <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group">
+                        <Icon className="h-3.5 w-3.5 opacity-60 group-hover:opacity-100 shrink-0" />
+                        <span className="truncate">{label}</span>
+                      </button>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground/60 pt-3">Developer</h3>
+              <ul className="space-y-2">
+                {DEV_TOOLS.map(({ icon: Icon, label, href }) => (
                   <li key={label}>
                     <Link href={href}>
                       <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group">

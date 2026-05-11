@@ -24,7 +24,7 @@ export function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 shrink-0">
             <div className="h-7 w-7 rounded-md bg-primary flex items-center justify-center shadow-md shadow-primary/30">
-              <span className="text-white font-bold text-sm leading-none">X</span>
+              <span className="text-white font-bold text-sm leading-none">XT</span>
             </div>
             <span className="font-semibold text-foreground tracking-tight">X Toolkit</span>
             <Badge variant="outline" className="hidden sm:inline-flex text-[10px] font-medium border-primary/30 text-primary bg-primary/8 px-1.5 py-0">
