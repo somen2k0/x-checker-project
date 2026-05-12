@@ -34,6 +34,8 @@ interface MiniToolLayoutProps {
   affiliateCategory?: "scheduling" | "design" | "monetize" | "growth" | "analytics" | "all";
 }
 
+const SITE_URL = "https://xtoolkit.live";
+
 export function MiniToolLayout({
   seoTitle,
   seoDescription,
@@ -48,9 +50,40 @@ export function MiniToolLayout({
 }: MiniToolLayoutProps) {
   const [path] = useLocation();
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: `${SITE_URL}/`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Tools",
+        item: `${SITE_URL}/tools`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: title,
+        item: `${SITE_URL}${path}`,
+      },
+    ],
+  };
+
   return (
     <Layout>
-      <SeoHead title={seoTitle} description={seoDescription} faqs={faqs} path={path} />
+      <SeoHead
+        title={seoTitle}
+        description={seoDescription}
+        faqs={faqs}
+        path={path}
+        extraSchemas={[breadcrumbSchema]}
+      />
 
       <div className="max-w-4xl mx-auto px-4 md:px-8 py-10 md:py-14 space-y-12">
 
