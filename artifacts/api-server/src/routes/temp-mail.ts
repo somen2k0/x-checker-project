@@ -122,13 +122,32 @@ router.get("/temp-mail/messages/:id", async (req, res) => {
 
 // ── Disposable Inbox tab (Gmailnator via RapidAPI) ────────────────
 
-// ── RapidAPI key pool (supports RAPIDAPI_KEY, RAPIDAPI_KEY_1 … RAPIDAPI_KEY_10) ──
+// ── RapidAPI key pool ─────────────────────────────────────────────
+// Add your RapidAPI keys here (get them at rapidapi.com → Gmailnator).
+// The backend will shuffle and round-robin through all non-empty keys
+// automatically, so you never hit a single-key rate limit.
+// You can also set them as env vars (RAPIDAPI_KEY, RAPIDAPI_KEY_1 … RAPIDAPI_KEY_10)
+// and they will be merged into the pool at runtime.
+const HARDCODED_RAPIDAPI_KEYS: string[] = [
+  // "your-key-1-here",
+  // "your-key-2-here",
+  // "your-key-3-here",
+  // "your-key-4-here",
+  // "your-key-5-here",
+  // "your-key-6-here",
+  // "your-key-7-here",
+  // "your-key-8-here",
+  // "your-key-9-here",
+  // "your-key-10-here",
+];
+
 function buildKeyPool(): string[] {
-  const candidates = [
+  const fromEnv = [
     process.env.RAPIDAPI_KEY,
     ...Array.from({ length: 10 }, (_, i) => process.env[`RAPIDAPI_KEY_${i + 1}`]),
-  ];
-  return candidates.filter(Boolean) as string[];
+  ].filter(Boolean) as string[];
+  // Merge hardcoded keys + env keys, deduplicate
+  return [...new Set([...HARDCODED_RAPIDAPI_KEYS.filter(Boolean), ...fromEnv])];
 }
 
 let _keyPool: string[] = [];
