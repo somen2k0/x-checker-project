@@ -97,8 +97,15 @@ function DisposableInboxTab() {
     try {
       const r = await fetch(`/api/guerrilla/inbox?sid_token=${encodeURIComponent(sid)}`);
       if (r.ok) {
-        const d = await r.json() as { messages: GuerrillaMessage[] };
-        setMessages(d.messages ?? []);
+        const d = await r.json() as { messages?: unknown };
+        const incoming = Array.isArray(d.messages) ? (d.messages as GuerrillaMessage[]) : [];
+        // Merge: add new messages and update read-status on existing ones,
+        // but never remove already-displayed messages (prevents auto-disappear).
+        setMessages((prev) => {
+          const byId = new Map(prev.map((m) => [m.mail_id, m]));
+          incoming.forEach((m) => byId.set(m.mail_id, { ...byId.get(m.mail_id), ...m }));
+          return Array.from(byId.values());
+        });
       }
     } catch {} finally { if (!silent) setLoadingMsgs(false); }
   }, []);
@@ -167,8 +174,14 @@ function DisposableInboxTab() {
         const d = await r.json() as GuerrillaFullMessage;
         setSelected(d);
         setMessages((ms) => ms.map((m) => m.mail_id === msg.mail_id ? { ...m, mail_read: "1" } : m));
+      } else {
+        setSelected({ body: "", from: msg.mail_from, subject: msg.mail_subject });
+        toast({ title: "Could not load message", description: "The message may have expired.", variant: "destructive" });
       }
-    } catch {} finally { setLoadingMsg(false); }
+    } catch {
+      setSelected({ body: "", from: msg.mail_from, subject: msg.mail_subject });
+      toast({ title: "Network error", description: "Could not fetch message details.", variant: "destructive" });
+    } finally { setLoadingMsg(false); }
   };
 
   const copyAddress = () => {

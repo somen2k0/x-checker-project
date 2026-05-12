@@ -240,8 +240,15 @@ router.get("/guerrilla/inbox", async (req, res) => {
   try {
     const r = await gFetch({ f: "check_email", seq: "0" }, sid_token);
     if (!r.ok) { res.json({ messages: [] }); return; }
-    const d = await r.json() as { list?: unknown[] };
-    res.json({ messages: d.list ?? [] });
+    const d = await r.json() as { list?: unknown };
+    const raw = Array.isArray(d.list) ? d.list : [];
+    // Filter out the Guerrilla Mail placeholder entry (mail_id "0") which is
+    // always present when the inbox is empty and has blank/invalid fields.
+    const messages = raw.filter((m: unknown) => {
+      const msg = m as Record<string, unknown>;
+      return msg.mail_id && String(msg.mail_id) !== "0";
+    });
+    res.json({ messages });
   } catch (err) {
     req.log.error({ err }, "guerrilla inbox error");
     res.json({ messages: [] });
