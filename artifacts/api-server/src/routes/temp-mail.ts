@@ -16,7 +16,7 @@ function rapidHeaders(key: string) {
   };
 }
 
-// ── Disposable Inbox (mail.tm) ─────────────────────────────────────
+// ── Temp Gmail tab (mail.tm) ──────────────────────────────────────
 
 router.get("/temp-mail/domains", async (req, res) => {
   try {
@@ -120,7 +120,7 @@ router.get("/temp-mail/messages/:id", async (req, res) => {
   }
 });
 
-// ── Gmailnator (Temp Gmail tab) ────────────────────────────────────
+// ── Disposable Inbox tab (Gmailnator via RapidAPI) ────────────────
 
 function getKey(): string | null {
   const keys = [
