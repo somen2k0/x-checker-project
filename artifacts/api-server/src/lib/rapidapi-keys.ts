@@ -1,15 +1,21 @@
-const RAPIDAPI_KEYS: string[] = [
-  "YOUR_RAPIDAPI_KEY_1",
-  "YOUR_RAPIDAPI_KEY_2",
-  "YOUR_RAPIDAPI_KEY_3",
-  "YOUR_RAPIDAPI_KEY_4",
-  "YOUR_RAPIDAPI_KEY_5",
-  "YOUR_RAPIDAPI_KEY_6",
-  "YOUR_RAPIDAPI_KEY_7",
-  "YOUR_RAPIDAPI_KEY_8",
-  "YOUR_RAPIDAPI_KEY_9",
-  "YOUR_RAPIDAPI_KEY_10",
-];
+function getRapidApiKeysFromEnv(): string[] {
+  const keys: string[] = [];
+
+  const single = process.env["RAPIDAPI_KEY"];
+  if (single && single.trim()) {
+    keys.push(single.trim());
+  }
+
+  let i = 1;
+  while (true) {
+    const k = process.env[`RAPIDAPI_KEY_${i}`];
+    if (!k || !k.trim()) break;
+    keys.push(k.trim());
+    i++;
+  }
+
+  return keys;
+}
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -20,14 +26,14 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-let pool: string[] = shuffle(RAPIDAPI_KEYS.filter((k) => k && !k.startsWith("YOUR_RAPIDAPI_KEY")));
+let pool: string[] = [];
 let index = 0;
 
 export function getNextRapidApiKey(): string | null {
-  const live = RAPIDAPI_KEYS.filter((k) => k && !k.startsWith("YOUR_RAPIDAPI_KEY"));
+  const live = getRapidApiKeysFromEnv();
   if (live.length === 0) return null;
 
-  if (index >= pool.length) {
+  if (index >= pool.length || pool.length !== live.length) {
     pool = shuffle(live);
     index = 0;
   }
@@ -38,5 +44,5 @@ export function getNextRapidApiKey(): string | null {
 }
 
 export function hasRapidApiKeys(): boolean {
-  return RAPIDAPI_KEYS.some((k) => k && !k.startsWith("YOUR_RAPIDAPI_KEY"));
+  return getRapidApiKeysFromEnv().length > 0;
 }
