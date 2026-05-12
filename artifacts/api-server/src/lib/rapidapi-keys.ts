@@ -1,6 +1,14 @@
 const RAPIDAPI_KEYS: string[] = [
-  "894c8f0b44msh483bb59b42c084ap15db0bjsne64fe8ccbbd4",
-  "e9b0fdba6bmsh970f41e51594567p178216jsn8158f0ea5df7",
+  "YOUR_RAPIDAPI_KEY_1",
+  "YOUR_RAPIDAPI_KEY_2",
+  "YOUR_RAPIDAPI_KEY_3",
+  "YOUR_RAPIDAPI_KEY_4",
+  "YOUR_RAPIDAPI_KEY_5",
+  "YOUR_RAPIDAPI_KEY_6",
+  "YOUR_RAPIDAPI_KEY_7",
+  "YOUR_RAPIDAPI_KEY_8",
+  "YOUR_RAPIDAPI_KEY_9",
+  "YOUR_RAPIDAPI_KEY_10",
 ];
 
 function shuffle<T>(arr: T[]): T[] {
