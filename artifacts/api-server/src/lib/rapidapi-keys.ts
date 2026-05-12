@@ -19,7 +19,26 @@ const HARDCODED_KEYS: string[] = [
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+const COOLDOWN_MS = 60_000; // 60 s cooldown per key after a 429
+
 let _index = 0;
+
+/** Timestamp (ms) at which each key last received a 429/401. */
+const _coolingUntil: Map<string, number> = new Map();
+
+function markCooling(key: string): void {
+  _coolingUntil.set(key, Date.now() + COOLDOWN_MS);
+}
+
+function isCooling(key: string): boolean {
+  const until = _coolingUntil.get(key);
+  if (!until) return false;
+  if (Date.now() >= until) {
+    _coolingUntil.delete(key);
+    return false;
+  }
+  return true;
+}
 
 export function getRapidApiKeys(): string[] {
   return HARDCODED_KEYS.filter((k) => k.trim().length > 0);
@@ -29,18 +48,25 @@ export function hasRapidApiKeys(): boolean {
   return getRapidApiKeys().length > 0;
 }
 
-/** Returns the next key in round-robin order. */
+/** Returns the next key in round-robin order, skipping keys that are cooling down. */
 export function getNextRapidApiKey(): string | null {
   const keys = getRapidApiKeys();
   if (keys.length === 0) return null;
-  const key = keys[_index % keys.length];
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[_index % keys.length]!;
+    _index = (_index + 1) % keys.length;
+    if (!isCooling(key)) return key;
+  }
+  // All cooling — return the one whose cooldown expires soonest
+  const key = keys[_index % keys.length]!;
   _index = (_index + 1) % keys.length;
   return key ?? null;
 }
 
 /**
- * Tries each key in round-robin order. Skips to the next key on 429/401.
- * Returns on first success, or the last failed response if all keys exhausted.
+ * Tries each key in round-robin order, skipping keys still in their
+ * 429 cooldown window. Returns on first success, or the last failed
+ * response if all available keys are exhausted.
  */
 export async function fetchWithKeyRotation(
   fn: (key: string) => Promise<Response>
@@ -53,13 +79,24 @@ export async function fetchWithKeyRotation(
     };
   }
 
+  // Build an ordered list starting from _index, skipping cooling keys first
   const startIdx = _index % keys.length;
+  const ordered: string[] = [];
+
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[(startIdx + i) % keys.length]!;
+    if (!isCooling(key)) ordered.push(key);
+  }
+  // Append cooling keys at the end as a last resort
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[(startIdx + i) % keys.length]!;
+    if (isCooling(key)) ordered.push(key);
+  }
+
   let lastRes: Response | null = null;
 
-  for (let attempt = 0; attempt < keys.length; attempt++) {
-    const idx = (startIdx + attempt) % keys.length;
-    const key = keys[idx]!;
-    _index = (idx + 1) % keys.length;
+  for (const key of ordered) {
+    _index = ((keys.indexOf(key) + 1) % keys.length);
 
     let res: Response;
     try {
@@ -68,10 +105,13 @@ export async function fetchWithKeyRotation(
       continue;
     }
 
-    if (res.status !== 429 && res.status !== 401) {
-      return { res, exhausted: false };
+    if (res.status === 429 || res.status === 401) {
+      markCooling(key);
+      lastRes = res;
+      continue;
     }
-    lastRes = res;
+
+    return { res, exhausted: false };
   }
 
   return {
