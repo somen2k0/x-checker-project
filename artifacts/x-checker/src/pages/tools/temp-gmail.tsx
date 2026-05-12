@@ -23,7 +23,6 @@ interface GuerrillaFullMessage { body: string; from?: string; subject?: string; 
 interface GmailnatorMessage { mid: string; from?: string; subject?: string; date?: string; }
 interface GmailnatorFullMessage { content?: string; from?: string; subject?: string; date?: string; }
 
-type GmailType = "any" | "dot" | "plus" | "googlemail";
 
 type Tab = "disposable" | "tempgmail" | "gmail";
 
@@ -387,15 +386,7 @@ function DisposableInboxTab() {
 
 // ── Tab 2: Temp Gmail (Gmailnator via RapidAPI) ────────────────────
 
-const GMAIL_TYPES: { key: GmailType; label: string }[] = [
-  { key: "any", label: "Any (random)" },
-  { key: "dot", label: "@gmail.com · dot trick" },
-  { key: "plus", label: "@gmail.com · plus trick" },
-  { key: "googlemail", label: "@googlemail.com" },
-];
-
 function TempGmailTab() {
-  const [gmailType, setGmailType] = useState<GmailType>("any");
   const [email, setEmail] = useState<string | null>(null);
   const [messages, setMessages] = useState<GmailnatorMessage[]>([]);
   const [selected, setSelected] = useState<GmailnatorFullMessage | null>(null);
@@ -409,13 +400,13 @@ function TempGmailTab() {
   const { toast } = useToast();
   const initialized = useRef(false);
 
-  const generate = useCallback(async (type: GmailType = gmailType) => {
+  const generate = useCallback(async () => {
     setGenerating(true); setError(null); setApiMissing(false); setEmail(null); setMessages([]); setSelected(null); setSelectedMid(null);
     try {
       const r = await fetch("/api/temp-gmail/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type }),
+        body: JSON.stringify({ type: "any" }),
       });
       const d = await r.json() as { email?: string; error?: string };
       if (r.status === 503) { setApiMissing(true); setError(d.error ?? "Gmailnator API not configured."); return; }
@@ -423,7 +414,7 @@ function TempGmailTab() {
       setEmail(d.email);
     } catch { setError("Network error. Please try again."); }
     finally { setGenerating(false); }
-  }, [gmailType]);
+  }, []);
 
   const fetchMessages = useCallback(async (addr: string, silent = false) => {
     if (!silent) setLoadingMsgs(true);
@@ -463,13 +454,8 @@ function TempGmailTab() {
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
-    generate("any");
+    generate();
   }, [generate]);
-
-  const switchType = (type: GmailType) => {
-    setGmailType(type);
-    generate(type);
-  };
 
   return (
     <div className="space-y-4">
@@ -492,24 +478,11 @@ function TempGmailTab() {
             )}
           </div>
           {email && (
-            <button onClick={() => generate(gmailType)} disabled={generating}
+            <button onClick={() => generate()} disabled={generating}
               className="h-8 w-8 rounded-lg border border-border/60 bg-muted/30 hover:bg-muted/60 flex items-center justify-center transition-colors shrink-0 mt-0.5 disabled:opacity-40">
               <Shuffle className="h-4 w-4 text-muted-foreground" />
             </button>
           )}
-        </div>
-
-        {/* Domain type pills */}
-        <div>
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold mb-2">Domain</p>
-          <div className="flex flex-wrap gap-2">
-            {GMAIL_TYPES.map(({ key, label }) => (
-              <button key={key} onClick={() => switchType(key)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${gmailType === key ? "bg-red-500/20 border-red-400/50 text-red-300" : "border-border/50 text-muted-foreground hover:border-border hover:text-foreground bg-muted/20"}`}>
-                {label}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Copy + refresh buttons */}
@@ -531,7 +504,7 @@ function TempGmailTab() {
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 flex items-center gap-3">
           <AlertCircle className="h-5 w-5 text-red-400 shrink-0" />
           <p className="text-sm text-red-300 flex-1">{error}</p>
-          <Button size="sm" variant="outline" onClick={() => generate(gmailType)} disabled={generating}
+          <Button size="sm" variant="outline" onClick={() => generate()} disabled={generating}
             className="text-xs gap-1.5 border-red-500/40 text-red-300 hover:bg-red-500/10 shrink-0">
             <RefreshCw className={`h-3.5 w-3.5 ${generating ? "animate-spin" : ""}`} />Retry
           </Button>
@@ -543,7 +516,7 @@ function TempGmailTab() {
         <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-4 flex items-center gap-3">
           <AlertCircle className="h-5 w-5 text-orange-400 shrink-0" />
           <p className="text-sm text-orange-300 flex-1">{error}</p>
-          <Button size="sm" variant="outline" onClick={() => generate(gmailType)} disabled={generating}
+          <Button size="sm" variant="outline" onClick={() => generate()} disabled={generating}
             className="text-xs gap-1.5 border-orange-500/40 text-orange-300 hover:bg-orange-500/10 shrink-0">
             Retry
           </Button>
