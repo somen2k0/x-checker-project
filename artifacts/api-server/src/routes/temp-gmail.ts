@@ -27,16 +27,11 @@ const ETYPE_MAP: Record<string, number[]> = {
 };
 
 const MAX_RETRIES = 5;
+const ALLOWED_DOMAINS = new Set(["gmail.com", "googlemail.com"]);
 
-function emailMatchesType(email: string, type: string): boolean {
-  const [user, domain] = email.split("@");
-  if (!user || !domain) return false;
-  switch (type) {
-    case "dot":        return user.includes(".");
-    case "plus":       return user.includes("+");
-    case "googlemail": return domain.toLowerCase() === "googlemail.com";
-    default:           return true;
-  }
+function isAllowedEmail(email: string): boolean {
+  const domain = email.split("@")[1]?.toLowerCase();
+  return !!domain && ALLOWED_DOMAINS.has(domain);
 }
 
 router.post("/temp-gmail/generate", async (req, res) => {
@@ -74,13 +69,13 @@ router.post("/temp-gmail/generate", async (req, res) => {
 
     lastEmail = data.email;
 
-    if (emailMatchesType(data.email, resolvedType)) {
+    if (isAllowedEmail(data.email)) {
       res.json({ email: data.email, type: resolvedType });
       return;
     }
   }
 
-  // All retries exhausted — return the last address we got from Gmailnator
+  // All retries exhausted — return whatever Gmailnator last gave us
   res.json({ email: lastEmail, type: resolvedType });
 });
 
