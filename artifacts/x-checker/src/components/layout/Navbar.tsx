@@ -34,10 +34,20 @@ const NAV_CATEGORIES = [
       { icon: MessageSquareText, label: "Tweet Formatter", href: "/tools/tweet-formatter" },
       { icon: Type, label: "Font Preview", href: "/tools/font-preview" },
       { icon: BarChart2, label: "Character Counter", href: "/tools/character-counter" },
-      { icon: FileJson, label: "JSON Formatter", href: "/tools/json-formatter", badge: "Popular" },
-      { icon: Lock, label: "Base64 Encoder", href: "/tools/base64" },
     ],
     comingSoon: ["Follower Analyzer", "Tweet Scheduler", "Profile Audit"],
+  },
+  {
+    key: "dev-tools",
+    label: "Dev Tools",
+    color: "text-orange-400",
+    bg: "bg-orange-400/10",
+    href: "/developer-tools",
+    tools: [
+      { icon: FileJson, label: "JSON Formatter", href: "/tools/json-formatter", badge: "Popular" },
+      { icon: Lock, label: "Base64 Encoder / Decoder", href: "/tools/base64" },
+    ],
+    comingSoon: ["URL Encoder / Decoder", "CSS Minifier", "Regex Tester"],
   },
   {
     key: "seo",
@@ -61,7 +71,6 @@ const NAV_CATEGORIES = [
     bg: "bg-cyan-400/10",
     href: "/email-tools",
     tools: [
-      { icon: Inbox, label: "Temp Gmail", href: "/tools/temp-gmail", badge: "New" },
       { icon: Pencil, label: "Subject Line Generator", href: "/tools/subject-line-generator" },
       { icon: Mail, label: "Email Signature Generator", href: "/tools/email-signature-generator" },
       { icon: Hash, label: "Email Character Counter", href: "/tools/email-character-counter" },
@@ -192,7 +201,7 @@ export function Navbar() {
             </div>
             <span className="font-semibold text-foreground tracking-tight">X Toolkit</span>
             <Badge variant="outline" className="hidden lg:inline-flex text-[10px] font-medium border-primary/30 text-primary bg-primary/8 px-1.5 py-0">
-              26+ Tools
+              35+ Tools
             </Badge>
           </Link>
 
@@ -209,6 +218,15 @@ export function Navbar() {
             {NAV_CATEGORIES.map((cat) => (
               <NavItem key={cat.key} category={cat} currentPath={location} />
             ))}
+
+            <Link href="/tools/temp-gmail">
+              <button className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                location === "/tools/temp-gmail" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              }`}>
+                <Inbox className="h-3.5 w-3.5" />
+                Temp Mail
+              </button>
+            </Link>
 
             <Link href="/about">
               <button className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${

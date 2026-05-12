@@ -70,6 +70,14 @@ export default function Home() {
       {/* ── Hero ── */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
+        <div
+          className="absolute inset-0 pointer-events-none opacity-[0.15]"
+          style={{
+            backgroundImage:
+              "linear-gradient(hsl(var(--primary)/0.4) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)/0.4) 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+          }}
+        />
         <div className="max-w-6xl mx-auto px-4 md:px-8 pt-16 pb-14 md:pt-24 md:pb-20 text-center relative">
           <Badge variant="outline" className="inline-flex mb-5 border-primary/30 text-primary bg-primary/8 px-3 py-1 text-xs font-medium">
             <Zap className="h-3 w-3 mr-1.5" /> {TOTAL_LIVE}+ free tools · no signup required
