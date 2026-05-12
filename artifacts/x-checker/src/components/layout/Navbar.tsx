@@ -7,7 +7,7 @@ import {
   MessageSquare, Home, Info, Menu, X, Layers, ChevronDown,
   Search, Sparkles, Link2, AtSign, Hash, MessageSquareText,
   Type, BarChart2, Users, FileJson, Lock, TrendingUp, Globe,
-  Mail, ShieldCheck, Pencil, FileText, Shield, Tag, Clock,
+  Mail, ShieldCheck, Pencil, FileText, Shield, Tag, Clock, Inbox,
 } from "lucide-react";
 
 const BADGE_STYLES: Record<string, string> = {
@@ -61,11 +61,12 @@ const NAV_CATEGORIES = [
     bg: "bg-cyan-400/10",
     href: "/email-tools",
     tools: [
-      { icon: Pencil, label: "Subject Line Generator", href: "/tools/subject-line-generator", badge: "New" },
-      { icon: Mail, label: "Email Signature Generator", href: "/tools/email-signature-generator", badge: "New" },
-      { icon: Hash, label: "Email Character Counter", href: "/tools/email-character-counter", badge: "New" },
-      { icon: ShieldCheck, label: "Email Validator", href: "/tools/email-validator", badge: "New" },
-      { icon: FileText, label: "Plain Text Formatter", href: "/tools/plain-text-formatter", badge: "New" },
+      { icon: Inbox, label: "Temp Gmail", href: "/tools/temp-gmail", badge: "New" },
+      { icon: Pencil, label: "Subject Line Generator", href: "/tools/subject-line-generator" },
+      { icon: Mail, label: "Email Signature Generator", href: "/tools/email-signature-generator" },
+      { icon: Hash, label: "Email Character Counter", href: "/tools/email-character-counter" },
+      { icon: ShieldCheck, label: "Email Validator", href: "/tools/email-validator" },
+      { icon: FileText, label: "Plain Text Formatter", href: "/tools/plain-text-formatter" },
     ],
     comingSoon: ["Email A/B Tester", "Spam Score Checker", "Newsletter Template Generator"],
   },

@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useLocation, Link } from "wouter";
-import { Home, Wrench, Info, Search, X, ChevronRight, Sparkles, Users, Type, Code2, TrendingUp, AtSign, Smile, Briefcase, Palette, Hash, MessageSquare as MessageSquareIcon, BarChart2, FileJson, Lock, Link2, Globe, Mail, ShieldCheck, Pencil } from "lucide-react";
+import { Home, Wrench, Info, Search, X, ChevronRight, Sparkles, Users, Type, Code2, TrendingUp, AtSign, Smile, Briefcase, Palette, Hash, MessageSquare as MessageSquareIcon, BarChart2, FileJson, Lock, Link2, Globe, Mail, ShieldCheck, Pencil, Inbox } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -83,9 +83,11 @@ const TOOL_CATEGORIES = [
     color: "text-cyan-400",
     bg: "bg-cyan-400/10 border-cyan-400/20",
     tools: [
-      { icon: Pencil, label: "Subject Line Generator", desc: "AI-powered subject lines", href: "#", badge: "Soon" },
-      { icon: ShieldCheck, label: "Email Validator", desc: "Validate format & MX records", href: "#", badge: "Soon" },
-      { icon: Mail, label: "Plain Text Formatter", desc: "Convert HTML email to plain text", href: "#", badge: "Soon" },
+      { icon: Inbox, label: "Temp Gmail", desc: "Disposable Gmail inbox, one click", href: "/tools/temp-gmail", badge: "New" },
+      { icon: Pencil, label: "Subject Line Generator", desc: "AI-powered subject lines", href: "/tools/subject-line-generator" },
+      { icon: ShieldCheck, label: "Email Validator", desc: "Validate format & MX records", href: "/tools/email-validator" },
+      { icon: Mail, label: "Email Signature Generator", desc: "Professional email signature builder", href: "/tools/email-signature-generator" },
+      { icon: Mail, label: "Plain Text Formatter", desc: "Convert HTML email to plain text", href: "/tools/plain-text-formatter" },
     ],
   },
 ];
