@@ -14,12 +14,27 @@ function rapidHeaders(key: string): Record<string, string> {
   };
 }
 
+// Verified eType mappings against the live Gmailnator API:
+// [2] = dot trick  (@gmail.com with dots)
+// [4] = plus trick (@gmail.com with +tag)
+// [3] = googlemail (@googlemail.com)
+// [1,2,3,4] = any  (random from all types)
+const ETYPE_MAP: Record<string, number[]> = {
+  dot:        [2],
+  plus:       [4],
+  googlemail: [3],
+  any:        [1, 2, 3, 4],
+};
+
 router.post("/temp-gmail/generate", async (req, res) => {
+  const { type } = req.body as { type?: string };
+  const eType = ETYPE_MAP[type ?? "any"] ?? ETYPE_MAP["any"];
+
   const { res: apiRes, exhausted } = await fetchWithKeyRotation((key) =>
     fetch(`${BASE_URL}/api/emails/generate`, {
       method: "POST",
       headers: rapidHeaders(key),
-      body: JSON.stringify({}),
+      body: JSON.stringify({ eType }),
       signal: AbortSignal.timeout(12000),
     })
   );
@@ -34,13 +49,13 @@ router.post("/temp-gmail/generate", async (req, res) => {
     return;
   }
 
-  const data = await apiRes.json() as { email?: string };
+  const data = await apiRes.json() as { email?: string; status?: string };
   if (!data.email) {
     res.status(502).json({ error: "Invalid response from Gmailnator API." });
     return;
   }
 
-  res.json({ email: data.email });
+  res.json({ email: data.email, type: type ?? "any" });
 });
 
 router.post("/temp-gmail/messages", async (req, res) => {
