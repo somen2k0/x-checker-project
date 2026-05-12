@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FeedbackModal } from "@/components/FeedbackModal";
 import {
-  MessageSquare, Home, Info, Menu, X, Layers, ChevronDown,
+  MessageSquare, Home, Info, Menu, X, ChevronDown,
   Search, Sparkles, Link2, AtSign, Hash, MessageSquareText,
   Type, BarChart2, Users, FileJson, Lock, TrendingUp, Globe,
   Mail, ShieldCheck, Pencil, FileText, Shield, Tag, Clock, Inbox,
@@ -204,8 +204,19 @@ export function Navbar() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="h-7 w-7 rounded-md bg-primary flex items-center justify-center shadow-md shadow-primary/30">
-              <Layers className="h-4 w-4 text-white" />
+            <div className="h-7 w-7 rounded-md overflow-hidden shadow-md shadow-primary/30 shrink-0">
+              <svg width="28" height="28" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="180" height="180" rx="40" fill="url(#navGrad)"/>
+                <defs>
+                  <linearGradient id="navGrad" x1="0" y1="0" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#6366f1"/>
+                    <stop offset="100%" stopColor="#8b5cf6"/>
+                  </linearGradient>
+                </defs>
+                <line x1="54" y1="54" x2="126" y2="126" stroke="white" strokeWidth="18" strokeLinecap="round"/>
+                <line x1="126" y1="54" x2="54" y2="126" stroke="white" strokeWidth="18" strokeLinecap="round"/>
+                <circle cx="137" cy="137" r="10" fill="white" fillOpacity="0.35"/>
+              </svg>
             </div>
             <span className="font-semibold text-foreground tracking-tight">X Toolkit</span>
             <Badge variant="outline" className="hidden lg:inline-flex text-[10px] font-medium border-primary/30 text-primary bg-primary/8 px-1.5 py-0">

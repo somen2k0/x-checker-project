@@ -126,7 +126,7 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {[
               { value: `${TOTAL_LIVE}+`, label: "Free tools" },
-              { value: "5", label: "Tool categories" },
+              { value: "6", label: "Tool categories" },
               { value: "0", label: "Signups required" },
               { value: "~2s", label: "Average result time" },
             ].map(({ value, label }) => (
@@ -144,7 +144,7 @@ export default function Home() {
         <div className="text-center mb-10">
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">Tool Categories</h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-sm">
-            Five categories and growing. Every tool is free — no paywall, no account.
+            Six categories and growing. Every tool is free — no paywall, no account.
           </p>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

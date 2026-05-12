@@ -432,6 +432,16 @@ export const ALL_TOOLS: Tool[] = [
     badge: "New",
     tags: ["email", "validate", "check", "format", "syntax"],
   },
+  {
+    id: "temp-mail",
+    label: "Temp Mail",
+    description: "Get a free disposable email inbox — no signup, auto-refresh, multiple providers.",
+    href: "/tools/temp-mail",
+    category: "email",
+    icon: Mail,
+    badge: "Popular",
+    tags: ["temp mail", "temporary email", "disposable", "inbox", "anonymous", "gmail"],
+  },
 ];
 
 export function getToolsByCategory(category: CategoryKey): Tool[] {
