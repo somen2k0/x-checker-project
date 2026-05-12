@@ -215,15 +215,19 @@ router.post("/guerrilla/set-user", async (req, res) => {
   const { user, domain, sid_token } = req.body as { user?: string; domain?: string; sid_token?: string };
   if (!sid_token) { res.status(400).json({ error: "sid_token required." }); return; }
   try {
+    // All Guerrilla Mail domains are aliases of the same inbox — the API does not
+    // accept a domain parameter. Only send the username, then substitute the
+    // user-selected domain ourselves in the response.
     const params: Record<string, string> = { f: "set_email_user", lang: "en" };
     if (user) params.email_user = user;
-    if (domain) params.site = domain;
     const r = await gFetch(params, sid_token);
     if (!r.ok) { res.status(502).json({ error: "Could not update address." }); return; }
     const d = await r.json() as { email_addr?: string; sid_token?: string };
     if (!d.email_addr) { res.status(502).json({ error: "Invalid provider response." }); return; }
-    const [newUser, newDomain] = d.email_addr.split("@");
-    res.json({ email: d.email_addr, user: newUser, domain: newDomain, sid_token: d.sid_token ?? sid_token, domains: GUERRILLA_DOMAINS });
+    const actualUser = d.email_addr.split("@")[0] ?? user ?? "";
+    const targetDomain = domain?.trim() || d.email_addr.split("@")[1] || "guerrillamailblock.com";
+    const finalEmail = `${actualUser}@${targetDomain}`;
+    res.json({ email: finalEmail, user: actualUser, domain: targetDomain, sid_token: d.sid_token ?? sid_token, domains: GUERRILLA_DOMAINS });
   } catch (err) {
     req.log.error({ err }, "guerrilla set-user error");
     res.status(500).json({ error: "Failed to update address." });

@@ -33,13 +33,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   }
 
   try {
+    // All Guerrilla Mail domains are aliases of the same inbox — the API does not
+    // accept a domain parameter. We only send the username to the API, then
+    // substitute the user-selected domain ourselves in the response.
     const params: Record<string, string> = {
       f: "set_email_user",
       lang: "en",
       sid_token,
     };
     if (user && user.trim()) params.email_user = user.trim().toLowerCase();
-    if (domain && domain.trim()) params.site = domain.trim();
 
     const r = await gGet(params);
     if (!r.ok) {
@@ -53,11 +55,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       return;
     }
 
-    const parts = d.email_addr.split("@");
+    const actualUser = d.email_addr.split("@")[0] ?? user ?? "";
+    const targetDomain = domain?.trim() || d.email_addr.split("@")[1] || "guerrillamailblock.com";
+    const finalEmail = `${actualUser}@${targetDomain}`;
+
     res.status(200).json({
-      email: d.email_addr,
-      user: parts[0] ?? user ?? "",
-      domain: parts[1] ?? domain ?? "",
+      email: finalEmail,
+      user: actualUser,
+      domain: targetDomain,
       sid_token: d.sid_token ?? sid_token,
       domains: DOMAINS,
     });
