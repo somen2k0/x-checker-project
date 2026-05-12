@@ -14,6 +14,14 @@ function rapidHeaders(key: string) {
   };
 }
 
+// eType mapping: 1=random, 2=dot trick, 3=plus trick, 4=googlemail
+const ETYPE_MAP: Record<string, number[]> = {
+  dot:        [2],
+  plus:       [3],
+  googlemail: [4],
+  any:        [1, 2, 3],
+};
+
 router.post("/temp-gmail/generate", async (req, res) => {
   if (!hasRapidApiKeys()) {
     res.status(503).json({ error: "Gmailnator API not configured. Please add your RapidAPI keys." });
@@ -26,11 +34,14 @@ router.post("/temp-gmail/generate", async (req, res) => {
     return;
   }
 
+  const { type } = req.body as { type?: string };
+  const eType = ETYPE_MAP[type ?? "any"] ?? [1, 2, 3];
+
   try {
     const response = await fetch(`${BASE_URL}/generateEmail`, {
       method: "POST",
       headers: rapidHeaders(key),
-      body: JSON.stringify({ prefixList: [], eType: [3] }),
+      body: JSON.stringify({ prefixList: [], eType }),
       signal: AbortSignal.timeout(10000),
     });
 
@@ -38,7 +49,7 @@ router.post("/temp-gmail/generate", async (req, res) => {
       const text = await response.text().catch(() => "");
       req.log.warn({ status: response.status, body: text }, "Gmailnator generateEmail failed");
       if (response.status === 429) {
-        res.status(429).json({ error: "Rate limited. Retrying with another key." });
+        res.status(429).json({ error: "Rate limited. Try again in a moment." });
         return;
       }
       res.status(502).json({ error: "Failed to generate email address." });
@@ -51,7 +62,7 @@ router.post("/temp-gmail/generate", async (req, res) => {
       return;
     }
 
-    res.json({ email: data.email });
+    res.json({ email: data.email, type: type ?? "any" });
   } catch (err) {
     req.log.error({ err }, "temp-gmail generate error");
     res.status(500).json({ error: "Failed to generate email. Please try again." });
