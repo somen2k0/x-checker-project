@@ -6,14 +6,15 @@ import { useToolView } from "@/hooks/use-track";
 import {
   Mail, RefreshCw, Copy, Inbox, ChevronRight, ArrowLeft,
   Clock, Loader2, MailOpen, AlertCircle, Sparkles, Shuffle,
-  Plus, Hash, CheckCircle2, ExternalLink,
+  Plus, Hash, CheckCircle2, ExternalLink, AtSign,
 } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────
 
 interface MailTmAccount { id: string; address: string; token: string; }
 interface MailTmMessage { id: string; from: { address: string; name?: string }; subject: string; seen: boolean; createdAt: string; text?: string; html?: { content: string }[] | string; intro?: string; }
-interface GmailnatorMessage { mid?: string; from?: string; subject?: string; date?: string; html?: string; }
+interface GuerrillaInbox { email: string; user: string; domain: string; sid_token: string; domains: string[]; }
+interface GuerrillaMessage { mail_id: string; mail_from: string; mail_subject: string; mail_excerpt: string; mail_timestamp: string; mail_read: string; }
 
 type Tab = "inbox" | "tempgmail" | "gmail";
 
@@ -67,163 +68,290 @@ const relatedTools = [
   { title: "Email Character Counter", href: "/tools/email-character-counter", description: "Count subject and body characters." },
 ];
 
-// ── Gmailnator message row ─────────────────────────────────────────
+// ── Guerrilla Mail message row ─────────────────────────────────────
 
-function GmailnatorMessageRow({ msg }: { msg: GmailnatorMessage }) {
+function GuerrillaMessageRow({ msg, sid_token }: { msg: GuerrillaMessage; sid_token: string }) {
   const [expanded, setExpanded] = useState(false);
+  const [body, setBody] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const toggle = async () => {
+    if (expanded) { setExpanded(false); return; }
+    setExpanded(true);
+    if (body !== null) return;
+    setLoading(true);
+    try {
+      const r = await fetch(`/api/guerrilla/message/${msg.mail_id}?sid_token=${encodeURIComponent(sid_token)}`);
+      if (r.ok) { const d = await r.json() as { body?: string }; setBody(d.body ?? ""); }
+    } catch { setBody(""); } finally { setLoading(false); }
+  };
+
+  const ts = msg.mail_timestamp
+    ? new Date(parseInt(msg.mail_timestamp) * 1000).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
+    : "";
+
   return (
     <div>
-      <button onClick={() => setExpanded(!expanded)} className={`w-full text-left px-4 py-3 transition-colors hover:bg-muted/30 ${expanded ? "bg-muted/20" : ""}`}>
+      <button onClick={toggle} className={`w-full text-left px-4 py-3 transition-colors hover:bg-muted/30 ${expanded ? "bg-muted/20" : ""}`}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-foreground/70 truncate">{msg.from ?? "Unknown"}</p>
-            <p className="text-sm font-medium truncate mt-0.5">{msg.subject || "(No subject)"}</p>
+            <p className="text-xs font-semibold text-foreground/70 truncate">{msg.mail_from || "Unknown"}</p>
+            <p className={`text-sm truncate mt-0.5 ${msg.mail_read === "0" ? "font-semibold text-foreground" : "text-foreground/70"}`}>
+              {msg.mail_subject || "(No subject)"}
+            </p>
           </div>
-          {msg.date && <span className="text-[10px] text-muted-foreground/50 shrink-0 mt-0.5">{msg.date}</span>}
+          {ts && <span className="text-[10px] text-muted-foreground/50 shrink-0 mt-0.5">{ts}</span>}
         </div>
       </button>
-      {expanded && msg.html && (
+      {expanded && (
         <div className="px-4 pb-4 border-t border-border/40 bg-muted/10">
-          <div className="text-xs text-muted-foreground leading-relaxed mt-3 max-h-60 overflow-y-auto" dangerouslySetInnerHTML={{ __html: msg.html }} />
+          {loading ? (
+            <div className="flex items-center gap-2 py-4 text-muted-foreground text-sm">
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+            </div>
+          ) : body ? (
+            <div className="text-xs leading-relaxed mt-3 max-h-72 overflow-y-auto prose prose-invert prose-xs max-w-none" dangerouslySetInnerHTML={{ __html: body }} />
+          ) : (
+            <p className="text-xs text-muted-foreground mt-3 leading-relaxed">{msg.mail_excerpt}</p>
+          )}
         </div>
       )}
     </div>
   );
 }
 
-// ── Tab 1: Disposable Inbox (via Gmailnator API) ───────────────────
+// ── Tab 1: Disposable Inbox (Guerrilla Mail — free, no API key) ────
+
+const GUERRILLA_REFRESH_MS = 15000;
+const GUERRILLA_STORAGE_KEY = "guerrilla_inbox_v1";
+
+function saveGuerrilla(ib: GuerrillaInbox) { try { localStorage.setItem(GUERRILLA_STORAGE_KEY, JSON.stringify(ib)); } catch {} }
+function loadGuerrilla(): GuerrillaInbox | null { try { const s = localStorage.getItem(GUERRILLA_STORAGE_KEY); return s ? JSON.parse(s) as GuerrillaInbox : null; } catch { return null; } }
+function clearGuerrilla() { try { localStorage.removeItem(GUERRILLA_STORAGE_KEY); } catch {} }
 
 function DisposableInbox() {
-  const [email, setEmail] = useState<string | null>(null);
-  const [emailType, setEmailType] = useState("");
-  const [messages, setMessages] = useState<GmailnatorMessage[]>([]);
-  const [generating, setGenerating] = useState(false);
+  const [inbox, setInbox] = useState<GuerrillaInbox | null>(null);
+  const [messages, setMessages] = useState<GuerrillaMessage[]>([]);
+  const [creating, setCreating] = useState(false);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [type, setType] = useState("any");
-  const [countdown, setCountdown] = useState(GMAIL_REFRESH_MS / 1000);
+  const [countdown, setCountdown] = useState(GUERRILLA_REFRESH_MS / 1000);
+  const [showCustom, setShowCustom] = useState(false);
+  const [customUser, setCustomUser] = useState("");
+  const [settingUser, setSettingUser] = useState(false);
   const refreshTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const { toast } = useToast();
 
-  const fetchInbox = useCallback(async (addr: string, silent = false) => {
+  const stopTimers = () => {
+    if (refreshTimer.current) clearInterval(refreshTimer.current);
+    if (countdownTimer.current) clearInterval(countdownTimer.current);
+  };
+
+  const startTimers = useCallback((ib: GuerrillaInbox) => {
+    stopTimers();
+    setCountdown(GUERRILLA_REFRESH_MS / 1000);
+    refreshTimer.current = setInterval(() => {
+      fetchInbox(ib, true);
+      setCountdown(GUERRILLA_REFRESH_MS / 1000);
+    }, GUERRILLA_REFRESH_MS);
+    countdownTimer.current = setInterval(() => setCountdown((c) => (c <= 1 ? GUERRILLA_REFRESH_MS / 1000 : c - 1)), 1000);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fetchInbox = useCallback(async (ib: GuerrillaInbox, silent = false) => {
     if (!silent) setLoadingMsgs(true);
     try {
-      const r = await fetch("/api/gmailnator/inbox", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: addr }) });
-      if (r.ok) { const d = await r.json() as { messages: GmailnatorMessage[] }; setMessages(d.messages ?? []); }
+      const r = await fetch(`/api/guerrilla/inbox?sid_token=${encodeURIComponent(ib.sid_token)}`);
+      if (r.ok) { const d = await r.json() as { messages: GuerrillaMessage[] }; setMessages(d.messages ?? []); }
     } catch {} finally { if (!silent) setLoadingMsgs(false); }
   }, []);
 
-  const generate = useCallback(async (t: string) => {
-    setGenerating(true); setError(null); setMessages([]); setEmail(null);
-    if (refreshTimer.current) clearInterval(refreshTimer.current);
-    if (countdownTimer.current) clearInterval(countdownTimer.current);
+  const createInbox = useCallback(async () => {
+    setCreating(true); setError(null); setMessages([]); setShowCustom(false); setCustomUser("");
+    stopTimers();
     try {
-      const r = await fetch("/api/gmailnator/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(t !== "any" ? { type: t } : {}) });
-      const d = await r.json() as { email?: string; type?: string; error?: string };
-      if (!r.ok || !d.email) { setError(d.error ?? "Could not generate Gmail address. Please try again."); return; }
-      setEmail(d.email); setEmailType(d.type ?? "");
+      const r = await fetch("/api/guerrilla/new");
+      const d = await r.json() as GuerrillaInbox & { error?: string };
+      if (!r.ok || !d.email) { setError(d.error ?? "Could not create inbox. Please try again."); clearGuerrilla(); return; }
+      setInbox(d); saveGuerrilla(d);
       toast({ title: "Inbox ready!", description: d.email });
-      await fetchInbox(d.email);
-      setCountdown(GMAIL_REFRESH_MS / 1000);
-      refreshTimer.current = setInterval(() => { fetchInbox(d.email!, true); setCountdown(GMAIL_REFRESH_MS / 1000); }, GMAIL_REFRESH_MS);
-      countdownTimer.current = setInterval(() => setCountdown((c) => c <= 1 ? GMAIL_REFRESH_MS / 1000 : c - 1), 1000);
+      await fetchInbox(d);
+      startTimers(d);
     } catch { setError("Network error. Please try again."); }
-    finally { setGenerating(false); }
-  }, [fetchInbox, toast]);
+    finally { setCreating(false); }
+  }, [fetchInbox, startTimers, toast]);
 
-  useEffect(() => { generate("any"); }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => () => { if (refreshTimer.current) clearInterval(refreshTimer.current); if (countdownTimer.current) clearInterval(countdownTimer.current); }, []);
-
-  const copyEmail = () => {
-    if (!email) return;
-    navigator.clipboard.writeText(email);
-    toast({ title: "Copied!", description: "Gmail address copied." });
+  const applyCustomUser = async () => {
+    if (!inbox || !customUser.trim()) return;
+    setSettingUser(true);
+    try {
+      const r = await fetch("/api/guerrilla/set-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user: customUser.trim(), sid_token: inbox.sid_token }),
+      });
+      const d = await r.json() as GuerrillaInbox & { error?: string };
+      if (!r.ok || !d.email) { toast({ title: "Error", description: d.error ?? "Could not set username.", variant: "destructive" }); return; }
+      setInbox(d); saveGuerrilla(d); setShowCustom(false); setCustomUser("");
+      toast({ title: "Username set!", description: d.email });
+      fetchInbox(d, true);
+    } catch { toast({ title: "Network error", description: "Please try again.", variant: "destructive" }); }
+    finally { setSettingUser(false); }
   };
 
-  const TYPE_OPTIONS = [
-    { value: "any", label: "Any (random)" },
-    { value: "dot", label: "@gmail.com · dot trick" },
-    { value: "plus", label: "@gmail.com · plus trick" },
-    { value: "googlemail", label: "@googlemail.com" },
-  ];
+  const switchDomain = async (domain: string) => {
+    if (!inbox) return;
+    try {
+      const r = await fetch("/api/guerrilla/set-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user: inbox.user, domain, sid_token: inbox.sid_token }),
+      });
+      const d = await r.json() as GuerrillaInbox & { error?: string };
+      if (r.ok && d.email) { setInbox(d); saveGuerrilla(d); fetchInbox(d, true); }
+    } catch {}
+  };
+
+  useEffect(() => {
+    const saved = loadGuerrilla();
+    if (saved) {
+      fetch(`/api/guerrilla/inbox?sid_token=${encodeURIComponent(saved.sid_token)}`)
+        .then((r) => { if (r.ok) { setInbox(saved); fetchInbox(saved, true); startTimers(saved); } else createInbox(); })
+        .catch(() => createInbox());
+    } else {
+      createInbox();
+    }
+    return stopTimers;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const copyAddress = () => {
+    if (!inbox) return;
+    navigator.clipboard.writeText(inbox.email);
+    toast({ title: "Copied!", description: inbox.email });
+  };
+
+  const unread = messages.filter((m) => m.mail_read === "0").length;
 
   return (
     <div className="space-y-4">
-      {/* Type selector */}
-      <div className="flex flex-wrap items-center gap-2 p-1 bg-muted/40 border border-border/60 rounded-xl w-fit">
-        {TYPE_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            onClick={() => setType(opt.value)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${type === opt.value ? "bg-background shadow-sm text-foreground border border-border/60" : "text-muted-foreground hover:text-foreground"}`}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
+      {/* Address card */}
+      <div className="rounded-xl border border-border/60 bg-card/40 overflow-hidden">
+        {/* Top: icon + address + timer */}
+        <div className="px-4 py-4 flex items-start gap-3">
+          <div className="h-10 w-10 rounded-xl bg-cyan-400/15 border border-cyan-400/25 flex items-center justify-center shrink-0 mt-0.5">
+            <Mail className="h-5 w-5 text-cyan-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">Your Temporary Email Address</p>
+            {inbox ? (
+              <div className="font-mono text-base font-semibold flex flex-wrap items-center">
+                <span className="text-foreground">{inbox.user}</span>
+                <span className="text-muted-foreground">@</span>
+                <span className="text-cyan-400">{inbox.domain}</span>
+              </div>
+            ) : (
+              <div className="h-6 bg-muted/60 rounded animate-pulse w-56 mt-1" />
+            )}
+          </div>
+          <div className="flex items-center gap-1 text-[11px] text-muted-foreground shrink-0 mt-1">
+            <Clock className="h-3 w-3" />{countdown}s
+          </div>
+        </div>
 
-      {/* Generate button */}
-      <div className="flex flex-wrap gap-2 items-center">
-        <Button onClick={() => generate(type)} disabled={generating} className="gap-2 text-xs shadow-sm shadow-primary/20">
-          {generating ? <><Loader2 className="h-3.5 w-3.5 animate-spin" />Generating…</> : <><Sparkles className="h-3.5 w-3.5" />{email ? "Generate New" : "Generate Inbox"}</>}
-        </Button>
-        {email && (
-          <Button variant="outline" size="sm" onClick={copyEmail} className="text-xs gap-1.5 border-border/60">
-            <Copy className="h-3.5 w-3.5" />Copy Address
+        {/* Action buttons */}
+        <div className="px-4 pb-3 flex flex-wrap gap-2 items-center">
+          <Button size="sm" onClick={copyAddress} disabled={!inbox}
+            className="text-xs gap-1.5 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold shadow-sm shadow-cyan-500/20">
+            <Copy className="h-3.5 w-3.5" /> Copy Address
           </Button>
+          <Button variant="outline" size="sm" onClick={() => inbox && fetchInbox(inbox)} disabled={!inbox || loadingMsgs} className="text-xs gap-1.5 border-border/60">
+            <RefreshCw className={`h-3.5 w-3.5 ${loadingMsgs ? "animate-spin" : ""}`} /> Refresh
+          </Button>
+          <Button variant="outline" size="sm" onClick={createInbox} disabled={creating} className="text-xs gap-1.5 border-border/60">
+            <Shuffle className="h-3.5 w-3.5" /> {creating ? "Creating…" : "New Address"}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setShowCustom((v) => !v)} disabled={!inbox}
+            className={`text-xs gap-1.5 border-border/60 ${showCustom ? "bg-muted/50" : ""}`}>
+            <AtSign className="h-3.5 w-3.5" /> Custom Username
+          </Button>
+          {inbox && inbox.domains.length > 1 && (
+            <select value={inbox.domain} onChange={(e) => switchDomain(e.target.value)}
+              className="rounded-lg border border-border/60 bg-muted/30 px-2.5 py-1.5 text-xs text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/30">
+              {inbox.domains.map((d) => <option key={d} value={d}>@{d}</option>)}
+            </select>
+          )}
+        </div>
+
+        {/* Custom username input (inline) */}
+        {showCustom && (
+          <div className="px-4 pb-4 pt-1 border-t border-border/40 flex gap-2 items-center">
+            <input
+              value={customUser}
+              onChange={(e) => setCustomUser(e.target.value.replace(/[^a-z0-9._-]/gi, ""))}
+              onKeyDown={(e) => e.key === "Enter" && applyCustomUser()}
+              placeholder="Enter custom username…"
+              autoFocus
+              className="flex-1 min-w-0 rounded-lg border border-border/60 bg-background/60 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+            <Button size="sm" onClick={applyCustomUser} disabled={!customUser.trim() || settingUser} className="text-xs shrink-0">
+              {settingUser ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Set"}
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => { setShowCustom(false); setCustomUser(""); }} className="text-xs shrink-0">Cancel</Button>
+          </div>
         )}
       </div>
 
+      {/* Error */}
       {error && (
         <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3">
           <AlertCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
-          <p className="text-sm text-red-400">{error}</p>
-          <Button size="sm" variant="ghost" onClick={() => generate(type)} className="ml-auto text-xs border-destructive/30">Retry</Button>
+          <p className="text-sm text-red-400 flex-1">{error}</p>
+          <Button size="sm" variant="ghost" onClick={createInbox} className="text-xs shrink-0">Retry</Button>
         </div>
       )}
 
-      {email && (
-        <div className="rounded-xl border border-border/60 bg-card/40 overflow-hidden">
-          {/* Email header */}
-          <div className="px-4 py-3 border-b border-border/50 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4 text-cyan-400" />
-              <span className="font-mono text-sm font-semibold text-foreground">{email}</span>
-              {emailType && <span className="text-[10px] bg-muted/60 border border-border/50 rounded-full px-2 py-0.5 text-muted-foreground">{emailType}</span>}
-            </div>
-            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-              <Clock className="h-3 w-3" />{countdown}s
-              <button onClick={() => email && fetchInbox(email)} disabled={loadingMsgs} className="ml-1 text-muted-foreground/60 hover:text-muted-foreground transition-colors disabled:opacity-40">
-                <RefreshCw className={`h-3 w-3 ${loadingMsgs ? "animate-spin" : ""}`} />
-              </button>
-            </div>
+      {/* Inbox */}
+      <div className="rounded-xl border border-border/60 bg-card/30 overflow-hidden">
+        <div className="px-4 py-3 border-b border-border/50 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Inbox</span>
+            {unread > 0 && (
+              <span className="h-4 min-w-4 px-1 text-[10px] bg-cyan-500 text-black rounded-full flex items-center justify-center font-bold">{unread}</span>
+            )}
           </div>
-
-          {/* Inbox */}
-          {loadingMsgs && messages.length === 0 && (
-            <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground text-sm">
-              <Loader2 className="h-4 w-4 animate-spin" /> Checking inbox…
-            </div>
-          )}
-          {!loadingMsgs && messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-10 gap-2 text-center px-4">
-              <MailOpen className="h-6 w-6 text-muted-foreground/20" />
-              <p className="text-sm text-muted-foreground/60">Inbox is empty</p>
-              <p className="text-xs text-muted-foreground/40">Send an email to <span className="font-mono">{email}</span> and it appears here</p>
-            </div>
-          )}
-          <div className="divide-y divide-border/40">
-            {messages.map((msg, i) => (
-              <GmailnatorMessageRow key={msg.mid ?? i} msg={msg} />
-            ))}
-          </div>
+          <button onClick={() => inbox && fetchInbox(inbox)} disabled={loadingMsgs || !inbox}
+            className="h-7 w-7 rounded-md border border-border/60 bg-muted/30 hover:bg-muted/60 flex items-center justify-center transition-colors disabled:opacity-50">
+            <RefreshCw className={`h-3.5 w-3.5 text-muted-foreground ${loadingMsgs ? "animate-spin" : ""}`} />
+          </button>
         </div>
-      )}
+
+        {loadingMsgs && messages.length === 0 && (
+          <div className="flex items-center justify-center py-10 gap-2 text-muted-foreground text-sm">
+            <Loader2 className="h-4 w-4 animate-spin" /> Checking inbox…
+          </div>
+        )}
+        {!loadingMsgs && messages.length === 0 && inbox && (
+          <div className="flex flex-col items-center justify-center py-12 gap-2 text-center px-4">
+            <MailOpen className="h-8 w-8 text-muted-foreground/20" />
+            <p className="text-sm text-muted-foreground/60">No messages yet</p>
+            <p className="text-xs text-muted-foreground/40">Send an email to <span className="font-mono">{inbox.email}</span> and it will appear here</p>
+          </div>
+        )}
+        <div className="divide-y divide-border/40">
+          {messages.map((msg) => (
+            <GuerrillaMessageRow key={msg.mail_id} msg={msg} sid_token={inbox?.sid_token ?? ""} />
+          ))}
+        </div>
+      </div>
 
       {/* Feature pills */}
       <div className="flex flex-wrap gap-2">
-        {[{ icon: Mail, label: "Real Gmail address" }, { icon: RefreshCw, label: `Auto-refresh ${GMAIL_REFRESH_MS / 1000}s` }, { icon: Sparkles, label: "Dot & plus tricks" }, { icon: CheckCircle2, label: "No signup needed" }].map(({ icon: Ic, label }) => (
+        {[
+          { icon: Mail, label: "9 domains available" },
+          { icon: RefreshCw, label: `Auto-refresh ${GUERRILLA_REFRESH_MS / 1000}s` },
+          { icon: AtSign, label: "Custom usernames" },
+          { icon: CheckCircle2, label: "No signup needed" },
+        ].map(({ icon: Ic, label }) => (
           <div key={label} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground bg-muted/40 border border-border/50 rounded-full px-3 py-1">
             <Ic className="h-3 w-3" />{label}
           </div>
