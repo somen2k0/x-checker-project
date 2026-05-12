@@ -122,14 +122,35 @@ router.get("/temp-mail/messages/:id", async (req, res) => {
 
 // ── Disposable Inbox tab (Gmailnator via RapidAPI) ────────────────
 
-function getKey(): string | null {
-  const keys = [
+// ── RapidAPI key pool (supports RAPIDAPI_KEY, RAPIDAPI_KEY_1 … RAPIDAPI_KEY_10) ──
+function buildKeyPool(): string[] {
+  const candidates = [
     process.env.RAPIDAPI_KEY,
-    process.env.RAPIDAPI_KEY_1,
-    process.env.RAPIDAPI_KEY_2,
-  ].filter(Boolean) as string[];
-  if (!keys.length) return null;
-  return keys[Math.floor(Math.random() * keys.length)];
+    ...Array.from({ length: 10 }, (_, i) => process.env[`RAPIDAPI_KEY_${i + 1}`]),
+  ];
+  return candidates.filter(Boolean) as string[];
+}
+
+let _keyPool: string[] = [];
+let _keyIndex = 0;
+
+function getKey(): string | null {
+  // Rebuild pool lazily (picks up keys added at runtime without restart)
+  _keyPool = buildKeyPool();
+  if (!_keyPool.length) return null;
+
+  // Fisher-Yates shuffle on first use so all instances start at different offsets
+  if (_keyIndex === 0 && _keyPool.length > 1) {
+    for (let i = _keyPool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [_keyPool[i], _keyPool[j]] = [_keyPool[j], _keyPool[i]];
+    }
+  }
+
+  // Round-robin through the pool
+  const key = _keyPool[_keyIndex % _keyPool.length];
+  _keyIndex = (_keyIndex + 1) % _keyPool.length;
+  return key;
 }
 
 const ETYPE_MAP: Record<string, number[]> = {

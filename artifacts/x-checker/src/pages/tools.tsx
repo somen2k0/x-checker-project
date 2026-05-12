@@ -32,6 +32,7 @@ const CATEGORY_TABS = [
   { key: "text-formatting", label: "Text & Format" },
   { key: "developer", label: "Developer" },
   { key: "seo", label: "SEO" },
+  { key: "email", label: "Email" },
 ] as const;
 
 const MORE_CATEGORY_KEYS: CategoryKey[] = [
@@ -39,6 +40,7 @@ const MORE_CATEGORY_KEYS: CategoryKey[] = [
   "text-formatting",
   "developer",
   "seo",
+  "email",
 ];
 
 function formatCount(n: number): string {

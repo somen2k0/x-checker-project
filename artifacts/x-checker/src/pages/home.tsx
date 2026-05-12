@@ -16,6 +16,7 @@ const CATEGORY_ORDER: import("@/lib/tools-registry").CategoryKey[] = [
   "text-formatting",
   "developer",
   "seo",
+  "email",
 ];
 
 const TESTIMONIALS = [
@@ -152,7 +153,6 @@ export default function Home() {
             const cat = CATEGORIES[key];
             const Icon = cat.icon;
             const count = LIVE_TOOLS.filter((t) => t.category === key).length;
-            const isNew = key === "seo";
             return (
               <Link
                 key={key}
@@ -165,11 +165,6 @@ export default function Home() {
                   </div>
                   <div className="flex items-center gap-2 mb-1.5">
                     <h3 className="text-sm font-semibold group-hover:text-primary transition-colors">{cat.label}</h3>
-                    {isNew && (
-                      <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-emerald-400/15 text-emerald-400 border border-emerald-400/30">
-                        Coming Soon
-                      </span>
-                    )}
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed mb-3">{cat.description}</p>
                   <div className="flex items-center justify-between">

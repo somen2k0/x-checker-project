@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -101,6 +101,11 @@ function TrackedRouter() {
       <Route path="/tools/email-validator" component={EmailValidator} />
       <Route path="/tools/temp-gmail" component={TempGmail} />
       <Route path="/tools/temp-mail" component={TempGmail} />
+
+      {/* Canonical alias: /tools/x-account-checker → /tools?tab=checker */}
+      <Route path="/tools/x-account-checker">
+        {() => <Redirect to="/tools?tab=checker" />}
+      </Route>
 
       {/* Category landing pages */}
       <Route path="/ai-writing-tools" component={AiWritingTools} />
