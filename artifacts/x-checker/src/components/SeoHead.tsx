@@ -38,6 +38,14 @@ export function SeoHead({ title, description, path, faqs, extraSchemas }: SeoHea
     const prevOgUrl = metaOgUrl?.getAttribute("content") ?? "";
     metaOgUrl?.setAttribute("content", canonicalUrl);
 
+    const metaTwitterTitle = document.querySelector('meta[name="twitter:title"]');
+    const prevTwitterTitle = metaTwitterTitle?.getAttribute("content") ?? "";
+    metaTwitterTitle?.setAttribute("content", title);
+
+    const metaTwitterDesc = document.querySelector('meta[name="twitter:description"]');
+    const prevTwitterDesc = metaTwitterDesc?.getAttribute("content") ?? "";
+    metaTwitterDesc?.setAttribute("content", description);
+
     let canonicalEl = document.querySelector('link[rel="canonical"]');
     const prevCanonical = canonicalEl?.getAttribute("href") ?? "";
     if (!canonicalEl) {
@@ -84,6 +92,8 @@ export function SeoHead({ title, description, path, faqs, extraSchemas }: SeoHea
       metaOgTitle?.setAttribute("content", prevOgTitle);
       metaOgDesc?.setAttribute("content", prevOgDesc);
       metaOgUrl?.setAttribute("content", prevOgUrl);
+      metaTwitterTitle?.setAttribute("content", prevTwitterTitle);
+      metaTwitterDesc?.setAttribute("content", prevTwitterDesc);
       canonicalEl?.setAttribute("href", prevCanonical);
       injectedScripts.forEach((el) => el.remove());
     };

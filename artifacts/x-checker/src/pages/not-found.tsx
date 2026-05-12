@@ -1,9 +1,19 @@
+import { useEffect } from "react";
 import { Link } from "wouter";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Home, Search } from "lucide-react";
 
 export default function NotFound() {
+  useEffect(() => {
+    const robotsMeta = document.querySelector('meta[name="robots"]');
+    const prev = robotsMeta?.getAttribute("content") ?? "";
+    robotsMeta?.setAttribute("content", "noindex, nofollow");
+    return () => {
+      robotsMeta?.setAttribute("content", prev);
+    };
+  }, []);
+
   return (
     <Layout>
       <div className="max-w-lg mx-auto px-4 text-center py-24 space-y-6">

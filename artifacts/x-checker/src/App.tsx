@@ -100,7 +100,9 @@ function TrackedRouter() {
       <Route path="/tools/email-signature-generator" component={EmailSignatureGenerator} />
       <Route path="/tools/email-validator" component={EmailValidator} />
       <Route path="/tools/temp-gmail" component={TempGmail} />
-      <Route path="/tools/temp-mail" component={TempGmail} />
+      <Route path="/tools/temp-mail">
+        {() => <Redirect to="/tools/temp-gmail" />}
+      </Route>
 
       {/* Canonical alias: /tools/x-account-checker → /tools?tab=checker */}
       <Route path="/tools/x-account-checker">
