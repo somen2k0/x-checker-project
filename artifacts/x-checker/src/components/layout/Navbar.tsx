@@ -8,6 +8,7 @@ import {
   Search, Sparkles, Link2, AtSign, Hash, MessageSquareText,
   Type, BarChart2, Users, FileJson, Lock, TrendingUp, Globe,
   Mail, ShieldCheck, Pencil, FileText, Shield, Tag, Clock, Inbox,
+  Minimize2, Code2, KeyRound, Regex, Database, Shuffle,
 } from "lucide-react";
 
 const BADGE_STYLES: Record<string, string> = {
@@ -46,8 +47,15 @@ const NAV_CATEGORIES = [
     tools: [
       { icon: FileJson, label: "JSON Formatter", href: "/tools/json-formatter", badge: "Popular" },
       { icon: Lock, label: "Base64 Encoder / Decoder", href: "/tools/base64" },
+      { icon: Link2, label: "URL Encoder / Decoder", href: "/tools/url-encoder" },
+      { icon: Minimize2, label: "CSS Minifier", href: "/tools/css-minifier" },
+      { icon: Code2, label: "HTML Formatter", href: "/tools/html-formatter" },
+      { icon: KeyRound, label: "JWT Decoder", href: "/tools/jwt-decoder", badge: "New" },
+      { icon: Regex, label: "Regex Tester", href: "/tools/regex-tester", badge: "New" },
+      { icon: Database, label: "SQL Formatter", href: "/tools/sql-formatter", badge: "New" },
+      { icon: Shuffle, label: "UUID Generator", href: "/tools/uuid-generator" },
     ],
-    comingSoon: ["URL Encoder / Decoder", "CSS Minifier", "Regex Tester"],
+    comingSoon: [],
   },
   {
     key: "seo",
@@ -219,9 +227,9 @@ export function Navbar() {
               <NavItem key={cat.key} category={cat} currentPath={location} />
             ))}
 
-            <Link href="/tools/temp-gmail">
+            <Link href="/tools/temp-mail">
               <button className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-1.5 ${
-                location === "/tools/temp-gmail" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                location === "/tools/temp-mail" || location === "/tools/temp-gmail" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               }`}>
                 <Inbox className="h-3.5 w-3.5" />
                 Temp Mail

@@ -24,6 +24,13 @@ import FontPreview from "@/pages/tools/font-preview";
 import CharacterCounter from "@/pages/tools/character-counter";
 import JsonFormatter from "@/pages/tools/json-formatter";
 import Base64Tool from "@/pages/tools/base64";
+import CssMinifier from "@/pages/tools/css-minifier";
+import HtmlFormatter from "@/pages/tools/html-formatter";
+import JwtDecoder from "@/pages/tools/jwt-decoder";
+import RegexTester from "@/pages/tools/regex-tester";
+import SqlFormatter from "@/pages/tools/sql-formatter";
+import UrlEncoder from "@/pages/tools/url-encoder";
+import UuidGenerator from "@/pages/tools/uuid-generator";
 // SEO Tools
 import MetaTagGenerator from "@/pages/tools/meta-tag-generator";
 import UrlSlugGenerator from "@/pages/tools/url-slug-generator";
@@ -70,6 +77,13 @@ function TrackedRouter() {
       <Route path="/tools/character-counter" component={CharacterCounter} />
       <Route path="/tools/json-formatter" component={JsonFormatter} />
       <Route path="/tools/base64" component={Base64Tool} />
+      <Route path="/tools/css-minifier" component={CssMinifier} />
+      <Route path="/tools/html-formatter" component={HtmlFormatter} />
+      <Route path="/tools/jwt-decoder" component={JwtDecoder} />
+      <Route path="/tools/regex-tester" component={RegexTester} />
+      <Route path="/tools/sql-formatter" component={SqlFormatter} />
+      <Route path="/tools/url-encoder" component={UrlEncoder} />
+      <Route path="/tools/uuid-generator" component={UuidGenerator} />
 
       {/* SEO Tools */}
       <Route path="/tools/meta-tag-generator" component={MetaTagGenerator} />
@@ -86,6 +100,7 @@ function TrackedRouter() {
       <Route path="/tools/email-signature-generator" component={EmailSignatureGenerator} />
       <Route path="/tools/email-validator" component={EmailValidator} />
       <Route path="/tools/temp-gmail" component={TempGmail} />
+      <Route path="/tools/temp-mail" component={TempGmail} />
 
       {/* Category landing pages */}
       <Route path="/ai-writing-tools" component={AiWritingTools} />
