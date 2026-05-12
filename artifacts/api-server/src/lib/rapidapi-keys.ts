@@ -6,8 +6,8 @@
 
 const HARDCODED_KEYS: string[] = [
   "bbea6a9443mshdfc8d058f9d97efp1571dajsndb43135538fa", // key 1
-  // "paste_your_second_key_here",                       // key 2
-  // "paste_your_third_key_here",                        // key 3
+  "894c8f0b44msh483bb59b42c084ap15db0bjsne64fe8ccbbd4",                       // key 2
+  "e9b0fdba6bmsh970f41e51594567p178216jsn8158f0ea5df7",                        // key 3
   // "paste_your_fourth_key_here",                       // key 4
   // "paste_your_fifth_key_here",                        // key 5
   // "paste_your_sixth_key_here",                        // key 6
