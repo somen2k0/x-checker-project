@@ -1,5 +1,5 @@
 import { type LucideIcon, ArrowRight, Wrench } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Layout } from "./Layout";
 import { SeoHead } from "@/components/SeoHead";
 import { Button } from "@/components/ui/button";
@@ -46,9 +46,11 @@ export function MiniToolLayout({
   children,
   affiliateCategory = "all",
 }: MiniToolLayoutProps) {
+  const [path] = useLocation();
+
   return (
     <Layout>
-      <SeoHead title={seoTitle} description={seoDescription} faqs={faqs} />
+      <SeoHead title={seoTitle} description={seoDescription} faqs={faqs} path={path} />
 
       <div className="max-w-4xl mx-auto px-4 md:px-8 py-10 md:py-14 space-y-12">
 
