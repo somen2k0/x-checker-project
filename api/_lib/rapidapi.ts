@@ -1,43 +1,49 @@
 // ── RapidAPI key pool — round-robin rotation ──────────────────────────────────
-// Reads keys from env vars: RAPIDAPI_KEY, RAPIDAPI_KEY_1 … RAPIDAPI_KEY_N
-// Module-level counter persists across warm Vercel invocations in the same
-// container, giving true round-robin within a container lifetime.
-// Across cold-starts we fall back gracefully — still picks the first available key.
+// Add all your RapidAPI keys below. The system will rotate through them
+// automatically after every request. If one hits a rate limit (429) it skips
+// to the next key automatically so you never get blocked.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const HARDCODED_KEYS: string[] = [
+  "bbea6a9443mshdfc8d058f9d97efp1571dajsndb43135538fa", // key 1
+  // "paste_your_second_key_here",                       // key 2
+  // "paste_your_third_key_here",                        // key 3
+  // "paste_your_fourth_key_here",                       // key 4
+  // "paste_your_fifth_key_here",                        // key 5
+  // "paste_your_sixth_key_here",                        // key 6
+  // "paste_your_seventh_key_here",                      // key 7
+  // "paste_your_eighth_key_here",                       // key 8
+  // "paste_your_ninth_key_here",                        // key 9
+  // "paste_your_tenth_key_here",                        // key 10
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const RAPIDAPI_HOST = "gmailnator.p.rapidapi.com";
+export const BASE_URL = `https://${RAPIDAPI_HOST}`;
 
 let _counter = 0;
 
 export function getKeys(): string[] {
-  const keys: string[] = [];
-
-  // Support a plain RAPIDAPI_KEY as well as RAPIDAPI_KEY_1 … RAPIDAPI_KEY_20
-  const plain = process.env["RAPIDAPI_KEY"];
-  if (plain?.trim()) keys.push(plain.trim());
-
-  for (let i = 1; i <= 20; i++) {
-    const k = process.env[`RAPIDAPI_KEY_${i}`];
-    if (k?.trim()) keys.push(k.trim());
-  }
-
-  // Deduplicate while preserving order
-  return [...new Set(keys)];
+  return HARDCODED_KEYS.filter((k) => k.trim().length > 0);
 }
 
 export function hasKeys(): boolean {
   return getKeys().length > 0;
 }
 
-/** Returns the next key in the round-robin pool, or null if no keys are set. */
-export function nextKey(): string | null {
-  const keys = getKeys();
-  if (keys.length === 0) return null;
-  const key = keys[_counter % keys.length];
-  _counter = (_counter + 1) % keys.length;
-  return key ?? null;
+export function rapidHeaders(key: string): Record<string, string> {
+  return {
+    "Content-Type": "application/json",
+    "x-rapidapi-key": key,
+    "x-rapidapi-host": RAPIDAPI_HOST,
+  };
 }
 
 /**
- * Calls `fn` with successive keys until one succeeds (non-429/non-401) or
- * all keys are exhausted. Returns the last Response regardless.
+ * Tries each key in round-robin order. If a key returns 429 or 401 it
+ * immediately moves to the next one. Returns on first success, or the last
+ * failed response if all keys are exhausted.
  */
 export async function fetchWithRotation(
   fn: (key: string) => Promise<Response>
@@ -50,15 +56,12 @@ export async function fetchWithRotation(
     };
   }
 
-  // Start from the current counter position and try each key once
   const startIdx = _counter % keys.length;
   let lastRes: Response | null = null;
 
   for (let attempt = 0; attempt < keys.length; attempt++) {
     const idx = (startIdx + attempt) % keys.length;
     const key = keys[idx]!;
-
-    // Advance global counter so next call starts from the next key
     _counter = (idx + 1) % keys.length;
 
     let res: Response;
@@ -75,18 +78,10 @@ export async function fetchWithRotation(
   }
 
   return {
-    res: lastRes ?? new Response(JSON.stringify({ error: "all_keys_exhausted" }), { status: 429 }),
+    res: lastRes ?? new Response(
+      JSON.stringify({ error: "All RapidAPI keys are rate-limited. Add more keys to the pool." }),
+      { status: 429 }
+    ),
     exhausted: true,
-  };
-}
-
-export const RAPIDAPI_HOST = "gmailnator.p.rapidapi.com";
-export const BASE_URL = `https://${RAPIDAPI_HOST}`;
-
-export function rapidHeaders(key: string): Record<string, string> {
-  return {
-    "Content-Type": "application/json",
-    "x-rapidapi-key": key,
-    "x-rapidapi-host": RAPIDAPI_HOST,
   };
 }

@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { hasKeys, fetchWithRotation, rapidHeaders, BASE_URL } from "../_lib/rapidapi";
+import { fetchWithRotation, rapidHeaders, BASE_URL } from "../_lib/rapidapi";
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -16,13 +16,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  if (!hasKeys()) {
-    res.status(503).json({ error: "Gmailnator API not configured." });
-    return;
-  }
-
   const { res: apiRes, exhausted } = await fetchWithRotation((key) =>
-    fetch(`${BASE_URL}/getMessages`, {
+    fetch(`${BASE_URL}/api/emails/getMessageList`, {
       method: "POST",
       headers: rapidHeaders(key),
       body: JSON.stringify({ email }),

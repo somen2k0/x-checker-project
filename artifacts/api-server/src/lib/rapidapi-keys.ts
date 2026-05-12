@@ -1,35 +1,35 @@
 // ── RapidAPI key pool — round-robin rotation ──────────────────────────────────
-// Reads keys from env: RAPIDAPI_KEY, RAPIDAPI_KEY_1 … RAPIDAPI_KEY_20
-// Scans all 20 slots so gaps (e.g. KEY_1, KEY_3 but no KEY_2) are handled.
+// Add all your RapidAPI keys below. The system will rotate through them
+// automatically after every request. If one hits a rate limit (429) it skips
+// to the next key automatically so you never get blocked.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const HARDCODED_KEYS: string[] = [
+  "bbea6a9443mshdfc8d058f9d97efp1571dajsndb43135538fa", // key 1
+  // "paste_your_second_key_here",                       // key 2
+  // "paste_your_third_key_here",                        // key 3
+  // "paste_your_fourth_key_here",                       // key 4
+  // "paste_your_fifth_key_here",                        // key 5
+  // "paste_your_sixth_key_here",                        // key 6
+  // "paste_your_seventh_key_here",                      // key 7
+  // "paste_your_eighth_key_here",                       // key 8
+  // "paste_your_ninth_key_here",                        // key 9
+  // "paste_your_tenth_key_here",                        // key 10
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+let _index = 0;
 
 export function getRapidApiKeys(): string[] {
-  const seen = new Set<string>();
-  const keys: string[] = [];
-
-  const plain = process.env["RAPIDAPI_KEY"];
-  if (plain?.trim() && !seen.has(plain.trim())) {
-    seen.add(plain.trim());
-    keys.push(plain.trim());
-  }
-
-  for (let i = 1; i <= 20; i++) {
-    const k = process.env[`RAPIDAPI_KEY_${i}`];
-    if (k?.trim() && !seen.has(k.trim())) {
-      seen.add(k.trim());
-      keys.push(k.trim());
-    }
-  }
-
-  return keys;
+  return HARDCODED_KEYS.filter((k) => k.trim().length > 0);
 }
 
 export function hasRapidApiKeys(): boolean {
   return getRapidApiKeys().length > 0;
 }
 
-let _index = 0;
-
-/** Returns the next key in the round-robin pool, or null if no keys are set. */
+/** Returns the next key in round-robin order. */
 export function getNextRapidApiKey(): string | null {
   const keys = getRapidApiKeys();
   if (keys.length === 0) return null;
@@ -39,8 +39,8 @@ export function getNextRapidApiKey(): string | null {
 }
 
 /**
- * Calls `fn` with successive keys until one succeeds or all are exhausted.
- * Returns { res, exhausted } — if exhausted, all keys returned 429/401.
+ * Tries each key in round-robin order. Skips to the next key on 429/401.
+ * Returns on first success, or the last failed response if all keys exhausted.
  */
 export async function fetchWithKeyRotation(
   fn: (key: string) => Promise<Response>
@@ -75,7 +75,10 @@ export async function fetchWithKeyRotation(
   }
 
   return {
-    res: lastRes ?? new Response(JSON.stringify({ error: "all_keys_exhausted" }), { status: 429 }),
+    res: lastRes ?? new Response(
+      JSON.stringify({ error: "All RapidAPI keys are rate-limited. Add more keys to the pool." }),
+      { status: 429 }
+    ),
     exhausted: true,
   };
 }

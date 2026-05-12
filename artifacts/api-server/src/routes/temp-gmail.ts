@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { hasRapidApiKeys, fetchWithKeyRotation } from "../lib/rapidapi-keys";
+import { fetchWithKeyRotation } from "../lib/rapidapi-keys";
 
 const router = Router();
 
@@ -14,28 +14,12 @@ function rapidHeaders(key: string): Record<string, string> {
   };
 }
 
-// eType mapping: 1=random, 2=dot trick, 3=plus trick, 4=googlemail
-const ETYPE_MAP: Record<string, number[]> = {
-  dot:        [2],
-  plus:       [3],
-  googlemail: [4],
-  any:        [1, 2, 3],
-};
-
 router.post("/temp-gmail/generate", async (req, res) => {
-  if (!hasRapidApiKeys()) {
-    res.status(503).json({ error: "Gmailnator API not configured. Please add RAPIDAPI_KEY_1 (and optionally RAPIDAPI_KEY_2 … RAPIDAPI_KEY_N) as environment variables." });
-    return;
-  }
-
-  const { type } = req.body as { type?: string };
-  const eType = ETYPE_MAP[type ?? "any"] ?? [1, 2, 3];
-
   const { res: apiRes, exhausted } = await fetchWithKeyRotation((key) =>
-    fetch(`${BASE_URL}/generateEmail`, {
+    fetch(`${BASE_URL}/api/emails/generate`, {
       method: "POST",
       headers: rapidHeaders(key),
-      body: JSON.stringify({ prefixList: [], eType }),
+      body: JSON.stringify({}),
       signal: AbortSignal.timeout(12000),
     })
   );
@@ -45,7 +29,7 @@ router.post("/temp-gmail/generate", async (req, res) => {
       res.status(429).json({ error: "All RapidAPI keys are rate-limited. Please wait a moment or add more keys." });
       return;
     }
-    req.log.warn({ status: apiRes.status }, "Gmailnator generateEmail failed");
+    req.log.warn({ status: apiRes.status }, "Gmailnator generate failed");
     res.status(502).json({ error: "Failed to generate email address." });
     return;
   }
@@ -56,7 +40,7 @@ router.post("/temp-gmail/generate", async (req, res) => {
     return;
   }
 
-  res.json({ email: data.email, type: type ?? "any" });
+  res.json({ email: data.email });
 });
 
 router.post("/temp-gmail/messages", async (req, res) => {
@@ -67,13 +51,8 @@ router.post("/temp-gmail/messages", async (req, res) => {
     return;
   }
 
-  if (!hasRapidApiKeys()) {
-    res.status(503).json({ error: "Gmailnator API not configured." });
-    return;
-  }
-
   const { res: apiRes, exhausted } = await fetchWithKeyRotation((key) =>
-    fetch(`${BASE_URL}/getMessages`, {
+    fetch(`${BASE_URL}/api/emails/getMessageList`, {
       method: "POST",
       headers: rapidHeaders(key),
       body: JSON.stringify({ email }),
@@ -103,13 +82,8 @@ router.post("/temp-gmail/message", async (req, res) => {
     return;
   }
 
-  if (!hasRapidApiKeys()) {
-    res.status(503).json({ error: "Gmailnator API not configured." });
-    return;
-  }
-
   const { res: apiRes, exhausted } = await fetchWithKeyRotation((key) =>
-    fetch(`${BASE_URL}/getMessage`, {
+    fetch(`${BASE_URL}/api/emails/get-message`, {
       method: "POST",
       headers: rapidHeaders(key),
       body: JSON.stringify({ email, mid }),
