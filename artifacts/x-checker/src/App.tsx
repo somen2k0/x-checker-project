@@ -37,6 +37,7 @@ import PlainTextFormatter from "@/pages/tools/plain-text-formatter";
 import EmailCharacterCounter from "@/pages/tools/email-character-counter";
 import EmailSignatureGenerator from "@/pages/tools/email-signature-generator";
 import EmailValidator from "@/pages/tools/email-validator";
+import TempGmail from "@/pages/tools/temp-gmail";
 // Category pages
 import AiWritingTools from "@/pages/categories/ai-writing-tools";
 import SocialMediaTools from "@/pages/categories/social-media-tools";
@@ -84,6 +85,7 @@ function TrackedRouter() {
       <Route path="/tools/email-character-counter" component={EmailCharacterCounter} />
       <Route path="/tools/email-signature-generator" component={EmailSignatureGenerator} />
       <Route path="/tools/email-validator" component={EmailValidator} />
+      <Route path="/tools/temp-gmail" component={TempGmail} />
 
       {/* Category landing pages */}
       <Route path="/ai-writing-tools" component={AiWritingTools} />
