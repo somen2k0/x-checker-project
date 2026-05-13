@@ -1,6 +1,12 @@
 import { useState, useMemo } from "react";
 import { useLocation, Link } from "wouter";
-import { Home, Wrench, Info, Search, X, ChevronRight, Sparkles, Users, Type, Code2, TrendingUp, AtSign, Smile, Briefcase, Palette, Hash, MessageSquare as MessageSquareIcon, BarChart2, FileJson, Lock, Link2, Globe, Mail, ShieldCheck, Pencil, Inbox } from "lucide-react";
+import {
+  Home, Wrench, Info, Search, X, ChevronRight,
+  Sparkles, Users, Type, Code2, TrendingUp, AtSign, Smile, Briefcase, Palette,
+  Hash, MessageSquare as MessageSquareIcon, BarChart2, FileJson, Lock, Link2,
+  Globe, Mail, ShieldCheck, Pencil, Inbox, Minimize2, KeyRound, Database,
+  Shuffle, Shield, Tag, FileText, BarChart,
+} from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -35,7 +41,7 @@ const TOOL_CATEGORIES = [
     tools: [
       { icon: Search, label: "Account Checker", desc: "Bulk-check 100 X accounts", href: "/tools?tab=checker", badge: "Popular" },
       { icon: Link2, label: "Profile Link Generator", desc: "Convert usernames to links", href: "/tools?tab=links" },
-      { icon: AtSign, label: "@ Formatter", desc: "Add/remove @ prefix in bulk", href: "/tools?tab=at" },
+      { icon: AtSign, label: "Handle Formatter", desc: "Add/remove @ prefix in bulk", href: "/tools?tab=at" },
       { icon: AtSign, label: "Username Generator", desc: "Unique X handle ideas", href: "/tools/username-generator" },
       { icon: Users, label: "Display Name Ideas", desc: "Curated X display names", href: "/tools/name-ideas" },
     ],
@@ -60,8 +66,15 @@ const TOOL_CATEGORIES = [
     color: "text-orange-400",
     bg: "bg-orange-400/10 border-orange-400/20",
     tools: [
-      { icon: FileJson, label: "JSON Formatter", desc: "Format, minify & validate JSON", href: "/tools/json-formatter", badge: "New" },
-      { icon: Lock, label: "Base64 Encoder", desc: "Encode/decode with Unicode", href: "/tools/base64", badge: "New" },
+      { icon: FileJson, label: "JSON Formatter", desc: "Format, minify & validate JSON", href: "/tools/json-formatter", badge: "Popular" },
+      { icon: Lock, label: "Base64 Encoder / Decoder", desc: "Encode/decode Base64 with Unicode", href: "/tools/base64" },
+      { icon: Link2, label: "URL Encoder / Decoder", desc: "Percent-encode and decode URLs", href: "/tools/url-encoder" },
+      { icon: Minimize2, label: "CSS Minifier", desc: "Minify CSS files instantly", href: "/tools/css-minifier" },
+      { icon: Code2, label: "HTML Formatter", desc: "Prettify & indent HTML", href: "/tools/html-formatter" },
+      { icon: KeyRound, label: "JWT Decoder", desc: "Decode & inspect JWT tokens", href: "/tools/jwt-decoder", badge: "New" },
+      { icon: BarChart, label: "Regex Tester", desc: "Test regular expressions live", href: "/tools/regex-tester", badge: "New" },
+      { icon: Database, label: "SQL Formatter", desc: "Format & beautify SQL queries", href: "/tools/sql-formatter", badge: "New" },
+      { icon: Shuffle, label: "UUID Generator", desc: "Generate v4 UUIDs in bulk", href: "/tools/uuid-generator" },
     ],
   },
   {
@@ -71,9 +84,11 @@ const TOOL_CATEGORIES = [
     color: "text-pink-400",
     bg: "bg-pink-400/10 border-pink-400/20",
     tools: [
-      { icon: Globe, label: "Meta Tag Checker", desc: "Optimize meta titles & descriptions", href: "#", badge: "Soon" },
-      { icon: TrendingUp, label: "Keyword Density", desc: "Check keyword frequency", href: "#", badge: "Soon" },
-      { icon: Link2, label: "URL Slug Generator", desc: "Clean, SEO-friendly slugs", href: "#", badge: "Soon" },
+      { icon: Globe, label: "Meta Tag Generator", desc: "Optimise meta titles & descriptions", href: "/tools/meta-tag-generator", badge: "New" },
+      { icon: Link2, label: "URL Slug Generator", desc: "Clean, SEO-friendly slugs", href: "/tools/url-slug-generator", badge: "New" },
+      { icon: TrendingUp, label: "Keyword Density", desc: "Check keyword frequency", href: "/tools/keyword-density", badge: "New" },
+      { icon: Shield, label: "Robots.txt Generator", desc: "Generate robots.txt rules", href: "/tools/robots-txt-generator", badge: "New" },
+      { icon: Tag, label: "Sitemap Validator", desc: "Validate XML sitemaps", href: "/tools/sitemap-validator", badge: "New" },
     ],
   },
   {
@@ -83,11 +98,13 @@ const TOOL_CATEGORIES = [
     color: "text-cyan-400",
     bg: "bg-cyan-400/10 border-cyan-400/20",
     tools: [
-      { icon: Inbox, label: "Temp Gmail", desc: "Disposable Gmail inbox, one click", href: "/tools/temp-gmail", badge: "New" },
+      { icon: Inbox, label: "Temp Email", desc: "Disposable throwaway inbox", href: "/tools/temp-mail/disposable", badge: "New" },
+      { icon: Mail, label: "Temp Gmail", desc: "Real temporary Gmail address", href: "/tools/temp-mail/tempgmail", badge: "New" },
+      { icon: Hash, label: "Gmail Tricks", desc: "Dot & plus-tag address variants", href: "/tools/temp-mail/gmail-tricks" },
       { icon: Pencil, label: "Subject Line Generator", desc: "AI-powered subject lines", href: "/tools/subject-line-generator" },
       { icon: ShieldCheck, label: "Email Validator", desc: "Validate format & MX records", href: "/tools/email-validator" },
       { icon: Mail, label: "Email Signature Generator", desc: "Professional email signature builder", href: "/tools/email-signature-generator" },
-      { icon: Mail, label: "Plain Text Formatter", desc: "Convert HTML email to plain text", href: "/tools/plain-text-formatter" },
+      { icon: FileText, label: "Plain Text Formatter", desc: "Convert HTML email to plain text", href: "/tools/plain-text-formatter" },
     ],
   },
 ];
@@ -171,7 +188,7 @@ export function MobileNav() {
 
       {/* Tools Drawer */}
       <Sheet open={drawerOpen} onOpenChange={(v) => { setDrawerOpen(v); if (!v) setSearch(""); }}>
-        <SheetContent side="bottom" className="h-[85dvh] rounded-t-2xl px-0 pb-20 flex flex-col">
+        <SheetContent side="bottom" className="h-[85dvh] rounded-t-2xl px-0 pb-20 flex flex-col [&>button]:hidden">
           <SheetHeader className="px-4 pt-2 pb-3 border-b border-border/50 shrink-0">
             <div className="flex items-center justify-between">
               <SheetTitle className="text-base font-semibold flex items-center gap-2">
@@ -254,7 +271,7 @@ export function MobileNav() {
               </div>
             ) : (
               /* Category accordion */
-              <Accordion type="multiple" defaultValue={["ai-writing", "social-media"]} className="space-y-2">
+              <Accordion type="multiple" defaultValue={["social-media", "developer"]} className="space-y-2">
                 {TOOL_CATEGORIES.map((cat) => {
                   const CatIcon = cat.icon;
                   const liveCount = cat.tools.filter((t) => t.badge !== "Soon" && t.href !== "#").length;
