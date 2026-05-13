@@ -400,6 +400,8 @@ function DisposableInboxTab() {
 
 // ── Tab 2: Temp Gmail (Gmailnator via RapidAPI) ────────────────────
 
+const GMAIL_REFRESH_MS = 15000;
+
 function TempGmailTab() {
   const [email, setEmail] = useState<string | null>(null);
   const [messages, setMessages] = useState<GmailnatorMessage[]>([]);
@@ -411,24 +413,12 @@ function TempGmailTab() {
   const [error, setError] = useState<string | null>(null);
   const [apiMissing, setApiMissing] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [countdown, setCountdown] = useState(GMAIL_REFRESH_MS / 1000);
   const { toast } = useToast();
   const initialized = useRef(false);
-
-  const generate = useCallback(async () => {
-    setGenerating(true); setError(null); setApiMissing(false); setEmail(null); setMessages([]); setSelected(null); setSelectedMid(null);
-    try {
-      const r = await fetch("/api/temp-gmail/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "any" }),
-      });
-      const d = await r.json() as { email?: string; error?: string };
-      if (r.status === 503) { setApiMissing(true); setError(d.error ?? "Gmailnator API not configured."); return; }
-      if (!r.ok || !d.email) { setError(d.error ?? "Failed to generate address."); return; }
-      setEmail(d.email);
-    } catch { setError("Network error. Please try again."); }
-    finally { setGenerating(false); }
-  }, []);
+  const refreshTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const emailRef = useRef<string | null>(null);
 
   const fetchMessages = useCallback(async (addr: string, silent = false) => {
     if (!silent) setLoadingMsgs(true);
@@ -460,6 +450,44 @@ function TempGmailTab() {
     finally { if (!silent) setLoadingMsgs(false); }
   }, []);
 
+  const stopPolling = useCallback(() => {
+    if (refreshTimer.current) { clearInterval(refreshTimer.current); refreshTimer.current = null; }
+    if (countdownTimer.current) { clearInterval(countdownTimer.current); countdownTimer.current = null; }
+  }, []);
+
+  const startPolling = useCallback((addr: string) => {
+    stopPolling();
+    setCountdown(GMAIL_REFRESH_MS / 1000);
+    refreshTimer.current = setInterval(() => {
+      if (emailRef.current) fetchMessages(emailRef.current, true);
+      setCountdown(GMAIL_REFRESH_MS / 1000);
+    }, GMAIL_REFRESH_MS);
+    countdownTimer.current = setInterval(() => {
+      setCountdown((c) => (c <= 1 ? GMAIL_REFRESH_MS / 1000 : c - 1));
+    }, 1000);
+  }, [fetchMessages, stopPolling]);
+
+  const generate = useCallback(async () => {
+    stopPolling();
+    setGenerating(true); setError(null); setApiMissing(false); setEmail(null); setMessages([]); setSelected(null); setSelectedMid(null);
+    emailRef.current = null;
+    try {
+      const r = await fetch("/api/temp-gmail/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "any" }),
+      });
+      const d = await r.json() as { email?: string; error?: string };
+      if (r.status === 503) { setApiMissing(true); setError(d.error ?? "Gmailnator API not configured."); return; }
+      if (!r.ok || !d.email) { setError(d.error ?? "Failed to generate address."); return; }
+      emailRef.current = d.email;
+      setEmail(d.email);
+      await fetchMessages(d.email);
+      startPolling(d.email);
+    } catch { setError("Network error. Please try again."); }
+    finally { setGenerating(false); }
+  }, [fetchMessages, startPolling, stopPolling]);
+
   const openMessage = async (msg: GmailnatorMessage) => {
     if (!email) return;
     setSelectedMid(msg.mid);
@@ -479,7 +507,6 @@ function TempGmailTab() {
         const d = await r.json() as GmailnatorFullMessage;
         setSelected({ ...d, from: d.from ?? msg.from, subject: d.subject ?? msg.subject, date: msg.date });
       } else {
-        // Fallback: show metadata without body
         setSelected({ content: "", from: msg.from, subject: msg.subject, date: msg.date });
       }
     } catch {
@@ -499,6 +526,8 @@ function TempGmailTab() {
     initialized.current = true;
     generate();
   }, [generate]);
+
+  useEffect(() => () => stopPolling(), [stopPolling]);
 
   return (
     <div className="space-y-4">
@@ -521,10 +550,15 @@ function TempGmailTab() {
             )}
           </div>
           {email && (
-            <button onClick={() => generate()} disabled={generating}
-              className="h-8 w-8 rounded-lg border border-border/60 bg-muted/30 hover:bg-muted/60 flex items-center justify-center transition-colors shrink-0 mt-0.5 disabled:opacity-40">
-              <Shuffle className="h-4 w-4 text-muted-foreground" />
-            </button>
+            <div className="flex items-center gap-2 shrink-0 mt-0.5">
+              <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <Clock className="h-3 w-3" />{countdown}s
+              </div>
+              <button onClick={() => generate()} disabled={generating}
+                className="h-8 w-8 rounded-lg border border-border/60 bg-muted/30 hover:bg-muted/60 flex items-center justify-center transition-colors disabled:opacity-40">
+                <Shuffle className="h-4 w-4 text-muted-foreground" />
+              </button>
+            </div>
           )}
         </div>
 
@@ -594,7 +628,7 @@ function TempGmailTab() {
                 <div className="flex flex-col items-center justify-center py-8 gap-2 text-center px-4">
                   <MailOpen className="h-7 w-7 text-muted-foreground/20" />
                   <p className="text-sm text-muted-foreground/60">No messages yet</p>
-                  <p className="text-xs text-muted-foreground/40">Click "Check Inbox" after sending an email</p>
+                  <p className="text-xs text-muted-foreground/40">Send an email here — inbox checks automatically every {GMAIL_REFRESH_MS / 1000}s</p>
                 </div>
               )}
               {messages.map((msg) => (
