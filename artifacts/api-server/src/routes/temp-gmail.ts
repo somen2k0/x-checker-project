@@ -26,57 +26,37 @@ const ETYPE_MAP: Record<string, number[]> = {
   any:        [1, 2, 3, 4],
 };
 
-const MAX_RETRIES = 5;
-const ALLOWED_DOMAINS = new Set(["gmail.com", "googlemail.com"]);
-
-function isAllowedEmail(email: string): boolean {
-  const domain = email.split("@")[1]?.toLowerCase();
-  return !!domain && ALLOWED_DOMAINS.has(domain);
-}
-
 router.post("/temp-gmail/generate", async (req, res) => {
   const { type } = req.body as { type?: string };
   const resolvedType = type ?? "any";
   const eType = ETYPE_MAP[resolvedType] ?? ETYPE_MAP["any"];
 
-  let lastEmail: string | null = null;
+  const { res: apiRes, exhausted } = await fetchWithKeyRotation((key) =>
+    fetch(`${BASE_URL}/api/emails/generate`, {
+      method: "POST",
+      headers: rapidHeaders(key),
+      body: JSON.stringify({ eType }),
+      signal: AbortSignal.timeout(12000),
+    })
+  );
 
-  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    const { res: apiRes, exhausted } = await fetchWithKeyRotation((key) =>
-      fetch(`${BASE_URL}/api/emails/generate`, {
-        method: "POST",
-        headers: rapidHeaders(key),
-        body: JSON.stringify({ eType }),
-        signal: AbortSignal.timeout(12000),
-      })
-    );
-
-    if (!apiRes.ok) {
-      if (exhausted || apiRes.status === 429) {
-        res.status(429).json({ error: "All RapidAPI keys are rate-limited. Please wait a moment or add more keys." });
-        return;
-      }
-      req.log.warn({ status: apiRes.status, attempt }, "Gmailnator generate failed");
-      res.status(502).json({ error: "Failed to generate email address." });
+  if (!apiRes.ok) {
+    if (exhausted || apiRes.status === 429) {
+      res.status(429).json({ error: "All RapidAPI keys are rate-limited. Please wait a moment or add more keys." });
       return;
     }
-
-    const data = await apiRes.json() as { email?: string; status?: string };
-    if (!data.email) {
-      res.status(502).json({ error: "Invalid response from Gmailnator API." });
-      return;
-    }
-
-    lastEmail = data.email;
-
-    if (isAllowedEmail(data.email)) {
-      res.json({ email: data.email, type: resolvedType });
-      return;
-    }
+    req.log.warn({ status: apiRes.status }, "Gmailnator generate failed");
+    res.status(502).json({ error: "Failed to generate email address." });
+    return;
   }
 
-  // All retries exhausted — return whatever Gmailnator last gave us
-  res.json({ email: lastEmail, type: resolvedType });
+  const data = await apiRes.json() as { email?: string; status?: string };
+  if (!data.email) {
+    res.status(502).json({ error: "Invalid response from Gmailnator API." });
+    return;
+  }
+
+  res.json({ email: data.email, type: resolvedType });
 });
 
 router.post("/temp-gmail/messages", async (req, res) => {
