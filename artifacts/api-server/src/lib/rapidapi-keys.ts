@@ -41,7 +41,11 @@ function isCooling(key: string): boolean {
 }
 
 export function getRapidApiKeys(): string[] {
-  return HARDCODED_KEYS.filter((k) => k.trim().length > 0);
+  const envKeys = (process.env.RAPIDAPI_KEYS ?? "")
+    .split(",")
+    .map((k) => k.trim())
+    .filter((k) => k.length > 0);
+  return [...envKeys, ...HARDCODED_KEYS].filter((k) => k.trim().length > 0);
 }
 
 export function hasRapidApiKeys(): boolean {

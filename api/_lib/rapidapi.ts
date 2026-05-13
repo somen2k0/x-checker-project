@@ -25,7 +25,12 @@ export const BASE_URL = `https://${RAPIDAPI_HOST}`;
 let _counter = 0;
 
 export function getKeys(): string[] {
-  return HARDCODED_KEYS.filter((k) => k.trim().length > 0);
+  const envKeys = (process.env.RAPIDAPI_KEYS ?? "")
+    .split(",")
+    .map((k) => k.trim())
+    .filter((k) => k.length > 0);
+  const combined = [...envKeys, ...HARDCODED_KEYS].filter((k) => k.trim().length > 0);
+  return combined;
 }
 
 export function hasKeys(): boolean {
