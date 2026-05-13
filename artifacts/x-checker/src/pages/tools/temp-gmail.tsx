@@ -1,5 +1,4 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { useLocation } from "wouter";
 import { MiniToolLayout } from "@/components/layout/MiniToolLayout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -864,63 +863,53 @@ function GmailTricksTab() {
   );
 }
 
-// ── Tab → URL mapping ──────────────────────────────────────────────
+// ── Per-tab page config ─────────────────────────────────────────────
 
-const TAB_URLS: Record<Tab, string> = {
-  disposable: "/tools/temp-mail/disposable",
-  tempgmail:  "/tools/temp-mail/tempgmail",
-  gmail:      "/tools/temp-mail/gmail-tricks",
+const TAB_CONFIG: Record<Tab, { seoTitle: string; seoDescription: string; icon: typeof Inbox; title: string; description: string }> = {
+  disposable: {
+    seoTitle: "Disposable Inbox — Free Throwaway Email Address",
+    seoDescription: "Generate a free disposable email address instantly. No signup required. Switch domains and create custom usernames.",
+    icon: Inbox,
+    title: "Disposable Inbox",
+    description: "Instant throwaway email address with domain switching and custom usernames — no signup required.",
+  },
+  tempgmail: {
+    seoTitle: "Temp Gmail — Temporary Gmail Address Generator",
+    seoDescription: "Generate a real temporary Gmail address via Gmailnator. Receive emails without giving out your real Gmail.",
+    icon: Mail,
+    title: "Temp Gmail",
+    description: "Generate a real temporary Gmail address and check its inbox — powered by Gmailnator, no signup needed.",
+  },
+  gmail: {
+    seoTitle: "Gmail Tricks — Dot & Plus-Tag Address Generator",
+    seoDescription: "Generate Gmail dot trick and plus-tag variants from your address. Use them to filter and track emails.",
+    icon: Hash,
+    title: "Gmail Tricks",
+    description: "Generate unlimited Gmail dot-trick and plus-tag variants from your real address — all land in the same inbox.",
+  },
 };
 
 // ── Main Page ──────────────────────────────────────────────────────
 
 export default function TempMail({ defaultTab = "disposable" }: { defaultTab?: Tab }) {
-  const [tab, setTab] = useState<Tab>(defaultTab);
-  const [, navigate] = useLocation();
   useToolView("temp-mail");
-
-  function switchTab(key: Tab) {
-    setTab(key);
-    navigate(TAB_URLS[key]);
-  }
-
-  const TABS = [
-    { key: "disposable" as Tab, label: "Disposable Inbox", icon: Inbox, color: "text-cyan-400" },
-    { key: "tempgmail" as Tab, label: "Temp Gmail", icon: Mail, color: "text-red-400" },
-    { key: "gmail" as Tab, label: "Gmail Tricks", icon: Hash, color: "" },
-  ];
+  const cfg = TAB_CONFIG[defaultTab];
 
   return (
     <MiniToolLayout
-      seoTitle="Temp Mail — Disposable Email & Gmail Tricks"
-      seoDescription="Free temporary email with domain switching and custom usernames. Plus Gmail dot trick and plus-tag generator — all free, no signup required."
-      icon={Inbox}
+      seoTitle={cfg.seoTitle}
+      seoDescription={cfg.seoDescription}
+      icon={cfg.icon}
       badge="Email Tool"
-      title="Temp Mail"
-      description="Disposable inbox with domain switching and custom usernames. Plus Gmail dot & plus-tag tricks — all free, no signup."
+      title={cfg.title}
+      description={cfg.description}
       faqs={faqs}
       relatedTools={relatedTools}
       affiliateCategory="growth"
     >
-      <div className="space-y-4">
-        {/* Tab switcher */}
-        <div className="flex gap-1 p-1 bg-muted/40 border border-border/60 rounded-xl w-fit flex-wrap">
-          {TABS.map(({ key, label, icon: Icon, color }) => (
-            <button
-              key={key}
-              onClick={() => switchTab(key)}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center gap-2 ${tab === key ? "bg-background border border-border/60 text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-            >
-              <Icon className={`h-3.5 w-3.5 ${color}`} />
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {tab === "disposable" && <DisposableInboxTab />}
-        {tab === "tempgmail" && <TempGmailTab />}
-        {tab === "gmail" && <GmailTricksTab />}
-      </div>
+      {defaultTab === "disposable" && <DisposableInboxTab />}
+      {defaultTab === "tempgmail" && <TempGmailTab />}
+      {defaultTab === "gmail" && <GmailTricksTab />}
     </MiniToolLayout>
   );
 }
