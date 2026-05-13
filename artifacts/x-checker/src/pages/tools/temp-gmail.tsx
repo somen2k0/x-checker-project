@@ -407,7 +407,7 @@ function TempGmailTab() {
   const [selectedMid, setSelectedMid] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
-  const [loadingMsg] = useState(false);
+  const [loadingMsg, setLoadingMsg] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [apiMissing, setApiMissing] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -438,21 +438,44 @@ function TempGmailTab() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: addr }),
       });
+      const d = await r.json() as { messages?: GmailnatorMessage[]; error?: string };
       if (r.ok) {
-        const d = await r.json() as { messages: GmailnatorMessage[] };
         setMessages(d.messages ?? []);
+        setError(null);
+      } else if (r.status === 429) {
+        setError("API quota reached for today — inbox will work again tomorrow. Your address is still valid.");
+      } else {
+        setError(d.error ?? "Failed to check inbox.");
       }
-    } catch {} finally { if (!silent) setLoadingMsgs(false); }
+    } catch { setError("Network error. Please try again."); }
+    finally { if (!silent) setLoadingMsgs(false); }
   }, []);
 
-  const openMessage = (msg: GmailnatorMessage) => {
+  const openMessage = async (msg: GmailnatorMessage) => {
+    if (!email) return;
     setSelectedMid(msg.mid);
-    setSelected({
-      content: msg.content ?? "",
-      from:    msg.from,
-      subject: msg.subject,
-      date:    msg.date,
-    });
+    // If the list already carries content, show immediately; otherwise fetch
+    if (msg.content) {
+      setSelected({ content: msg.content, from: msg.from, subject: msg.subject, date: msg.date });
+      return;
+    }
+    setLoadingMsg(true); setSelected(null);
+    try {
+      const r = await fetch("/api/temp-gmail/message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, mid: msg.mid }),
+      });
+      if (r.ok) {
+        const d = await r.json() as GmailnatorFullMessage;
+        setSelected({ ...d, from: d.from ?? msg.from, subject: d.subject ?? msg.subject, date: msg.date });
+      } else {
+        // Fallback: show metadata without body
+        setSelected({ content: "", from: msg.from, subject: msg.subject, date: msg.date });
+      }
+    } catch {
+      setSelected({ content: "", from: msg.from, subject: msg.subject, date: msg.date });
+    } finally { setLoadingMsg(false); }
   };
 
   const copyAddress = () => {
@@ -594,7 +617,11 @@ function TempGmailTab() {
                   {selected.content ? (
                     <div className="prose prose-invert prose-sm max-w-none text-sm" dangerouslySetInnerHTML={{ __html: selected.content }} />
                   ) : (
-                    <p className="text-sm text-muted-foreground">(Empty message)</p>
+                    <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
+                      <MailOpen className="h-7 w-7 text-muted-foreground/20" />
+                      <p className="text-sm text-muted-foreground/60">Message body unavailable</p>
+                      <p className="text-xs text-muted-foreground/40">The API provider doesn't expose message content on the free plan</p>
+                    </div>
                   )}
                 </div>
               </>

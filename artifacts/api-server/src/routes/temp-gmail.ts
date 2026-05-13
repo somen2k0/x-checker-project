@@ -87,10 +87,10 @@ router.post("/temp-gmail/messages", async (req, res) => {
   }
 
   type RawMsg = {
-    message_id?: string; mid?: string;
+    id?: string; message_id?: string; mid?: string;
     from?: string; sender?: string;
     subject?: string;
-    date?: string; timestamp?: string;
+    date?: string; timestamp?: number | string; time_ago?: string;
     content?: string; body?: string; text?: string;
   };
   type InboxResponse = {
@@ -109,23 +109,52 @@ router.post("/temp-gmail/messages", async (req, res) => {
 
   const rawMessages: RawMsg[] = Array.isArray(raw) ? raw : (raw.messages ?? []);
   const messages = rawMessages.map((m) => ({
-    mid:     m.message_id ?? m.mid ?? "",
-    from:    m.from ?? m.sender ?? "",
-    subject: m.subject ?? "",
-    date:    m.date ?? m.timestamp ?? "",
-    content: m.content ?? m.body ?? m.text ?? "",
+    mid:      m.id ?? m.message_id ?? m.mid ?? "",
+    from:     m.from ?? m.sender ?? "",
+    subject:  m.subject ?? "",
+    date:     m.time_ago ?? (m.date ?? (m.timestamp ? String(m.timestamp) : "")),
+    content:  m.content ?? m.body ?? m.text ?? "",
   }));
 
   res.json({ messages });
 });
 
-// The Gmailnator API no longer exposes a separate single-message endpoint.
-// Message content is now embedded in the inbox list response above.
-// This route is kept for backward compatibility but returns a 404 notice.
-router.post("/temp-gmail/message", (_req, res) => {
-  res.status(404).json({
-    error: "Individual message endpoint no longer available. Message content is included in the inbox list.",
-  });
+// Attempt to fetch individual message content by calling /api/inbox with the
+// message id — Gmailnator may return the full body for a single message this way.
+router.post("/temp-gmail/message", async (req, res) => {
+  const { email, mid } = req.body as { email?: string; mid?: string };
+  if (!email || !mid) {
+    res.status(400).json({ error: "email and mid are required." });
+    return;
+  }
+
+  const { res: apiRes, exhausted } = await fetchWithKeyRotation((key) =>
+    fetch(`${BASE_URL}/api/inbox`, {
+      method: "POST",
+      headers: rapidHeaders(key),
+      body: JSON.stringify({ email, id: mid }),
+      signal: AbortSignal.timeout(12000),
+    })
+  );
+
+  if (!apiRes.ok) {
+    if (exhausted || apiRes.status === 429) {
+      res.status(429).json({ error: "Rate-limited. Please wait a moment." });
+      return;
+    }
+    res.status(502).json({ error: "Failed to fetch message content." });
+    return;
+  }
+
+  type InboxResp = { status?: string; messages?: Array<{ content?: string; body?: string; from?: string; subject?: string; time_ago?: string }> };
+  let data: InboxResp | null = null;
+  try { data = await apiRes.json() as InboxResp; } catch { /**/ }
+
+  const msgs = Array.isArray(data) ? data : (data?.messages ?? []);
+  const first = (msgs as Array<{ content?: string; body?: string; from?: string; subject?: string; time_ago?: string }>)[0];
+  const content = first?.content ?? first?.body ?? "";
+
+  res.json({ content, from: first?.from, subject: first?.subject });
 });
 
 export default router;
