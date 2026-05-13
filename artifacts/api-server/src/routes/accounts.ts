@@ -1,14 +1,21 @@
 import { Router, type IRouter } from "express";
 import { CheckAccountsBody } from "@workspace/api-zod";
 import { logger } from "../lib/logger";
+import { getConfig } from "../lib/config-db";
 
 const router: IRouter = Router();
 
 const UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
-const BEARER =
+const DEFAULT_BEARER =
   "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA";
+
+async function getBearer(): Promise<string> {
+  return (await getConfig("twitter_bearer_token"))
+    ?? process.env.TWITTER_BEARER_TOKEN
+    ?? DEFAULT_BEARER;
+}
 
 const GRAPHQL_FEATURES = JSON.stringify({
   hidden_profile_subscriptions_enabled: true,
@@ -41,10 +48,11 @@ async function getGuestToken(): Promise<string> {
     return cachedGuestToken;
   }
 
+  const bearer = await getBearer();
   const res = await fetch("https://api.twitter.com/1.1/guest/activate.json", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${BEARER}`,
+      Authorization: `Bearer ${bearer}`,
       "User-Agent": UA,
     },
     signal: AbortSignal.timeout(8000),
@@ -67,7 +75,8 @@ async function getGuestToken(): Promise<string> {
 
 async function checkXAccount(
   username: string,
-  guestToken: string
+  guestToken: string,
+  bearer: string,
 ): Promise<AccountCheckResult> {
   const base: AccountCheckResult = {
     username,
@@ -90,7 +99,7 @@ async function checkXAccount(
 
     const res = await fetch(url, {
       headers: {
-        Authorization: `Bearer ${BEARER}`,
+        Authorization: `Bearer ${bearer}`,
         "x-guest-token": guestToken,
         "User-Agent": UA,
         "x-twitter-active-user": "yes",
@@ -192,6 +201,8 @@ router.post("/check-accounts", async (req, res): Promise<void> => {
 
   req.log.info({ count: cleanedUsernames.length }, "Checking X accounts");
 
+  const bearer = await getBearer();
+
   let guestToken: string;
   try {
     guestToken = await getGuestToken();
@@ -204,7 +215,7 @@ router.post("/check-accounts", async (req, res): Promise<void> => {
   }
 
   const results = await Promise.all(
-    cleanedUsernames.map((username) => checkXAccount(username, guestToken))
+    cleanedUsernames.map((username) => checkXAccount(username, guestToken, bearer))
   );
 
   res.json({ results });
