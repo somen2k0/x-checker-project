@@ -675,26 +675,28 @@ function TempGmailTab() {
                   {selected.content ? (
                     <div className="prose prose-invert prose-sm max-w-none text-sm" dangerouslySetInnerHTML={{ __html: selected.content }} />
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-8 gap-3 text-center px-4">
-                      <div className="h-11 w-11 rounded-xl bg-muted/40 border border-border/50 flex items-center justify-center">
-                        <MailOpen className="h-5 w-5 text-muted-foreground/40" />
+                    <div className="flex flex-col items-center justify-center py-8 gap-4 text-center px-4">
+                      <div className="h-12 w-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                        <ExternalLink className="h-5 w-5 text-red-400/60" />
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground/70">Message body not returned by API</p>
-                        <p className="text-xs text-muted-foreground/40 mt-1 leading-relaxed">
-                          Gmailnator may not expose the full body for this message.<br />
-                          Open Gmail to read it directly.
+                      <div className="space-y-1">
+                        <p className="text-sm font-semibold text-foreground/80">Read this message on Gmailnator</p>
+                        <p className="text-xs text-muted-foreground/50 leading-relaxed max-w-56">
+                          The API doesn't include message bodies on the free plan. Open the Gmailnator website to read the full content.
                         </p>
                       </div>
                       <a
-                        href="https://mail.google.com/"
+                        href={`https://www.gmailnator.com/inbox/#email=${encodeURIComponent(email ?? "")}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors rounded-lg px-3 py-2"
+                        className="inline-flex items-center gap-2 text-xs font-semibold bg-red-500 hover:bg-red-400 text-white transition-colors rounded-lg px-4 py-2.5"
                       >
                         <ExternalLink className="h-3.5 w-3.5" />
-                        Open Gmail →
+                        Open Gmailnator Inbox
                       </a>
+                      <p className="text-[11px] text-muted-foreground/35">
+                        Click the message titled <span className="font-medium text-muted-foreground/50">"{selected.subject || "No subject"}"</span> on the site
+                      </p>
                     </div>
                   )}
                 </div>
