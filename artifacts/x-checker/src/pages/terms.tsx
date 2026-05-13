@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Link } from "wouter";
 import { FileText } from "lucide-react";
@@ -13,12 +14,23 @@ These Terms apply to all visitors, users, and others who access or use the Servi
   {
     id: "description",
     title: "2. Description of Service",
-    content: `X Toolkit is a free, web-based collection of productivity tools for X (formerly Twitter) users. The Service currently includes:
+    content: `X Toolkit is a free, web-based collection of 35+ productivity tools organized across six categories:
 
-- **Account Checker**: checks the status (active, suspended, or not found) of X user accounts
-- **Bio Generator**: generates X profile bios using the Groq AI API
-- **Profile Link Generator**: converts usernames into direct X profile URLs
-- **@ Formatter**: adds or removes the @ prefix from lists of usernames
+**X Account Tools:**
+- Account Checker — bulk-check the status of up to 100 X accounts (active, suspended, or not found)
+- Profile Link Generator — converts usernames into clickable X profile URLs
+- @ Formatter — bulk add or remove the @ prefix from username lists
+- Bio Generator — AI-powered bio generation for X profiles
+
+**AI Writing Tools:** bio templates (funny, professional, aesthetic), username and name idea generators.
+
+**Text & Format Tools:** character counter, tweet formatter, hashtag formatter, plain-text formatter, font preview.
+
+**Developer Tools:** JSON formatter, JWT decoder, Base64 encoder/decoder, Regex tester, SQL formatter, CSS minifier, HTML formatter, URL encoder, UUID generator.
+
+**SEO Tools:** meta tag generator, URL slug generator, keyword density checker, robots.txt generator, sitemap validator.
+
+**Email Tools:** disposable email inboxes, email validator, email signature generator, subject line generator, email character counter.
 
 The Service is provided "as is" and we reserve the right to modify, suspend, or discontinue any feature at any time without notice.`,
   },
@@ -34,16 +46,19 @@ The Service is provided "as is" and we reserve the right to modify, suspend, or 
 - Interfere with or disrupt the Service or servers
 - Circumvent any rate limits or access restrictions
 - Reverse-engineer or attempt to extract the source code of the Service
+- Use the Account Checker to target or surveil specific individuals in violation of X's Terms of Service
 
 We reserve the right to terminate or restrict access for any user who violates these terms.`,
   },
   {
     id: "third-party",
     title: "4. Third-Party Services",
-    content: `X Toolkit interacts with third-party services, including X's API and Groq's API. Your use of these third-party services is governed by their respective terms:
+    content: `X Toolkit interacts with third-party services, including X's API, Groq's API, mail.tm, and Guerrilla Mail. Your use of these third-party services is governed by their respective terms:
 
 - X (Twitter) Terms of Service: x.com/en/tos
 - Groq Terms of Service: groq.com/terms-of-service
+- mail.tm Terms: mail.tm
+- Guerrilla Mail Terms: guerrillamail.com
 
 We are not responsible for the availability, accuracy, or legality of third-party services. X's API may change or become unavailable at any time, which could affect the functionality of the Account Checker.`,
   },
@@ -67,18 +82,30 @@ We are not responsible for any unauthorized use of your API key or any charges i
 - X's API may occasionally return incorrect or rate-limited responses, resulting in "Unknown" status
 - We make no warranty that account status information is accurate, complete, or up-to-date
 
-Generated bios from the Bio Generator are AI-generated suggestions. Review all generated content before use. We are not responsible for how generated content is used.`,
+Generated bios from the Bio Generator are AI-generated suggestions. Review all generated content before use. We are not responsible for how generated content is used.
+
+Developer, SEO, and email formatting tools process your input client-side. Results are provided as-is for informational purposes only.`,
+  },
+  {
+    id: "temp-mail",
+    title: "7. Temporary Email Inboxes",
+    content: `The Temp Mail tool provides access to disposable email addresses via third-party providers (mail.tm and Guerrilla Mail). By using this feature:
+
+- Inboxes are temporary and will expire according to the third-party provider's policy
+- We do not control, read, store, or guarantee delivery of messages
+- You must not use temporary email addresses to circumvent signup requirements for services that prohibit it
+- You assume full responsibility for how you use temporary email addresses`,
   },
   {
     id: "intellectual-property",
-    title: "7. Intellectual Property",
+    title: "8. Intellectual Property",
     content: `X Toolkit's code, design, and content (excluding user-provided inputs) are the property of X Toolkit and protected by applicable intellectual property laws.
 
 "X" and "Twitter" are trademarks of X Corp. X Toolkit is an independent tool and is not affiliated with, endorsed by, or sponsored by X Corp.`,
   },
   {
     id: "disclaimer",
-    title: "8. Disclaimer of Warranties",
+    title: "9. Disclaimer of Warranties",
     content: `THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT.
 
 We do not warrant that:
@@ -88,31 +115,35 @@ We do not warrant that:
   },
   {
     id: "limitation",
-    title: "9. Limitation of Liability",
+    title: "10. Limitation of Liability",
     content: `TO THE MAXIMUM EXTENT PERMITTED BY LAW, X TOOLKIT SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOST PROFITS, DATA LOSS, OR GOODWILL, ARISING OUT OF OR IN CONNECTION WITH YOUR USE OF THE SERVICE.
 
 Our total liability to you for any claims arising under these Terms shall not exceed $0 (as the Service is provided free of charge).`,
   },
   {
     id: "changes",
-    title: "10. Changes to Terms",
+    title: "11. Changes to Terms",
     content: `We reserve the right to update or modify these Terms at any time. When we do, we will update the "Last Updated" date at the top of this page. Continued use of the Service after changes constitutes your acceptance of the revised Terms.
 
 If changes are material, we will make reasonable efforts to notify users (e.g., via a notice on the Service).`,
   },
   {
     id: "governing-law",
-    title: "11. Governing Law",
+    title: "12. Governing Law",
     content: `These Terms shall be governed by and construed in accordance with applicable laws. Any disputes arising under these Terms shall be resolved through binding arbitration or the applicable courts in the jurisdiction where the Service operator is located.`,
   },
   {
     id: "contact",
-    title: "12. Contact",
+    title: "13. Contact",
     content: `If you have questions about these Terms, please contact us using the Feedback form available throughout the Service.`,
   },
 ];
 
 export default function Terms() {
+  useEffect(() => {
+    document.title = "Terms of Service — X Toolkit";
+  }, []);
+
   return (
     <Layout>
       <div className="max-w-3xl mx-auto px-4 md:px-8 py-12 md:py-16">
@@ -124,7 +155,7 @@ export default function Terms() {
           </div>
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight">Terms of Service</h1>
           <p className="text-muted-foreground">
-            Last updated: <span className="text-foreground/80">May 2025</span>
+            Last updated: <span className="text-foreground/80">May 2026</span>
           </p>
           <p className="text-muted-foreground leading-relaxed">
             Please read these Terms carefully before using X Toolkit. By using the Service,

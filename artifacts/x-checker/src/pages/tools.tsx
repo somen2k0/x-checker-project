@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { useSearchParams } from "@/hooks/use-search-params";
 import { useCheckAccounts, type AccountCheckResult } from "@workspace/api-client-react";
@@ -54,6 +54,10 @@ function formatDate(iso: string): string {
 }
 
 export default function Tools() {
+  useEffect(() => {
+    document.title = "X Account Checker & Tools — Check X Status, Generate Bios | X Toolkit";
+  }, []);
+
   const defaultTab = useSearchParams().get("tab") ?? "checker";
 
   // ── X Account Tools state ─────────────────────────────────────────
@@ -368,50 +372,102 @@ export default function Tools() {
                         <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy
                       </Button>
                     </CardHeader>
-                    <CardContent className="space-y-2">
-                      {results.map((r) => (
-                        <div key={r.username} className="flex items-center gap-3 rounded-lg border border-border/50 bg-background/40 px-3 py-2.5">
-                          {r.status === "active" && r.profileImageUrl ? (
-                            <Avatar className="h-8 w-8 border border-border/50 shrink-0">
-                              <AvatarImage src={r.profileImageUrl} alt={r.username} />
-                              <AvatarFallback className="text-[10px] bg-muted">{r.username[0]?.toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                          ) : (
-                            <div className="h-8 w-8 rounded-full bg-muted/60 border border-border/50 flex items-center justify-center shrink-0">
-                              <span className="text-[10px] font-medium text-muted-foreground">{r.username[0]?.toUpperCase()}</span>
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-sm font-medium truncate">@{r.username}</span>
-                              {r.isVerified && <BadgeCheck className="h-3.5 w-3.5 text-primary shrink-0" />}
-                            </div>
-                            {r.displayName && <div className="text-xs text-muted-foreground truncate">{r.displayName}</div>}
-                            {r.followerCount != null && (
-                              <div className="flex items-center gap-3 mt-0.5">
-                                <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-                                  <Users className="h-2.5 w-2.5" /> {formatCount(r.followerCount)}
-                                </span>
-                                {r.createdAt && (
-                                  <span className="text-[11px] text-muted-foreground flex items-center gap-1">
-                                    <Calendar className="h-2.5 w-2.5" /> {formatDate(r.createdAt)}
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            {getStatusIcon(r.status)}
-                            {getStatusBadge(r.status)}
-                            {r.status === "active" && (
-                              <a href={`https://x.com/${r.username}`} target="_blank" rel="noopener noreferrer"
-                                className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors">
-                                <ExternalLink className="h-3.5 w-3.5" />
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                    <CardContent className="p-0">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-border/50 bg-muted/30">
+                              <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Account</th>
+                              <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
+                              <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hidden sm:table-cell">Followers</th>
+                              <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hidden sm:table-cell">Following</th>
+                              <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hidden md:table-cell">Joined</th>
+                              <th className="w-8" />
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-border/40">
+                            {results.map((r) => (
+                              <tr key={r.username} className="hover:bg-muted/20 transition-colors group">
+                                {/* Account */}
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    {r.status === "active" && r.profileImageUrl ? (
+                                      <Avatar className="h-8 w-8 border border-border/50 shrink-0">
+                                        <AvatarImage src={r.profileImageUrl} alt={r.username} />
+                                        <AvatarFallback className="text-[10px] bg-muted">{r.username[0]?.toUpperCase()}</AvatarFallback>
+                                      </Avatar>
+                                    ) : (
+                                      <div className="h-8 w-8 rounded-full bg-muted/60 border border-border/50 flex items-center justify-center shrink-0">
+                                        <span className="text-[10px] font-medium text-muted-foreground">{r.username[0]?.toUpperCase()}</span>
+                                      </div>
+                                    )}
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-1">
+                                        <span className="font-medium truncate text-[13px]">@{r.username}</span>
+                                        {r.isVerified && <BadgeCheck className="h-3.5 w-3.5 text-primary shrink-0" />}
+                                      </div>
+                                      {r.displayName && (
+                                        <div className="text-xs text-muted-foreground truncate">{r.displayName}</div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </td>
+                                {/* Status */}
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center gap-1.5">
+                                    {getStatusIcon(r.status)}
+                                    {getStatusBadge(r.status)}
+                                  </div>
+                                </td>
+                                {/* Followers */}
+                                <td className="px-4 py-3 hidden sm:table-cell">
+                                  {r.followerCount != null ? (
+                                    <span className="flex items-center gap-1.5 text-sm text-foreground/80">
+                                      <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                                      {formatCount(r.followerCount)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-muted-foreground/40 text-xs">—</span>
+                                  )}
+                                </td>
+                                {/* Following */}
+                                <td className="px-4 py-3 hidden sm:table-cell">
+                                  {r.followingCount != null ? (
+                                    <span className="text-sm text-foreground/80">{formatCount(r.followingCount)}</span>
+                                  ) : (
+                                    <span className="text-muted-foreground/40 text-xs">—</span>
+                                  )}
+                                </td>
+                                {/* Joined */}
+                                <td className="px-4 py-3 hidden md:table-cell">
+                                  {r.createdAt ? (
+                                    <span className="flex items-center gap-1.5 text-sm text-foreground/80">
+                                      <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                                      {formatDate(r.createdAt)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-muted-foreground/40 text-xs">—</span>
+                                  )}
+                                </td>
+                                {/* External link */}
+                                <td className="pr-3 py-3">
+                                  {r.status === "active" && (
+                                    <a
+                                      href={`https://x.com/${r.username}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors opacity-0 group-hover:opacity-100 inline-flex"
+                                      title="Open profile"
+                                    >
+                                      <ExternalLink className="h-3.5 w-3.5" />
+                                    </a>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </CardContent>
                   </Card>
                 )}

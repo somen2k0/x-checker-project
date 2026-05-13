@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "wouter";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,10 @@ function StarRating({ count }: { count: number }) {
 }
 
 export default function Home() {
+  useEffect(() => {
+    document.title = "X Toolkit — 35+ Free Tools for X, SEO, Developers & Creators";
+  }, []);
+
   const popularTools = getPopularTools();
   const newTools = getNewTools();
   const socialTools = getToolsByCategory("social-media");
