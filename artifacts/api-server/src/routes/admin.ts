@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { getConfig, setConfig, deleteConfig } from "../lib/config-db";
 import { getStats } from "../lib/stats";
+import { getRecentActivity } from "../lib/activity-log";
 
 const router = Router();
 
@@ -329,6 +330,18 @@ router.delete("/admin/web3forms-key", async (req, res) => {
   }
   await deleteConfig("web3forms_key");
   res.json({ ok: true });
+});
+
+// ── Activity log ─────────────────────────────────────────────────────────────
+
+router.get("/admin/activity", async (req, res) => {
+  if (!(await checkAuth(req))) {
+    res.status(401).json({ error: "Invalid password." });
+    return;
+  }
+  const limit = Math.min(Number(req.query["limit"] ?? 50), 200);
+  const entries = await getRecentActivity(limit);
+  res.json({ entries });
 });
 
 // ── Stats ────────────────────────────────────────────────────────────────────

@@ -3,6 +3,7 @@ import { CheckAccountsBody } from "@workspace/api-zod";
 import { logger } from "../lib/logger";
 import { getConfig } from "../lib/config-db";
 import { increment } from "../lib/stats";
+import { logActivity } from "../lib/activity-log";
 
 const router: IRouter = Router();
 
@@ -225,6 +226,7 @@ router.post("/check-accounts", async (req, res): Promise<void> => {
   for (const r of results) {
     void increment(`accounts:status_${r.status}`);
   }
+  void logActivity("account_check", cleanedUsernames.length);
 
   res.json({ results });
 });

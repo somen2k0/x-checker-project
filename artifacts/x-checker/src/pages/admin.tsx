@@ -10,6 +10,7 @@ import {
   AlertTriangle, Loader2, Lock, Eye, EyeOff, ShieldCheck,
   Trash2, FlaskConical, Settings, Twitter, Zap, Shield,
   Database, BarChart3, Users, Mail, Sparkles, TrendingUp,
+  Clock, Activity,
 } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -799,6 +800,39 @@ function SettingsTab({ password, onPasswordChanged }: { password: string; onPass
 
 // ── Stats Tab ──────────────────────────────────────────────────────────────
 
+interface ActivityEntry {
+  id: number;
+  event_type: string;
+  count: number;
+  created_at: string;
+}
+
+function timeAgo(iso: string): string {
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
+const EVENT_META: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
+  account_check: {
+    label: "Account Check",
+    color: "text-blue-400",
+    icon: <Twitter className="h-3 w-3" />,
+  },
+  bio_generate: {
+    label: "Bio Generate",
+    color: "text-yellow-400",
+    icon: <Sparkles className="h-3 w-3" />,
+  },
+  tempgmail_generate: {
+    label: "Temp Email",
+    color: "text-sky-400",
+    icon: <Mail className="h-3 w-3" />,
+  },
+};
+
 interface RawStats {
   "accounts:requests"?: number;
   "accounts:usernames_checked"?: number;
@@ -839,6 +873,7 @@ function StatCard({
 function StatsTab({ password }: { password: string }) {
   const { toast } = useToast();
   const [stats, setStats] = useState<RawStats | null>(null);
+  const [activity, setActivity] = useState<ActivityEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
 
@@ -847,15 +882,22 @@ function StatsTab({ password }: { password: string }) {
   const fetchStats = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/stats", { headers });
-      if (res.status === 401) {
+      const [statsRes, activityRes] = await Promise.all([
+        fetch("/api/admin/stats", { headers }),
+        fetch("/api/admin/activity?limit=50", { headers }),
+      ]);
+      if (statsRes.status === 401) {
         sessionStorage.removeItem("admin_password");
         window.location.reload();
         return;
       }
-      if (!res.ok) throw new Error("Failed");
-      const data = await res.json() as { stats: RawStats };
+      if (!statsRes.ok) throw new Error("Failed");
+      const data = await statsRes.json() as { stats: RawStats };
       setStats(data.stats);
+      if (activityRes.ok) {
+        const aData = await activityRes.json() as { entries: ActivityEntry[] };
+        setActivity(aData.entries);
+      }
       setLastRefreshed(new Date());
     } catch {
       toast({ title: "Failed to load stats", variant: "destructive" });
@@ -979,6 +1021,44 @@ function StatsTab({ password }: { password: string }) {
               No usage recorded yet. Stats will appear here as your tools get used.
             </div>
           )}
+
+          {/* Activity Log */}
+          <section className="space-y-3">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Activity className="h-3.5 w-3.5" /> Recent Activity
+            </h3>
+            {activity.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-border/60 px-4 py-5 text-center text-sm text-muted-foreground">
+                No activity yet. Events will appear here in real time.
+              </div>
+            ) : (
+              <div className="rounded-lg border border-border/60 divide-y divide-border/30 overflow-hidden">
+                {activity.map((entry) => {
+                  const meta = EVENT_META[entry.event_type] ?? {
+                    label: entry.event_type,
+                    color: "text-muted-foreground",
+                    icon: <Clock className="h-3 w-3" />,
+                  };
+                  return (
+                    <div key={entry.id} className="flex items-center gap-3 px-4 py-2.5 bg-card hover:bg-muted/20 transition-colors">
+                      <span className={`flex items-center gap-1.5 text-xs font-medium ${meta.color} w-36 shrink-0`}>
+                        {meta.icon} {meta.label}
+                      </span>
+                      {entry.event_type === "account_check" && (
+                        <Badge variant="outline" className="text-xs px-1.5 py-0 h-5 font-mono">
+                          {entry.count} username{entry.count !== 1 ? "s" : ""}
+                        </Badge>
+                      )}
+                      <span className="flex-1" />
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" /> {timeAgo(entry.created_at)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
         </>
       )}
     </div>
