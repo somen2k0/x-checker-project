@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { CheckAccountsBody } from "@workspace/api-zod";
 import { logger } from "../lib/logger";
 import { getConfig } from "../lib/config-db";
+import { increment } from "../lib/stats";
 
 const router: IRouter = Router();
 
@@ -217,6 +218,13 @@ router.post("/check-accounts", async (req, res): Promise<void> => {
   const results = await Promise.all(
     cleanedUsernames.map((username) => checkXAccount(username, guestToken, bearer))
   );
+
+  // fire-and-forget stat tracking
+  void increment("accounts:requests");
+  void increment("accounts:usernames_checked", cleanedUsernames.length);
+  for (const r of results) {
+    void increment(`accounts:status_${r.status}`);
+  }
 
   res.json({ results });
 });

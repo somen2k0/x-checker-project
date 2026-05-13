@@ -9,7 +9,7 @@ import {
   Key, Plus, RefreshCw, CheckCircle2, XCircle,
   AlertTriangle, Loader2, Lock, Eye, EyeOff, ShieldCheck,
   Trash2, FlaskConical, Settings, Twitter, Zap, Shield,
-  Database,
+  Database, BarChart3, Users, Mail, Sparkles, TrendingUp,
 } from "lucide-react";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -694,10 +694,192 @@ function SettingsTab({ password, onPasswordChanged }: { password: string; onPass
   );
 }
 
+// ── Stats Tab ──────────────────────────────────────────────────────────────
+
+interface RawStats {
+  "accounts:requests"?: number;
+  "accounts:usernames_checked"?: number;
+  "accounts:status_active"?: number;
+  "accounts:status_suspended"?: number;
+  "accounts:status_not_found"?: number;
+  "accounts:status_unknown"?: number;
+  "bio:requests"?: number;
+  "tempgmail:generates"?: number;
+  [key: string]: number | undefined;
+}
+
+function StatCard({
+  icon,
+  label,
+  value,
+  sub,
+  color,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
+  sub?: string;
+  color?: string;
+}) {
+  return (
+    <div className="rounded-lg border border-border/60 bg-card px-4 py-4 space-y-2">
+      <div className={`flex items-center gap-2 text-xs font-medium ${color ?? "text-muted-foreground"}`}>
+        {icon}
+        {label}
+      </div>
+      <p className="text-2xl font-bold tracking-tight">{value.toLocaleString()}</p>
+      {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
+    </div>
+  );
+}
+
+function StatsTab({ password }: { password: string }) {
+  const { toast } = useToast();
+  const [stats, setStats] = useState<RawStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+
+  const headers = { "Content-Type": "application/json", "x-admin-password": password };
+
+  const fetchStats = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/stats", { headers });
+      if (!res.ok) throw new Error("Failed");
+      const data = await res.json() as { stats: RawStats };
+      setStats(data.stats);
+      setLastRefreshed(new Date());
+    } catch {
+      toast({ title: "Failed to load stats", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  }, [password]);
+
+  useEffect(() => { fetchStats(); }, [fetchStats]);
+
+  const accountRequests = stats?.["accounts:requests"] ?? 0;
+  const usernamesChecked = stats?.["accounts:usernames_checked"] ?? 0;
+  const active = stats?.["accounts:status_active"] ?? 0;
+  const suspended = stats?.["accounts:status_suspended"] ?? 0;
+  const notFound = stats?.["accounts:status_not_found"] ?? 0;
+  const unknown = stats?.["accounts:status_unknown"] ?? 0;
+  const bioRequests = stats?.["bio:requests"] ?? 0;
+  const tempGmailGenerates = stats?.["tempgmail:generates"] ?? 0;
+
+  const totalChecked = active + suspended + notFound + unknown;
+  const activeRate = totalChecked > 0 ? Math.round((active / totalChecked) * 100) : 0;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-sm font-semibold flex items-center gap-2">
+            <BarChart3 className="h-4 w-4 text-primary" /> Site Usage Stats
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Cumulative totals since tracking began.
+            {lastRefreshed && ` Last updated ${lastRefreshed.toLocaleTimeString()}.`}
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={fetchStats} disabled={loading}>
+          <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
+          Refresh
+        </Button>
+      </div>
+
+      {loading && !stats ? (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground py-6">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading stats…
+        </div>
+      ) : (
+        <>
+          {/* X Account Checker */}
+          <section className="space-y-3">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Twitter className="h-3.5 w-3.5" /> X Account Checker
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <StatCard
+                icon={<TrendingUp className="h-3.5 w-3.5" />}
+                label="Check Requests"
+                value={accountRequests}
+                sub="Total batch check calls"
+                color="text-blue-400"
+              />
+              <StatCard
+                icon={<Users className="h-3.5 w-3.5" />}
+                label="Usernames Checked"
+                value={usernamesChecked}
+                sub="Across all requests"
+                color="text-purple-400"
+              />
+            </div>
+
+            {totalChecked > 0 && (
+              <div className="rounded-lg border border-border/60 bg-card px-4 py-4 space-y-3">
+                <p className="text-xs font-medium text-muted-foreground">Results Breakdown</p>
+                <div className="space-y-2">
+                  {[
+                    { label: "Active", value: active, color: "bg-green-500", textColor: "text-green-400" },
+                    { label: "Suspended", value: suspended, color: "bg-red-500", textColor: "text-red-400" },
+                    { label: "Not Found", value: notFound, color: "bg-zinc-500", textColor: "text-zinc-400" },
+                    { label: "Unknown", value: unknown, color: "bg-yellow-500", textColor: "text-yellow-400" },
+                  ].map(({ label, value, color, textColor }) => (
+                    <div key={label} className="flex items-center gap-3">
+                      <span className={`text-xs w-20 shrink-0 ${textColor}`}>{label}</span>
+                      <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${color} transition-all`}
+                          style={{ width: totalChecked > 0 ? `${(value / totalChecked) * 100}%` : "0%" }}
+                        />
+                      </div>
+                      <span className="text-xs font-mono text-muted-foreground w-10 text-right">{value.toLocaleString()}</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">{activeRate}% of checked accounts are active.</p>
+              </div>
+            )}
+          </section>
+
+          {/* Other tools */}
+          <section className="space-y-3">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5" /> Other Tools
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <StatCard
+                icon={<Sparkles className="h-3.5 w-3.5" />}
+                label="Bio Generations"
+                value={bioRequests}
+                sub="AI Bio Generator requests"
+                color="text-yellow-400"
+              />
+              <StatCard
+                icon={<Mail className="h-3.5 w-3.5" />}
+                label="Temp Emails Created"
+                value={tempGmailGenerates}
+                sub="Via Gmailnator API"
+                color="text-sky-400"
+              />
+            </div>
+          </section>
+
+          {accountRequests === 0 && bioRequests === 0 && tempGmailGenerates === 0 && (
+            <div className="rounded-lg border border-dashed border-border/60 px-4 py-8 text-center text-sm text-muted-foreground">
+              No usage recorded yet. Stats will appear here as your tools get used.
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 // ── Main Panel ─────────────────────────────────────────────────────────────
 
 function AdminPanel({ password, onPasswordChanged }: { password: string; onPasswordChanged: (pw: string) => void }) {
-  const { toast } = useToast();
 
   function handleLogout() {
     sessionStorage.removeItem("admin_password");
@@ -718,11 +900,16 @@ function AdminPanel({ password, onPasswordChanged }: { password: string; onPassw
         </Button>
       </div>
 
-      <Tabs defaultValue="api-keys">
+      <Tabs defaultValue="stats">
         <TabsList className="w-full">
+          <TabsTrigger value="stats" className="flex-1 gap-1.5"><BarChart3 className="h-3.5 w-3.5" /> Stats</TabsTrigger>
           <TabsTrigger value="api-keys" className="flex-1 gap-1.5"><Key className="h-3.5 w-3.5" /> API Keys</TabsTrigger>
           <TabsTrigger value="settings" className="flex-1 gap-1.5"><Settings className="h-3.5 w-3.5" /> Settings</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="stats" className="mt-6">
+          <StatsTab password={password} />
+        </TabsContent>
 
         <TabsContent value="api-keys" className="mt-6">
           <ApiKeysTab password={password} />

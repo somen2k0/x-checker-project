@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { getConfig, setConfig, deleteConfig } from "../lib/config-db";
+import { getStats } from "../lib/stats";
 
 const router = Router();
 
@@ -289,6 +290,17 @@ router.delete("/admin/twitter-token", async (req, res) => {
   }
   await deleteConfig("twitter_bearer_token");
   res.json({ ok: true });
+});
+
+// ── Stats ────────────────────────────────────────────────────────────────────
+
+router.get("/admin/stats", async (req, res) => {
+  if (!(await checkAuth(req))) {
+    res.status(401).json({ error: "Invalid password." });
+    return;
+  }
+  const raw = await getStats();
+  res.json({ stats: raw });
 });
 
 export default router;

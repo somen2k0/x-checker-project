@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { increment } from "../lib/stats";
 
 const router = Router();
 
@@ -82,6 +83,7 @@ Example format: ["Bio one here", "Bio two here", "Bio three here"]`;
         : [raw];
     }
 
+    void increment("bio:requests");
     res.json({ bios: bios.slice(0, 3) });
   } catch (err) {
     req.log.error({ err }, "Bio generation failed");
