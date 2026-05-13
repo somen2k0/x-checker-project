@@ -9,7 +9,11 @@
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },
   "private": true,
+  "dependencies": {
+    "pg": "^8.20.0"
+  },
   "devDependencies": {
+    "@types/pg": "^8.20.0",
     "@types/node": "catalog:",
     "@vercel/node": "^5.7.15",
     "prettier": "^3.8.1",
