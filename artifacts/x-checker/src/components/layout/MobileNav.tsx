@@ -123,6 +123,7 @@ const BADGE_STYLES: Record<string, string> = {
 const NAV = [
   { href: "/", label: "Home", icon: Home },
   { href: "/tools", label: "Tools", icon: Wrench },
+  { href: "/tools/temp-mail/disposable", label: "Temp Mail", icon: Inbox },
   { href: "/about", label: "About", icon: Info },
 ];
 
@@ -153,7 +154,12 @@ export function MobileNav() {
         <div className="flex items-stretch h-14">
           {NAV.map(({ href, label, icon: Icon }) => {
             const isTools = href === "/tools";
-            const active = isTools ? drawerOpen || location === href : location === href;
+            const isTempMail = href === "/tools/temp-mail/disposable";
+            const active = isTools
+              ? drawerOpen || location === href
+              : isTempMail
+                ? location.startsWith("/tools/temp-mail")
+                : location === href;
 
             if (isTools) {
               return (
