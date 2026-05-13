@@ -867,18 +867,18 @@ function GmailTricksTab() {
 
 const TAB_CONFIG: Record<Tab, { seoTitle: string; seoDescription: string; icon: typeof Inbox; title: string; description: string }> = {
   disposable: {
-    seoTitle: "Disposable Inbox — Free Throwaway Email Address",
+    seoTitle: "Temp Email — Free Throwaway Email Address",
     seoDescription: "Generate a free disposable email address instantly. No signup required. Switch domains and create custom usernames.",
     icon: Inbox,
-    title: "Disposable Inbox",
+    title: "Temp Email",
     description: "Instant throwaway email address with domain switching and custom usernames — no signup required.",
   },
   tempgmail: {
     seoTitle: "Temp Gmail — Temporary Gmail Address Generator",
-    seoDescription: "Generate a real temporary Gmail address via Gmailnator. Receive emails without giving out your real Gmail.",
+    seoDescription: "Generate a real temporary Gmail address. Receive emails without giving out your real Gmail.",
     icon: Mail,
     title: "Temp Gmail",
-    description: "Generate a real temporary Gmail address and check its inbox — powered by Gmailnator, no signup needed.",
+    description: "Generate a real temporary Gmail address and check its inbox — no signup needed.",
   },
   gmail: {
     seoTitle: "Gmail Tricks — Dot & Plus-Tag Address Generator",
