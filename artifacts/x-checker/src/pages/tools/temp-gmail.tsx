@@ -433,11 +433,20 @@ function TempGmailTab() {
   const fetchMessages = useCallback(async (addr: string, silent = false) => {
     if (!silent) setLoadingMsgs(true);
     try {
-      const r = await fetch("/api/temp-gmail/messages", {
+      const attempt = async () => fetch("/api/temp-gmail/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: addr }),
       });
+
+      let r = await attempt();
+
+      // Auto-retry once on transient server errors
+      if (!r.ok && r.status >= 500 && r.status !== 503) {
+        await new Promise((res) => setTimeout(res, 1500));
+        r = await attempt();
+      }
+
       const d = await r.json() as { messages?: GmailnatorMessage[]; error?: string };
       if (r.ok) {
         setMessages(d.messages ?? []);
@@ -445,7 +454,7 @@ function TempGmailTab() {
       } else if (r.status === 429) {
         setError("API quota reached for today — inbox will work again tomorrow. Your address is still valid.");
       } else {
-        setError(d.error ?? "Failed to check inbox.");
+        setError(d.error ?? "The inbox service is temporarily unavailable. Please try again in a moment.");
       }
     } catch { setError("Network error. Please try again."); }
     finally { if (!silent) setLoadingMsgs(false); }
@@ -550,8 +559,11 @@ function TempGmailTab() {
         <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-4 flex items-center gap-3">
           <AlertCircle className="h-5 w-5 text-orange-400 shrink-0" />
           <p className="text-sm text-orange-300 flex-1">{error}</p>
-          <Button size="sm" variant="outline" onClick={() => generate()} disabled={generating}
+          <Button size="sm" variant="outline"
+            onClick={() => email ? fetchMessages(email) : generate()}
+            disabled={loadingMsgs || generating}
             className="text-xs gap-1.5 border-orange-500/40 text-orange-300 hover:bg-orange-500/10 shrink-0">
+            <RefreshCw className={`h-3.5 w-3.5 ${loadingMsgs ? "animate-spin" : ""}`} />
             Retry
           </Button>
         </div>

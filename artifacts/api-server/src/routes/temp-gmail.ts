@@ -67,7 +67,7 @@ router.post("/temp-gmail/messages", async (req, res) => {
     return;
   }
 
-  const { res: apiRes, exhausted } = await fetchWithKeyRotation((key) =>
+  const doFetch = () => fetchWithKeyRotation((key) =>
     fetch(`${BASE_URL}/api/inbox`, {
       method: "POST",
       headers: rapidHeaders(key),
@@ -76,13 +76,21 @@ router.post("/temp-gmail/messages", async (req, res) => {
     })
   );
 
+  let { res: apiRes, exhausted } = await doFetch();
+
+  // Retry once on transient server errors from the upstream API
+  if (!apiRes.ok && !exhausted && apiRes.status >= 500) {
+    await new Promise((r) => setTimeout(r, 1200));
+    ({ res: apiRes, exhausted } = await doFetch());
+  }
+
   if (!apiRes.ok) {
     if (exhausted || apiRes.status === 429) {
       res.status(429).json({ error: "Rate-limited across all keys. Please wait a moment." });
       return;
     }
     req.log.warn({ status: apiRes.status }, "Gmailnator inbox failed");
-    res.status(502).json({ error: "Failed to fetch messages." });
+    res.status(502).json({ error: "The inbox service is temporarily unavailable. Please try again in a moment." });
     return;
   }
 
