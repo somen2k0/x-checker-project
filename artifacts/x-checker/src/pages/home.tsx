@@ -122,18 +122,23 @@ export default function Home() {
       </section>
 
       {/* ── Stats bar ── */}
-      <section className="border-y border-border/50 bg-muted/20">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 py-5">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+      <section className="border-y border-border/50 bg-muted/10">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { value: `${TOTAL_LIVE}+`, label: "Free tools" },
-              { value: "6", label: "Tool categories" },
-              { value: "0", label: "Signups required" },
-              { value: "~2s", label: "Average result time" },
-            ].map(({ value, label }) => (
-              <div key={label} className="space-y-1">
-                <div className="text-2xl font-bold">{value}</div>
-                <div className="text-xs text-muted-foreground">{label}</div>
+              { value: `${TOTAL_LIVE}+`, label: "Free tools", icon: Zap, color: "text-amber-400", bg: "bg-amber-400/10 border-amber-400/20" },
+              { value: "6", label: "Tool categories", icon: Shield, color: "text-blue-400", bg: "bg-blue-400/10 border-blue-400/20" },
+              { value: "None", label: "Signup required", icon: CheckCircle2, color: "text-emerald-400", bg: "bg-emerald-400/10 border-emerald-400/20" },
+              { value: "~2s", label: "Average result time", icon: Users, color: "text-purple-400", bg: "bg-purple-400/10 border-purple-400/20" },
+            ].map(({ value, label, icon: Icon, color, bg }) => (
+              <div key={label} className={`flex items-center gap-3 rounded-xl border p-4 ${bg}`}>
+                <div className={`h-9 w-9 rounded-lg bg-background/60 border border-border/40 flex items-center justify-center shrink-0`}>
+                  <Icon className={`h-4 w-4 ${color}`} />
+                </div>
+                <div>
+                  <div className="text-xl font-bold leading-tight">{value}</div>
+                  <div className="text-[11px] text-muted-foreground leading-tight">{label}</div>
+                </div>
               </div>
             ))}
           </div>
@@ -143,6 +148,7 @@ export default function Home() {
       {/* ── Categories Overview ── */}
       <section id="categories" className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
         <div className="text-center mb-10">
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-3">Everything in one place</p>
           <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">Tool Categories</h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-sm">
             Six categories and growing. Every tool is free — no paywall, no account.
@@ -183,6 +189,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
           <div className="flex items-center justify-between mb-8">
             <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-amber-400 mb-2">Most used</p>
               <h2 className="text-2xl font-bold tracking-tight mb-1">Popular Tools</h2>
               <p className="text-sm text-muted-foreground">Most-used tools across the platform.</p>
             </div>
@@ -307,16 +314,18 @@ export default function Home() {
       <section className="border-t border-border/50 bg-muted/10">
         <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
           <div className="text-center mb-10">
+            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400 mb-3">User reviews</p>
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">Loved by creators &amp; developers</h2>
             <p className="text-muted-foreground text-sm">What people are saying.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {TESTIMONIALS.map(({ quote, name, role, stars }) => (
-              <div key={name} className="rounded-xl border border-border/60 bg-card/50 p-6 space-y-4">
+              <div key={name} className="relative rounded-xl border border-border/60 bg-card/50 p-6 space-y-4 overflow-hidden">
+                <div className="absolute top-3 right-4 text-7xl font-serif leading-none select-none text-primary/6 pointer-events-none">"</div>
                 <StarRating count={stars} />
-                <p className="text-sm text-muted-foreground leading-relaxed">"{quote}"</p>
-                <div className="flex items-center gap-2.5">
-                  <div className="h-8 w-8 rounded-full bg-primary/15 border border-primary/20 flex items-center justify-center">
+                <p className="text-sm text-muted-foreground leading-relaxed relative">"{quote}"</p>
+                <div className="flex items-center gap-2.5 pt-1 border-t border-border/40">
+                  <div className="h-8 w-8 rounded-full bg-primary/15 border border-primary/20 flex items-center justify-center shrink-0">
                     <span className="text-xs font-bold text-primary">{name[0]}</span>
                   </div>
                   <div>
