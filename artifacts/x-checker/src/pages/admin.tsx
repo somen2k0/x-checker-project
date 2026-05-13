@@ -1067,12 +1067,7 @@ function StatsTab({ password }: { password: string }) {
 
 // ── Main Panel ─────────────────────────────────────────────────────────────
 
-function AdminPanel({ password, onPasswordChanged }: { password: string; onPasswordChanged: (pw: string) => void }) {
-
-  function handleLogout() {
-    sessionStorage.removeItem("admin_password");
-    window.location.reload();
-  }
+function AdminPanel({ password, onPasswordChanged, onLogout }: { password: string; onPasswordChanged: (pw: string) => void; onLogout: () => void }) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10 space-y-6">
@@ -1083,7 +1078,7 @@ function AdminPanel({ password, onPasswordChanged }: { password: string; onPassw
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">Manage all credentials and API keys for your website.</p>
         </div>
-        <Button variant="ghost" size="sm" onClick={handleLogout} className="text-muted-foreground hover:text-foreground gap-1.5">
+        <Button variant="ghost" size="sm" onClick={onLogout} className="text-muted-foreground hover:text-foreground gap-1.5">
           <Lock className="h-3.5 w-3.5" /> Lock
         </Button>
       </div>
@@ -1113,21 +1108,48 @@ function AdminPanel({ password, onPasswordChanged }: { password: string; onPassw
 
 // ── Page ───────────────────────────────────────────────────────────────────
 
+type AuthState = "loading" | "setup" | "login" | "authed";
+
 export default function AdminPage() {
-  const [password, setPassword] = useState<string | null>(() =>
-    sessionStorage.getItem("admin_password"),
-  );
-  const [needsSetup, setNeedsSetup] = useState<boolean | null>(null);
-  const { toast } = useToast();
+  const [authState, setAuthState] = useState<AuthState>("loading");
+  const [password, setPassword] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/status")
-      .then((r) => r.json())
-      .then((data: { adminEnabled: boolean; needsSetup: boolean }) => {
-        setNeedsSetup(data.needsSetup);
-        if (data.needsSetup) setPassword(null);
-      })
-      .catch(() => setNeedsSetup(false));
+    async function init() {
+      try {
+        const statusRes = await fetch("/api/admin/status");
+        if (!statusRes.ok) { setAuthState("login"); return; }
+        const status = await statusRes.json() as { needsSetup: boolean };
+
+        if (status.needsSetup) {
+          sessionStorage.removeItem("admin_password");
+          setAuthState("setup");
+          return;
+        }
+
+        // Password is configured on the server — check for a stored session
+        const stored = sessionStorage.getItem("admin_password");
+        if (stored) {
+          // Validate the stored password against the server
+          const checkRes = await fetch("/api/admin/keys", {
+            headers: { "x-admin-password": stored },
+          });
+          if (checkRes.ok) {
+            setPassword(stored);
+            setAuthState("authed");
+            return;
+          }
+          // Stale / wrong password — clear it
+          sessionStorage.removeItem("admin_password");
+        }
+
+        setAuthState("login");
+      } catch {
+        // Server unreachable — send to login, never auto-show the panel
+        setAuthState("login");
+      }
+    }
+    void init();
   }, []);
 
   async function handleSetup(pw: string): Promise<{ ok: boolean; error?: string }> {
@@ -1140,7 +1162,7 @@ export default function AdminPage() {
       if (res.ok) {
         sessionStorage.setItem("admin_password", pw);
         setPassword(pw);
-        setNeedsSetup(false);
+        setAuthState("authed");
         return { ok: true };
       }
       const body = await res.json().catch(() => ({})) as { error?: string };
@@ -1156,6 +1178,7 @@ export default function AdminPage() {
       if (res.ok) {
         sessionStorage.setItem("admin_password", pw);
         setPassword(pw);
+        setAuthState("authed");
         return { ok: true };
       }
       if (res.status === 401) return { ok: false, error: "Incorrect password. Please try again." };
@@ -1166,7 +1189,18 @@ export default function AdminPage() {
     }
   }
 
-  if (needsSetup === null) {
+  function handlePasswordChanged(pw: string) {
+    sessionStorage.setItem("admin_password", pw);
+    setPassword(pw);
+  }
+
+  function handleLoggedOut() {
+    sessionStorage.removeItem("admin_password");
+    setPassword(null);
+    setAuthState("login");
+  }
+
+  if (authState === "loading") {
     return (
       <Layout>
         <div className="flex items-center justify-center py-24">
@@ -1178,10 +1212,10 @@ export default function AdminPage() {
 
   return (
     <Layout>
-      {password && !needsSetup ? (
-        <AdminPanel password={password} onPasswordChanged={(pw) => { setPassword(pw); }} />
+      {authState === "authed" && password ? (
+        <AdminPanel password={password} onPasswordChanged={handlePasswordChanged} onLogout={handleLoggedOut} />
       ) : (
-        <PasswordGate needsSetup={needsSetup} onAuth={handleAuth} onSetup={handleSetup} />
+        <PasswordGate needsSetup={authState === "setup"} onAuth={handleAuth} onSetup={handleSetup} />
       )}
     </Layout>
   );
