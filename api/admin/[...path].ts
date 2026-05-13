@@ -52,6 +52,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === "OPTIONS") { res.status(204).end(); return; }
 
+  try {
+    await routeHandler(req, res);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Internal server error.";
+    const isDatabaseError = message.includes("DATABASE_URL") || message.includes("ECONNREFUSED") || message.includes("connect");
+    res.status(503).json({
+      error: isDatabaseError
+        ? "Database not configured. Add DATABASE_URL to your Vercel environment variables and redeploy."
+        : message,
+    });
+  }
+}
+
+async function routeHandler(req: VercelRequest, res: VercelResponse) {
   const route = getRoute(req);
   const method = req.method ?? "GET";
 
