@@ -250,7 +250,7 @@ export function Navbar() {
   return (
     <>
       <nav className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 flex items-center justify-between gap-3">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 flex items-center justify-between gap-2">
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
@@ -275,9 +275,9 @@ export function Navbar() {
           </Link>
 
           {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-0.5">
+          <div className="hidden md:flex flex-1 items-center justify-center gap-0">
             <Link href="/">
-              <button className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+              <button className={`px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                 location === "/" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               }`}>
                 Home
@@ -291,7 +291,7 @@ export function Navbar() {
             <TempMailNavItem currentPath={location} />
 
             <Link href="/about">
-              <button className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+              <button className={`px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                 location === "/about" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               }`}>
                 About
@@ -300,22 +300,22 @@ export function Navbar() {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5 shrink-0">
+            <div className="hidden xl:flex items-center gap-1.5 text-xs text-muted-foreground">
               <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="hidden xl:inline text-[11px]">All systems operational</span>
+              <span className="text-[11px]">All systems operational</span>
             </div>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowFeedback(true)}
-              className="hidden sm:flex text-xs border-border/60 hover:bg-muted/50 gap-1.5 h-8"
+              className="hidden lg:flex text-xs border-border/60 hover:bg-muted/50 gap-1.5 h-8"
             >
               <MessageSquare className="h-3.5 w-3.5" />
-              <span className="hidden lg:inline">Feedback</span>
+              <span className="hidden xl:inline">Feedback</span>
             </Button>
             <Link href="/tools">
-              <Button size="sm" className="hidden md:flex text-xs h-8 shadow-sm shadow-primary/20 whitespace-nowrap">
+              <Button size="sm" className="hidden md:flex text-xs h-8 shadow-sm shadow-primary/20 whitespace-nowrap px-3">
                 Browse All →
               </Button>
             </Link>
