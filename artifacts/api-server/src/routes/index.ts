@@ -5,6 +5,7 @@ import bioRouter from "./bio";
 import contactRouter from "./contact";
 import tempGmailRouter from "./temp-gmail";
 import tempMailRouter from "./temp-mail";
+import adminRouter from "./admin";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(bioRouter);
 router.use(contactRouter);
 router.use(tempGmailRouter);
 router.use(tempMailRouter);
+router.use(adminRouter);
 
 export default router;
