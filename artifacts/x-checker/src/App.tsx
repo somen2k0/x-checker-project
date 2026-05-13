@@ -32,6 +32,11 @@ import RegexTester from "@/pages/tools/regex-tester";
 import SqlFormatter from "@/pages/tools/sql-formatter";
 import UrlEncoder from "@/pages/tools/url-encoder";
 import UuidGenerator from "@/pages/tools/uuid-generator";
+// New Tools
+import CaseConverter from "@/pages/tools/case-converter";
+import YamlJson from "@/pages/tools/yaml-json";
+import TimezoneConverter from "@/pages/tools/timezone-converter";
+import OgImagePreview from "@/pages/tools/og-image-preview";
 // SEO Tools
 import MetaTagGenerator from "@/pages/tools/meta-tag-generator";
 import UrlSlugGenerator from "@/pages/tools/url-slug-generator";
@@ -85,6 +90,12 @@ function TrackedRouter() {
       <Route path="/tools/sql-formatter" component={SqlFormatter} />
       <Route path="/tools/url-encoder" component={UrlEncoder} />
       <Route path="/tools/uuid-generator" component={UuidGenerator} />
+
+      {/* New Tools */}
+      <Route path="/tools/case-converter" component={CaseConverter} />
+      <Route path="/tools/yaml-json" component={YamlJson} />
+      <Route path="/tools/timezone-converter" component={TimezoneConverter} />
+      <Route path="/tools/og-image-preview" component={OgImagePreview} />
 
       {/* SEO Tools */}
       <Route path="/tools/meta-tag-generator" component={MetaTagGenerator} />

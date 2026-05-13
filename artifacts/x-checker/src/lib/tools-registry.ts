@@ -3,6 +3,7 @@ import {
   Hash, MessageSquare, Type, BarChart2, Users, FileJson, Lock,
   TrendingUp, Globe, Code2, Mail, ShieldCheck, Pencil, FileText,
   Shield, Tag, Minimize2, KeyRound, Regex, Database, Shuffle,
+  Clock, ArrowLeftRight,
   type LucideIcon,
 } from "lucide-react";
 
@@ -319,7 +320,50 @@ export const ALL_TOOLS: Tool[] = [
     tags: ["uuid", "guid", "unique", "id", "generator", "developer"],
   },
 
+  {
+    id: "case-converter",
+    label: "Case Converter",
+    description: "Convert text to UPPERCASE, lowercase, camelCase, snake_case, kebab-case, PascalCase, and more.",
+    href: "/tools/case-converter",
+    category: "text-formatting",
+    icon: Type,
+    badge: "New",
+    tags: ["case", "convert", "camelcase", "snake_case", "kebab", "uppercase", "lowercase", "title case", "pascal"],
+  },
+
+  // ── Developer ─────────────────────────────────────────────────────
+  {
+    id: "yaml-json",
+    label: "YAML ↔ JSON Converter",
+    description: "Convert YAML to JSON or JSON to YAML instantly. Supports nested objects, arrays, and all data types.",
+    href: "/tools/yaml-json",
+    category: "developer",
+    icon: ArrowLeftRight,
+    badge: "New",
+    tags: ["yaml", "json", "convert", "config", "kubernetes", "docker", "developer"],
+  },
+  {
+    id: "timezone-converter",
+    label: "Time Zone Converter",
+    description: "Convert any date and time between world timezones with full DST support. Compare multiple zones at once.",
+    href: "/tools/timezone-converter",
+    category: "developer",
+    icon: Clock,
+    badge: "New",
+    tags: ["timezone", "time zone", "convert", "utc", "dst", "world clock", "schedule"],
+  },
+
   // ── SEO ──────────────────────────────────────────────────────────
+  {
+    id: "og-image-preview",
+    label: "OG / Twitter Card Preview",
+    description: "Preview how any URL looks when shared on Facebook, X (Twitter), and LinkedIn. Checks all Open Graph and Twitter Card tags.",
+    href: "/tools/og-image-preview",
+    category: "seo",
+    icon: Globe,
+    badge: "New",
+    tags: ["og", "open graph", "twitter card", "preview", "social share", "facebook", "linkedin", "meta tags", "seo"],
+  },
   {
     id: "meta-tag-generator",
     label: "Meta Tag Generator",

@@ -261,6 +261,32 @@
     <priority>0.7</priority>
   </url>
 
+  <!-- New Tools -->
+  <url>
+    <loc>https://xtoolkit.live/tools/case-converter</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/yaml-json</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/timezone-converter</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/og-image-preview</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- Static Pages -->
   <url>
     <loc>https://xtoolkit.live/about</loc>
