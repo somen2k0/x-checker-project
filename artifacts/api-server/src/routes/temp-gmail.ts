@@ -3,7 +3,7 @@ import { fetchWithKeyRotation } from "../lib/rapidapi-keys";
 
 const router = Router();
 
-const RAPIDAPI_HOST = "gmailnator.p.rapidapi.com";
+const RAPIDAPI_HOST = "ephemera-mail.p.rapidapi.com";
 const BASE_URL = `https://${RAPIDAPI_HOST}`;
 
 function rapidHeaders(key: string): Record<string, string> {
@@ -11,6 +11,8 @@ function rapidHeaders(key: string): Record<string, string> {
     "Content-Type": "application/json",
     "x-rapidapi-key": key,
     "x-rapidapi-host": RAPIDAPI_HOST,
+    {"baseEmail":"user@gmail.com"}
+
   };
 }
 
