@@ -68,7 +68,7 @@ router.post("/temp-gmail/messages", async (req, res) => {
   }
 
   const { res: apiRes, exhausted } = await fetchWithKeyRotation((key) =>
-    fetch(`${BASE_URL}/api/emails/getMessageList`, {
+    fetch(`${BASE_URL}/api/inbox`, {
       method: "POST",
       headers: rapidHeaders(key),
       body: JSON.stringify({ email }),
@@ -81,44 +81,51 @@ router.post("/temp-gmail/messages", async (req, res) => {
       res.status(429).json({ error: "Rate-limited across all keys. Please wait a moment." });
       return;
     }
-    req.log.warn({ status: apiRes.status }, "Gmailnator getMessages failed");
+    req.log.warn({ status: apiRes.status }, "Gmailnator inbox failed");
     res.status(502).json({ error: "Failed to fetch messages." });
     return;
   }
 
-  const data = await apiRes.json() as Array<{ mid?: string; from?: string; subject?: string; date?: string }>;
-  res.json({ messages: Array.isArray(data) ? data : [] });
+  type RawMsg = {
+    message_id?: string; mid?: string;
+    from?: string; sender?: string;
+    subject?: string;
+    date?: string; timestamp?: string;
+    content?: string; body?: string; text?: string;
+  };
+  type InboxResponse = {
+    status?: string;
+    messages?: RawMsg[];
+    message_count?: number;
+  };
+
+  let raw: InboxResponse | RawMsg[];
+  try {
+    raw = await apiRes.json() as InboxResponse | RawMsg[];
+  } catch {
+    res.status(502).json({ error: "Invalid response from Gmailnator API." });
+    return;
+  }
+
+  const rawMessages: RawMsg[] = Array.isArray(raw) ? raw : (raw.messages ?? []);
+  const messages = rawMessages.map((m) => ({
+    mid:     m.message_id ?? m.mid ?? "",
+    from:    m.from ?? m.sender ?? "",
+    subject: m.subject ?? "",
+    date:    m.date ?? m.timestamp ?? "",
+    content: m.content ?? m.body ?? m.text ?? "",
+  }));
+
+  res.json({ messages });
 });
 
-router.post("/temp-gmail/message", async (req, res) => {
-  const { email, mid } = req.body as { email?: string; mid?: string };
-
-  if (!email || !mid) {
-    res.status(400).json({ error: "email and mid are required." });
-    return;
-  }
-
-  const { res: apiRes, exhausted } = await fetchWithKeyRotation((key) =>
-    fetch(`${BASE_URL}/api/emails/get-message`, {
-      method: "POST",
-      headers: rapidHeaders(key),
-      body: JSON.stringify({ email, mid }),
-      signal: AbortSignal.timeout(12000),
-    })
-  );
-
-  if (!apiRes.ok) {
-    if (exhausted || apiRes.status === 429) {
-      res.status(429).json({ error: "Rate-limited across all keys. Please wait a moment." });
-      return;
-    }
-    req.log.warn({ status: apiRes.status }, "Gmailnator getMessage failed");
-    res.status(502).json({ error: "Failed to fetch message." });
-    return;
-  }
-
-  const data = await apiRes.json() as { content?: string; from?: string; subject?: string; date?: string };
-  res.json(data);
+// The Gmailnator API no longer exposes a separate single-message endpoint.
+// Message content is now embedded in the inbox list response above.
+// This route is kept for backward compatibility but returns a 404 notice.
+router.post("/temp-gmail/message", (_req, res) => {
+  res.status(404).json({
+    error: "Individual message endpoint no longer available. Message content is included in the inbox list.",
+  });
 });
 
 export default router;

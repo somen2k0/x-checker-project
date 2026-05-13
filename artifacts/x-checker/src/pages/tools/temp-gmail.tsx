@@ -21,7 +21,7 @@ interface GuerrillaMessage {
 }
 interface GuerrillaFullMessage { body: string; from?: string; subject?: string; }
 
-interface GmailnatorMessage { mid: string; from?: string; subject?: string; date?: string; }
+interface GmailnatorMessage { mid: string; from?: string; subject?: string; date?: string; content?: string; }
 interface GmailnatorFullMessage { content?: string; from?: string; subject?: string; date?: string; }
 
 
@@ -407,7 +407,7 @@ function TempGmailTab() {
   const [selectedMid, setSelectedMid] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
-  const [loadingMsg, setLoadingMsg] = useState(false);
+  const [loadingMsg] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [apiMissing, setApiMissing] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -445,17 +445,14 @@ function TempGmailTab() {
     } catch {} finally { if (!silent) setLoadingMsgs(false); }
   }, []);
 
-  const openMessage = async (msg: GmailnatorMessage) => {
-    if (!email) return;
-    setSelectedMid(msg.mid); setLoadingMsg(true); setSelected(null);
-    try {
-      const r = await fetch("/api/temp-gmail/message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, mid: msg.mid }),
-      });
-      if (r.ok) { setSelected(await r.json() as GmailnatorFullMessage); }
-    } catch {} finally { setLoadingMsg(false); }
+  const openMessage = (msg: GmailnatorMessage) => {
+    setSelectedMid(msg.mid);
+    setSelected({
+      content: msg.content ?? "",
+      from:    msg.from,
+      subject: msg.subject,
+      date:    msg.date,
+    });
   };
 
   const copyAddress = () => {
