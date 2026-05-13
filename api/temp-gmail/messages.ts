@@ -16,8 +16,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  const { res: apiRes, exhausted } = await fetchWithRotation((key) =>
-    fetch(`${BASE_URL}/api/emails/getMessageList`, {
+  const doFetch = () => fetchWithRotation((key) =>
+    fetch(`${BASE_URL}/api/inbox`, {
       method: "POST",
       headers: rapidHeaders(key),
       body: JSON.stringify({ email }),
@@ -25,15 +25,52 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     })
   );
 
+  let { res: apiRes, exhausted } = await doFetch();
+
+  // Retry once on transient server errors
+  if (!apiRes.ok && !exhausted && apiRes.status >= 500) {
+    await new Promise((r) => setTimeout(r, 1200));
+    ({ res: apiRes, exhausted } = await doFetch());
+  }
+
   if (!apiRes.ok) {
     if (exhausted || apiRes.status === 429) {
-      res.status(429).json({ error: "Rate-limited across all keys. Please wait a moment." });
+      res.status(429).json({ error: "API quota reached for today — inbox will work again tomorrow. Your address is still valid." });
       return;
     }
-    res.status(502).json({ error: "Failed to fetch messages." });
+    res.status(502).json({ error: "The inbox service is temporarily unavailable. Please try again in a moment." });
     return;
   }
 
-  const data = await apiRes.json() as Array<{ mid?: string; from?: string; subject?: string; date?: string }>;
-  res.status(200).json({ messages: Array.isArray(data) ? data : [] });
+  type RawMsg = {
+    id?: string; message_id?: string; mid?: string;
+    from?: string; sender?: string;
+    subject?: string;
+    date?: string; timestamp?: number | string; time_ago?: string;
+    content?: string; body?: string; text?: string;
+  };
+  type InboxResponse = {
+    status?: string;
+    messages?: RawMsg[];
+    message_count?: number;
+  };
+
+  let raw: InboxResponse | RawMsg[];
+  try {
+    raw = await apiRes.json() as InboxResponse | RawMsg[];
+  } catch {
+    res.status(502).json({ error: "Invalid response from inbox API." });
+    return;
+  }
+
+  const rawMessages: RawMsg[] = Array.isArray(raw) ? raw : (raw.messages ?? []);
+  const messages = rawMessages.map((m) => ({
+    mid:     m.id ?? m.message_id ?? m.mid ?? "",
+    from:    m.from ?? m.sender ?? "",
+    subject: m.subject ?? "",
+    date:    m.time_ago ?? (m.date ?? (m.timestamp ? String(m.timestamp) : "")),
+    content: m.content ?? m.body ?? m.text ?? "",
+  }));
+
+  res.status(200).json({ messages });
 }

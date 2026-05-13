@@ -17,10 +17,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   }
 
   const { res: apiRes, exhausted } = await fetchWithRotation((key) =>
-    fetch(`${BASE_URL}/api/emails/get-message`, {
+    fetch(`${BASE_URL}/api/inbox`, {
       method: "POST",
       headers: rapidHeaders(key),
-      body: JSON.stringify({ email, mid }),
+      body: JSON.stringify({ email, id: mid }),
       signal: AbortSignal.timeout(12000),
     })
   );
@@ -34,6 +34,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  const data = await apiRes.json() as { content?: string; from?: string; subject?: string; date?: string };
-  res.status(200).json(data);
+  type InboxResp = {
+    status?: string;
+    messages?: Array<{ content?: string; body?: string; from?: string; subject?: string; time_ago?: string }>;
+  };
+
+  let data: InboxResp | null = null;
+  try { data = await apiRes.json() as InboxResp; } catch { /**/ }
+
+  const msgs = Array.isArray(data) ? data : (data?.messages ?? []);
+  const first = (msgs as Array<{ content?: string; body?: string; from?: string; subject?: string; time_ago?: string }>)[0];
+  const content = first?.content ?? first?.body ?? "";
+
+  res.status(200).json({ content, from: first?.from, subject: first?.subject });
 }
