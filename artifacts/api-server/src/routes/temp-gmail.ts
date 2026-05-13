@@ -11,7 +11,6 @@ function rapidHeaders(key: string): Record<string, string> {
     "Content-Type": "application/json",
     "x-rapidapi-key": key,
     "x-rapidapi-host": RAPIDAPI_HOST,
-    {"baseEmail":"user@gmail.com"}
 
   };
 }
