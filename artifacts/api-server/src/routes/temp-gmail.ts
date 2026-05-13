@@ -11,7 +11,6 @@ function rapidHeaders(key: string): Record<string, string> {
     "Content-Type": "application/json",
     "x-rapidapi-key": key,
     "x-rapidapi-host": RAPIDAPI_HOST,
-
   };
 }
 
@@ -42,8 +41,13 @@ router.post("/temp-gmail/generate", async (req, res) => {
   );
 
   if (!apiRes.ok) {
+    const body = await apiRes.json().catch(() => ({})) as { error?: string };
+    if (body.error === "no_keys" || apiRes.status === 503) {
+      res.status(503).json({ error: "no_keys" });
+      return;
+    }
     if (exhausted || apiRes.status === 429) {
-      res.status(429).json({ error: "All RapidAPI keys are rate-limited. Please wait a moment or add more keys." });
+      res.status(429).json({ error: "All RapidAPI keys are rate-limited. Please wait a moment." });
       return;
     }
     req.log.warn({ status: apiRes.status }, "Gmailnator generate failed");
@@ -96,11 +100,11 @@ router.post("/temp-gmail/messages", async (req, res) => {
   }
 
   type RawMsg = {
-    id?: string; message_id?: string; mid?: string;
+    id?: string; message_id?: string; mid?: string; msgid?: string;
     from?: string; sender?: string;
     subject?: string;
     date?: string; timestamp?: number | string; time_ago?: string;
-    content?: string; body?: string; text?: string;
+    content?: string; body?: string; text?: string; snippet?: string; preview?: string; excerpt?: string;
   };
   type InboxResponse = {
     status?: string;
@@ -118,18 +122,18 @@ router.post("/temp-gmail/messages", async (req, res) => {
 
   const rawMessages: RawMsg[] = Array.isArray(raw) ? raw : (raw.messages ?? []);
   const messages = rawMessages.map((m) => ({
-    mid:      m.id ?? m.message_id ?? m.mid ?? "",
-    from:     m.from ?? m.sender ?? "",
-    subject:  m.subject ?? "",
-    date:     m.time_ago ?? (m.date ?? (m.timestamp ? String(m.timestamp) : "")),
-    content:  m.content ?? m.body ?? m.text ?? "",
+    mid:     m.id ?? m.message_id ?? m.mid ?? m.msgid ?? "",
+    from:    m.from ?? m.sender ?? "",
+    subject: m.subject ?? "",
+    date:    m.time_ago ?? (m.date ?? (m.timestamp ? String(m.timestamp) : "")),
+    content: m.content ?? m.body ?? m.text ?? m.snippet ?? m.preview ?? m.excerpt ?? "",
   }));
 
   res.json({ messages });
 });
 
-// Attempt to fetch individual message content by calling /api/inbox with the
-// message id — Gmailnator may return the full body for a single message this way.
+// Fetch individual message content using the correct Gmailnator endpoint: POST /api/messageid
+// Falls back to /api/inbox with id if the primary endpoint returns nothing.
 router.post("/temp-gmail/message", async (req, res) => {
   const { email, mid } = req.body as { email?: string; mid?: string };
   if (!email || !mid) {
@@ -137,7 +141,73 @@ router.post("/temp-gmail/message", async (req, res) => {
     return;
   }
 
-  const { res: apiRes, exhausted } = await fetchWithKeyRotation((key) =>
+  type MsgBody = {
+    content?: string; body?: string; text?: string; html?: string; message?: string;
+    from?: string; sender?: string;
+    subject?: string;
+    msgid?: string; id?: string;
+  };
+
+  // --- Strategy 1: POST /api/messageid (correct Gmailnator endpoint for full body) ---
+  const { res: r1, exhausted: ex1 } = await fetchWithKeyRotation((key) =>
+    fetch(`${BASE_URL}/api/messageid`, {
+      method: "POST",
+      headers: rapidHeaders(key),
+      body: JSON.stringify({ msgid: mid }),
+      signal: AbortSignal.timeout(12000),
+    })
+  );
+
+  if (r1.ok && !ex1) {
+    let d1: MsgBody | MsgBody[] | { messages?: MsgBody[] } | null = null;
+    try { d1 = await r1.json() as typeof d1; } catch { /**/ }
+
+    const item1: MsgBody | undefined = Array.isArray(d1)
+      ? d1[0]
+      : (d1 as { messages?: MsgBody[] })?.messages?.[0] ?? (d1 as MsgBody) ?? undefined;
+
+    const content1 = item1?.content ?? item1?.body ?? item1?.text ?? item1?.html ?? item1?.message ?? "";
+    if (content1) {
+      res.json({
+        content: content1,
+        from: item1?.from ?? item1?.sender ?? "",
+        subject: item1?.subject ?? "",
+      });
+      return;
+    }
+  }
+
+  // --- Strategy 2: POST /api/messageid with id parameter ---
+  const { res: r2 } = await fetchWithKeyRotation((key) =>
+    fetch(`${BASE_URL}/api/messageid`, {
+      method: "POST",
+      headers: rapidHeaders(key),
+      body: JSON.stringify({ id: mid }),
+      signal: AbortSignal.timeout(12000),
+    })
+  );
+
+  if (r2.ok) {
+    let d2: MsgBody | MsgBody[] | { messages?: MsgBody[] } | null = null;
+    try { d2 = await r2.json() as typeof d2; } catch { /**/ }
+
+    const item2: MsgBody | undefined = Array.isArray(d2)
+      ? d2[0]
+      : (d2 as { messages?: MsgBody[] })?.messages?.[0] ?? (d2 as MsgBody) ?? undefined;
+
+    const content2 = item2?.content ?? item2?.body ?? item2?.text ?? item2?.html ?? item2?.message ?? "";
+    if (content2) {
+      res.json({
+        content: content2,
+        from: item2?.from ?? item2?.sender ?? "",
+        subject: item2?.subject ?? "",
+      });
+      return;
+    }
+  }
+
+  // --- Strategy 3: POST /api/inbox with email + id (legacy fallback) ---
+  const { res: r3 } = await fetchWithKeyRotation((key) =>
     fetch(`${BASE_URL}/api/inbox`, {
       method: "POST",
       headers: rapidHeaders(key),
@@ -146,24 +216,29 @@ router.post("/temp-gmail/message", async (req, res) => {
     })
   );
 
-  if (!apiRes.ok) {
-    if (exhausted || apiRes.status === 429) {
-      res.status(429).json({ error: "Rate-limited. Please wait a moment." });
-      return;
-    }
-    res.status(502).json({ error: "Failed to fetch message content." });
+  if (r3.ok) {
+    type InboxResp = { status?: string; messages?: MsgBody[] };
+    let d3: InboxResp | MsgBody[] | null = null;
+    try { d3 = await r3.json() as typeof d3; } catch { /**/ }
+
+    const msgs3: MsgBody[] = Array.isArray(d3) ? d3 : ((d3 as InboxResp)?.messages ?? []);
+    const first3 = msgs3[0];
+    const content3 = first3?.content ?? first3?.body ?? first3?.text ?? first3?.html ?? first3?.message ?? "";
+
+    res.json({
+      content: content3,
+      from: first3?.from ?? first3?.sender ?? "",
+      subject: first3?.subject ?? "",
+    });
     return;
   }
 
-  type InboxResp = { status?: string; messages?: Array<{ content?: string; body?: string; from?: string; subject?: string; time_ago?: string }> };
-  let data: InboxResp | null = null;
-  try { data = await apiRes.json() as InboxResp; } catch { /**/ }
+  if (ex1) {
+    res.status(429).json({ error: "Rate-limited. Please wait a moment." });
+    return;
+  }
 
-  const msgs = Array.isArray(data) ? data : (data?.messages ?? []);
-  const first = (msgs as Array<{ content?: string; body?: string; from?: string; subject?: string; time_ago?: string }>)[0];
-  const content = first?.content ?? first?.body ?? "";
-
-  res.json({ content, from: first?.from, subject: first?.subject });
+  res.status(502).json({ error: "Failed to fetch message content." });
 });
 
 export default router;

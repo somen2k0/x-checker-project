@@ -477,7 +477,7 @@ function TempGmailTab() {
         body: JSON.stringify({ type: "any" }),
       });
       const d = await r.json() as { email?: string; error?: string };
-      if (r.status === 503) { setApiMissing(true); setError(d.error ?? "Gmailnator API not configured."); return; }
+      if (r.status === 503 || d.error === "no_keys") { setApiMissing(true); setError("no_keys"); return; }
       if (!r.ok || !d.email) { setError(d.error ?? "Failed to generate address."); return; }
       emailRef.current = d.email;
       setEmail(d.email);
@@ -577,12 +577,25 @@ function TempGmailTab() {
 
       {/* API not configured error */}
       {apiMissing && (
-        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 flex items-center gap-3">
-          <AlertCircle className="h-5 w-5 text-red-400 shrink-0" />
-          <p className="text-sm text-red-300 flex-1">{error}</p>
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-5 space-y-3">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-amber-300">RapidAPI key required</p>
+              <p className="text-xs text-amber-300/70 mt-1 leading-relaxed">
+                Temp Gmail uses the Gmailnator API to generate real @gmail.com addresses.
+                A free RapidAPI key is needed to use it.
+              </p>
+            </div>
+          </div>
+          <ol className="text-xs text-amber-200/60 space-y-1 ml-8 list-decimal">
+            <li>Go to <a href="https://rapidapi.com/Glavier/api/gmailnator" target="_blank" rel="noopener noreferrer" className="text-amber-400 underline underline-offset-2 hover:text-amber-300">rapidapi.com → Gmailnator</a> and subscribe to the free plan</li>
+            <li>Copy your <strong className="text-amber-300">X-RapidAPI-Key</strong> from the API playground</li>
+            <li>Add it as a secret named <code className="bg-black/30 px-1 rounded">RAPIDAPI_KEYS</code> in Replit Secrets, then restart the server</li>
+          </ol>
           <Button size="sm" variant="outline" onClick={() => generate()} disabled={generating}
-            className="text-xs gap-1.5 border-red-500/40 text-red-300 hover:bg-red-500/10 shrink-0">
-            <RefreshCw className={`h-3.5 w-3.5 ${generating ? "animate-spin" : ""}`} />Retry
+            className="text-xs gap-1.5 border-amber-500/40 text-amber-300 hover:bg-amber-500/10 ml-8">
+            <RefreshCw className={`h-3.5 w-3.5 ${generating ? "animate-spin" : ""}`} />Retry after adding key
           </Button>
         </div>
       )}
@@ -662,10 +675,26 @@ function TempGmailTab() {
                   {selected.content ? (
                     <div className="prose prose-invert prose-sm max-w-none text-sm" dangerouslySetInnerHTML={{ __html: selected.content }} />
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-8 gap-2 text-center">
-                      <MailOpen className="h-7 w-7 text-muted-foreground/20" />
-                      <p className="text-sm text-muted-foreground/60">Message body unavailable</p>
-                      <p className="text-xs text-muted-foreground/40">The API provider doesn't expose message content on the free plan</p>
+                    <div className="flex flex-col items-center justify-center py-8 gap-3 text-center px-4">
+                      <div className="h-11 w-11 rounded-xl bg-muted/40 border border-border/50 flex items-center justify-center">
+                        <MailOpen className="h-5 w-5 text-muted-foreground/40" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground/70">Message body not returned by API</p>
+                        <p className="text-xs text-muted-foreground/40 mt-1 leading-relaxed">
+                          Gmailnator may not expose the full body for this message.<br />
+                          Open Gmail to read it directly.
+                        </p>
+                      </div>
+                      <a
+                        href="https://mail.google.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors rounded-lg px-3 py-2"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                        Open Gmail →
+                      </a>
                     </div>
                   )}
                 </div>
