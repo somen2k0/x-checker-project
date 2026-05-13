@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
+import { useLocation } from "wouter";
 import { MiniToolLayout } from "@/components/layout/MiniToolLayout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -793,11 +794,25 @@ function GmailTricksTab() {
   );
 }
 
+// ── Tab → URL mapping ──────────────────────────────────────────────
+
+const TAB_URLS: Record<Tab, string> = {
+  disposable: "/tools/temp-mail/disposable",
+  tempgmail:  "/tools/temp-mail/tempgmail",
+  gmail:      "/tools/temp-mail/gmail-tricks",
+};
+
 // ── Main Page ──────────────────────────────────────────────────────
 
-export default function TempMail() {
-  const [tab, setTab] = useState<Tab>("disposable");
+export default function TempMail({ defaultTab = "disposable" }: { defaultTab?: Tab }) {
+  const [tab, setTab] = useState<Tab>(defaultTab);
+  const [, navigate] = useLocation();
   useToolView("temp-mail");
+
+  function switchTab(key: Tab) {
+    setTab(key);
+    navigate(TAB_URLS[key]);
+  }
 
   const TABS = [
     { key: "disposable" as Tab, label: "Disposable Inbox", icon: Inbox, color: "text-cyan-400" },
@@ -823,7 +838,7 @@ export default function TempMail() {
           {TABS.map(({ key, label, icon: Icon, color }) => (
             <button
               key={key}
-              onClick={() => setTab(key)}
+              onClick={() => switchTab(key)}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center gap-2 ${tab === key ? "bg-background border border-border/60 text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
             >
               <Icon className={`h-3.5 w-3.5 ${color}`} />

@@ -100,9 +100,20 @@ function TrackedRouter() {
       <Route path="/tools/email-character-counter" component={EmailCharacterCounter} />
       <Route path="/tools/email-signature-generator" component={EmailSignatureGenerator} />
       <Route path="/tools/email-validator" component={EmailValidator} />
-      <Route path="/tools/temp-gmail" component={TempGmail} />
+      <Route path="/tools/temp-mail/disposable">
+        {() => <TempGmail defaultTab="disposable" />}
+      </Route>
+      <Route path="/tools/temp-mail/tempgmail">
+        {() => <TempGmail defaultTab="tempgmail" />}
+      </Route>
+      <Route path="/tools/temp-mail/gmail-tricks">
+        {() => <TempGmail defaultTab="gmail" />}
+      </Route>
       <Route path="/tools/temp-mail">
-        {() => <Redirect to="/tools/temp-gmail" />}
+        {() => <Redirect to="/tools/temp-mail/disposable" />}
+      </Route>
+      <Route path="/tools/temp-gmail">
+        {() => <Redirect to="/tools/temp-mail/tempgmail" />}
       </Route>
 
       {/* Canonical alias: /tools/x-account-checker → /tools?tab=checker */}
