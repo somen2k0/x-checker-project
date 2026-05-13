@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { increment, logActivity } from "./_lib/admin-db";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 const MODEL = "llama-3.3-70b-versatile";
@@ -79,6 +80,8 @@ Rules:
       .filter((l: string) => l.length > 0)
       .slice(0, 3);
 
+    void increment("bio:requests");
+    void logActivity("bio_generate");
     res.status(200).json({ bios });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

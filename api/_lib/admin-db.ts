@@ -101,6 +101,22 @@ export async function getStats(): Promise<Record<string, number>> {
   }
 }
 
+export async function increment(key: string, amount = 1): Promise<void> {
+  try {
+    await ensureStatsTable();
+    await getPool().query(
+      `INSERT INTO app_stats (key, value, updated_at)
+       VALUES ($1, $2, NOW())
+       ON CONFLICT (key) DO UPDATE
+         SET value      = app_stats.value + EXCLUDED.value,
+             updated_at = NOW()`,
+      [key, amount],
+    );
+  } catch {
+    // fire-and-forget — never crash a route because of stat tracking
+  }
+}
+
 // ── app_request_log ───────────────────────────────────────────────────────────
 
 let logTableReady = false;
@@ -123,6 +139,24 @@ export interface ActivityEntry {
   event_type: string;
   count: number;
   created_at: string;
+}
+
+export async function logActivity(eventType: string, count = 1): Promise<void> {
+  try {
+    await ensureLogTable();
+    await getPool().query(
+      "INSERT INTO app_request_log (event_type, count) VALUES ($1, $2)",
+      [eventType, count],
+    );
+    await getPool().query(`
+      DELETE FROM app_request_log
+      WHERE id NOT IN (
+        SELECT id FROM app_request_log ORDER BY created_at DESC LIMIT 200
+      )
+    `);
+  } catch {
+    // fire-and-forget — never crash a route because of activity logging
+  }
 }
 
 export async function getRecentActivity(limit = 50): Promise<ActivityEntry[]> {

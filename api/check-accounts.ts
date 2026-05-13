@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { increment, logActivity } from "./_lib/admin-db";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const UA =
@@ -218,6 +219,13 @@ export default async function handler(
   const results = await Promise.all(
     usernames.map((username) => checkXAccount(username, guestToken))
   );
+
+  void increment("accounts:requests");
+  void increment("accounts:usernames_checked", usernames.length);
+  for (const r of results) {
+    void increment(`accounts:status_${r.status}`);
+  }
+  void logActivity("account_check", usernames.length);
 
   res.status(200).json({ results });
 }
