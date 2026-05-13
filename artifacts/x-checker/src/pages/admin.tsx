@@ -59,7 +59,7 @@ function SourceBadge({ source }: { source: "env" | "hardcoded" }) {
 // ── Password Gate ──────────────────────────────────────────────────────────
 
 interface PasswordGateProps {
-  onAuth: (password: string) => Promise<boolean>;
+  onAuth: (password: string) => Promise<{ ok: boolean; error?: string }>;
 }
 
 function PasswordGate({ onAuth }: PasswordGateProps) {
@@ -73,9 +73,9 @@ function PasswordGate({ onAuth }: PasswordGateProps) {
     if (!password.trim()) return;
     setLoading(true);
     setError("");
-    const ok = await onAuth(password.trim());
-    if (!ok) {
-      setError("Incorrect password or admin panel is disabled.");
+    const result = await onAuth(password.trim());
+    if (!result.ok) {
+      setError(result.error ?? "Something went wrong. Please try again.");
       setLoading(false);
     }
   }
@@ -171,10 +171,10 @@ function AdminPanel({ password }: AdminPanelProps) {
     setServerKeyStatuses((s) => ({ ...s, [id]: { status: "testing" } }));
     toast({ title: "Testing key…", description: key.masked });
     try {
-      const res = await fetch("/api/admin/keys/test-server", {
+      const res = await fetch("/api/admin/keys", {
         method: "POST",
         headers,
-        body: JSON.stringify({ source: key.source, index: key.index }),
+        body: JSON.stringify({ action: "test-server", source: key.source, index: key.index }),
       });
       const data = await res.json() as { status: string; httpStatus: number };
       setServerKeyStatuses((s) => ({ ...s, [id]: { status: data.status as KeyStatus["status"], httpStatus: data.httpStatus } }));
@@ -186,7 +186,7 @@ function AdminPanel({ password }: AdminPanelProps) {
   async function testDraftKey(draftId: string, key: string) {
     setDraftKeys((prev) => prev.map((d) => d.id === draftId ? { ...d, status: { status: "testing" } } : d));
     try {
-      const res = await fetch("/api/admin/keys/test", {
+      const res = await fetch("/api/admin/keys", {
         method: "POST",
         headers,
         body: JSON.stringify({ key }),
@@ -385,7 +385,7 @@ export default function AdminPage() {
     sessionStorage.getItem("admin_password")
   );
 
-  async function handleAuth(pw: string): Promise<boolean> {
+  async function handleAuth(pw: string): Promise<{ ok: boolean; error?: string }> {
     try {
       const res = await fetch("/api/admin/keys", {
         headers: { "x-admin-password": pw },
@@ -393,11 +393,18 @@ export default function AdminPage() {
       if (res.ok) {
         sessionStorage.setItem("admin_password", pw);
         setPassword(pw);
-        return true;
+        return { ok: true };
       }
-      return false;
+      const body = await res.json().catch(() => ({})) as { error?: string };
+      if (res.status === 503) {
+        return { ok: false, error: "Admin panel is disabled on the server. Add ADMIN_PASSWORD to your Vercel environment variables and redeploy." };
+      }
+      if (res.status === 401) {
+        return { ok: false, error: "Incorrect password. Please try again." };
+      }
+      return { ok: false, error: body.error ?? `Server error (${res.status}). Check your deployment logs.` };
     } catch {
-      return false;
+      return { ok: false, error: "Could not reach the server. Check your network or deployment." };
     }
   }
 
