@@ -292,6 +292,45 @@ router.delete("/admin/twitter-token", async (req, res) => {
   res.json({ ok: true });
 });
 
+// ── Web3Forms key ─────────────────────────────────────────────────────────────
+
+router.get("/admin/web3forms-status", async (req, res) => {
+  if (!(await checkAuth(req))) {
+    res.status(401).json({ error: "Invalid password." });
+    return;
+  }
+  const dbKey = await getConfig("web3forms_key");
+  const envKey = process.env.WEB3FORMS_KEY;
+  const active = dbKey ?? envKey ?? null;
+  res.json({
+    source: dbKey ? "db" : envKey ? "env" : "none",
+    masked: active ? maskKey(active) : null,
+  });
+});
+
+router.put("/admin/web3forms-key", async (req, res) => {
+  if (!(await checkAuth(req))) {
+    res.status(401).json({ error: "Invalid password." });
+    return;
+  }
+  const { key } = req.body as { key?: string };
+  if (!key || key.trim().length === 0) {
+    res.status(400).json({ error: "key is required." });
+    return;
+  }
+  await setConfig("web3forms_key", key.trim());
+  res.json({ ok: true });
+});
+
+router.delete("/admin/web3forms-key", async (req, res) => {
+  if (!(await checkAuth(req))) {
+    res.status(401).json({ error: "Invalid password." });
+    return;
+  }
+  await deleteConfig("web3forms_key");
+  res.json({ ok: true });
+});
+
 // ── Stats ────────────────────────────────────────────────────────────────────
 
 router.get("/admin/stats", async (req, res) => {

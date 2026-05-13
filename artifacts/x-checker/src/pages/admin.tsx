@@ -605,6 +605,108 @@ function TwitterTokenSection({ password }: { password: string }) {
   );
 }
 
+// ── Web3Forms Section ─────────────────────────────────────────────────────────
+
+function Web3FormsSection({ password }: { password: string }) {
+  const { toast } = useToast();
+  const [status, setStatus] = useState<{ source: "db" | "env" | "none"; masked: string | null } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [newKey, setNewKey] = useState("");
+
+  const headers = { "Content-Type": "application/json", "x-admin-password": password };
+
+  const fetchStatus = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/web3forms-status", { headers });
+      if (res.ok) setStatus(await res.json() as { source: "db" | "env" | "none"; masked: string | null });
+    } finally {
+      setLoading(false);
+    }
+  }, [password]);
+
+  useEffect(() => { fetchStatus(); }, [fetchStatus]);
+
+  async function saveKey() {
+    if (!newKey.trim()) return;
+    try {
+      await fetch("/api/admin/web3forms-key", { method: "PUT", headers, body: JSON.stringify({ key: newKey.trim() }) });
+      toast({ title: "Web3Forms key saved." });
+      setEditing(false);
+      setNewKey("");
+      await fetchStatus();
+    } catch {
+      toast({ title: "Failed to save key", variant: "destructive" });
+    }
+  }
+
+  async function deleteKey() {
+    try {
+      await fetch("/api/admin/web3forms-key", { method: "DELETE", headers });
+      toast({ title: "Key removed. Contact form disabled until a new key is set." });
+      await fetchStatus();
+    } catch {
+      toast({ title: "Failed to remove key", variant: "destructive" });
+    }
+  }
+
+  return (
+    <section className="space-y-3 border-t border-border/40 pt-5">
+      <div>
+        <h2 className="text-sm font-semibold flex items-center gap-2"><Mail className="h-4 w-4 text-emerald-400" /> Web3Forms Key</h2>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          Used by the contact/feedback form to deliver messages to your email.{" "}
+          <a href="https://web3forms.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Get a free key at web3forms.com</a>.
+        </p>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Loading…</div>
+      ) : status?.source === "none" ? (
+        <div className="rounded-lg border border-dashed border-border/60 px-4 py-4 text-sm text-muted-foreground">
+          No key set — contact form is currently disabled.
+        </div>
+      ) : status && (
+        <div className="rounded-lg border border-border/60 overflow-hidden">
+          <div className="flex items-center gap-3 px-4 py-3 bg-card">
+            <code className="text-xs font-mono text-muted-foreground flex-1">{status.masked}</code>
+            {status.source === "db" && <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-xs gap-1"><Database className="h-2.5 w-2.5" /> Database</Badge>}
+            {status.source === "env" && <Badge variant="outline" className="text-xs">ENV VAR</Badge>}
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setEditing(true)}>Edit</Button>
+            {status.source === "db" && (
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={deleteKey}>
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {!editing && (
+        <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setEditing(true)}>
+          <Plus className="h-3.5 w-3.5" /> {status?.source === "none" ? "Set Key" : "Change Key"}
+        </Button>
+      )}
+
+      {editing && (
+        <div className="flex gap-2">
+          <Input
+            type="password"
+            placeholder="Paste your Web3Forms access key"
+            value={newKey}
+            onChange={(e) => setNewKey(e.target.value)}
+            className="font-mono text-xs"
+            autoFocus
+          />
+          <Button size="sm" onClick={saveKey} disabled={!newKey.trim()}>Save</Button>
+          <Button size="sm" variant="ghost" onClick={() => { setEditing(false); setNewKey(""); }}>Cancel</Button>
+        </div>
+      )}
+    </section>
+  );
+}
+
 // ── API Keys Tab ─────────────────────────────────────────────────────────────
 
 function ApiKeysTab({ password }: { password: string }) {
@@ -613,6 +715,7 @@ function ApiKeysTab({ password }: { password: string }) {
       <RapidApiKeysTab password={password} />
       <GroqKeySection password={password} />
       <TwitterTokenSection password={password} />
+      <Web3FormsSection password={password} />
     </div>
   );
 }
@@ -745,6 +848,11 @@ function StatsTab({ password }: { password: string }) {
     setLoading(true);
     try {
       const res = await fetch("/api/admin/stats", { headers });
+      if (res.status === 401) {
+        sessionStorage.removeItem("admin_password");
+        window.location.reload();
+        return;
+      }
       if (!res.ok) throw new Error("Failed");
       const data = await res.json() as { stats: RawStats };
       setStats(data.stats);
