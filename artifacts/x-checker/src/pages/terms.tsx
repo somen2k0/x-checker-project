@@ -14,7 +14,7 @@ These Terms apply to all visitors, users, and others who access or use the Servi
   {
     id: "description",
     title: "2. Description of Service",
-    content: `X Toolkit is a free, web-based collection of 35+ productivity tools organized across six categories:
+    content: `X Toolkit is a free, web-based collection of 39+ productivity tools organized across six categories:
 
 **X Account Tools:**
 - Account Checker — bulk-check the status of up to 100 X accounts (active, suspended, or not found)

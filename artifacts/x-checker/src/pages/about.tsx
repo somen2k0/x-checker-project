@@ -6,12 +6,13 @@ import {
   Shield, Zap, Heart, Search, Sparkles, Link2, AtSign, ArrowRight,
   Code2, Mail, BarChart2, FileText, Users, Globe,
 } from "lucide-react";
+import { TOTAL_LIVE } from "@/lib/tools-registry";
 
 const values = [
   {
     icon: Zap,
     title: "Fast & Free",
-    description: "All 35+ tools are instant and completely free. No paywalls, no rate-limit warnings on basic usage, no upsells.",
+    description: `All ${TOTAL_LIVE}+ tools are instant and completely free. No paywalls, no rate-limit warnings on basic usage, no upsells.`,
   },
   {
     icon: Shield,
@@ -76,7 +77,7 @@ export default function About() {
             Built for creators, developers & power users
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
-            X Toolkit is a free collection of 35+ productivity tools for X (Twitter) power users,
+            X Toolkit is a free collection of {TOTAL_LIVE}+ productivity tools for X (Twitter) power users,
             developers, SEO professionals, and email marketers. We built it because managing accounts
             and creating content at scale shouldn't require expensive SaaS subscriptions.
           </p>
@@ -113,7 +114,7 @@ export default function About() {
         <section className="mb-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: Globe, value: "35+", label: "Free Tools" },
+              { icon: Globe, value: `${TOTAL_LIVE}+`, label: "Free Tools" },
               { icon: Users, value: "6", label: "Categories" },
               { icon: Shield, value: "0", label: "Data Stored" },
               { icon: Zap, value: "~2s", label: "Avg Result Time" },
@@ -182,7 +183,7 @@ export default function About() {
         {/* CTA */}
         <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 md:p-8 text-center">
           <h2 className="text-xl font-semibold mb-2">Try X Toolkit now</h2>
-          <p className="text-muted-foreground text-sm mb-5">35+ tools. No account needed. Free forever.</p>
+          <p className="text-muted-foreground text-sm mb-5">{TOTAL_LIVE}+ tools. No account needed. Free forever.</p>
           <Link href="/tools">
             <Button className="shadow-sm shadow-primary/20">
               Open the Tools <ArrowRight className="h-4 w-4 ml-2" />

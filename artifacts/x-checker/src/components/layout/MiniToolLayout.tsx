@@ -1,4 +1,5 @@
 import { type LucideIcon, ArrowRight, Wrench, ChevronRight, Home } from "lucide-react";
+import { TOTAL_LIVE } from "@/lib/tools-registry";
 import { Link, useLocation } from "wouter";
 import { Layout } from "./Layout";
 import { SeoHead } from "@/components/SeoHead";
@@ -185,7 +186,7 @@ export function MiniToolLayout({
         <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <h3 className="font-semibold mb-1">Explore all tools</h3>
-            <p className="text-sm text-muted-foreground">35+ free tools — X tools, AI writing, developer utilities, and more. No signup required.</p>
+            <p className="text-sm text-muted-foreground">{TOTAL_LIVE}+ free tools — X tools, AI writing, developer utilities, and more. No signup required.</p>
           </div>
           <Link href="/tools">
             <Button className="shrink-0 shadow-sm shadow-primary/20 whitespace-nowrap">

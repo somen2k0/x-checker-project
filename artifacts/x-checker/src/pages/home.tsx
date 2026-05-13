@@ -63,7 +63,7 @@ function StarRating({ count }: { count: number }) {
 
 export default function Home() {
   useEffect(() => {
-    document.title = "X Toolkit — 35+ Free Tools for X, SEO, Developers & Creators";
+    document.title = `X Toolkit — ${TOTAL_LIVE}+ Free Tools for X, SEO, Developers & Creators`;
   }, []);
 
   const popularTools = getPopularTools();

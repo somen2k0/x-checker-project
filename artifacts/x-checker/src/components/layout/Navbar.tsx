@@ -10,6 +10,7 @@ import {
   Mail, ShieldCheck, Pencil, FileText, Shield, Tag, Clock, Inbox,
   Minimize2, Code2, KeyRound, Regex, Database, Shuffle, ArrowLeftRight,
 } from "lucide-react";
+import { TOTAL_LIVE } from "@/lib/tools-registry";
 
 const BADGE_STYLES: Record<string, string> = {
   Popular: "bg-amber-400/15 text-amber-400 border-amber-400/30",
@@ -274,7 +275,7 @@ export function Navbar() {
             </div>
             <span className="font-semibold text-foreground tracking-tight">X Toolkit</span>
             <Badge variant="outline" className="hidden lg:inline-flex text-[10px] font-medium border-primary/30 text-primary bg-primary/8 px-1.5 py-0">
-              35+ Tools
+              {TOTAL_LIVE}+ Tools
             </Badge>
           </Link>
 
