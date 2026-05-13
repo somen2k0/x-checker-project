@@ -8,7 +8,7 @@ import {
   Search, Sparkles, Link2, AtSign, Hash, MessageSquareText,
   Type, BarChart2, Users, FileJson, Lock, TrendingUp, Globe,
   Mail, ShieldCheck, Pencil, FileText, Shield, Tag, Clock, Inbox,
-  Minimize2, Code2, KeyRound, Regex, Database, Shuffle,
+  Minimize2, Code2, KeyRound, Regex, Database, Shuffle, ArrowLeftRight,
 } from "lucide-react";
 
 const BADGE_STYLES: Record<string, string> = {
@@ -35,6 +35,7 @@ const NAV_CATEGORIES = [
       { icon: MessageSquareText, label: "Tweet Formatter", href: "/tools/tweet-formatter" },
       { icon: Type, label: "Font Preview", href: "/tools/font-preview" },
       { icon: BarChart2, label: "Character Counter", href: "/tools/character-counter" },
+      { icon: Type, label: "Case Converter", href: "/tools/case-converter", badge: "New" },
     ],
     comingSoon: ["Follower Analyzer", "Tweet Scheduler", "Profile Audit"],
   },
@@ -54,6 +55,8 @@ const NAV_CATEGORIES = [
       { icon: Regex, label: "Regex Tester", href: "/tools/regex-tester", badge: "New" },
       { icon: Database, label: "SQL Formatter", href: "/tools/sql-formatter", badge: "New" },
       { icon: Shuffle, label: "UUID Generator", href: "/tools/uuid-generator" },
+      { icon: ArrowLeftRight, label: "YAML ↔ JSON Converter", href: "/tools/yaml-json", badge: "New" },
+      { icon: Clock, label: "Time Zone Converter", href: "/tools/timezone-converter", badge: "New" },
     ],
     comingSoon: [],
   },
@@ -64,6 +67,7 @@ const NAV_CATEGORIES = [
     bg: "bg-pink-400/10",
     href: "/seo-tools",
     tools: [
+      { icon: Globe, label: "OG / Twitter Card Preview", href: "/tools/og-image-preview", badge: "New" },
       { icon: Globe, label: "Meta Tag Generator", href: "/tools/meta-tag-generator", badge: "New" },
       { icon: Link2, label: "URL Slug Generator", href: "/tools/url-slug-generator", badge: "New" },
       { icon: TrendingUp, label: "Keyword Density", href: "/tools/keyword-density", badge: "New" },

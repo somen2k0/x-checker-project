@@ -5,7 +5,7 @@ import {
   Sparkles, Users, Type, Code2, TrendingUp, AtSign, Smile, Briefcase, Palette,
   Hash, MessageSquare as MessageSquareIcon, BarChart2, FileJson, Lock, Link2,
   Globe, Mail, ShieldCheck, Pencil, Inbox, Minimize2, KeyRound, Database,
-  Shuffle, Shield, Tag, FileText, BarChart,
+  Shuffle, Shield, Tag, FileText, BarChart, Clock, ArrowLeftRight,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
@@ -57,6 +57,7 @@ const TOOL_CATEGORIES = [
       { icon: MessageSquareIcon, label: "Tweet Thread Formatter", desc: "Split text into tweet threads", href: "/tools/tweet-formatter" },
       { icon: Type, label: "Font Preview", desc: "Preview text in Unicode fonts", href: "/tools/font-preview" },
       { icon: BarChart2, label: "Character Counter", desc: "Fit X's 280-char limit", href: "/tools/character-counter" },
+      { icon: Type, label: "Case Converter", desc: "camelCase, snake_case, UPPERCASE & more", href: "/tools/case-converter", badge: "New" },
     ],
   },
   {
@@ -75,6 +76,8 @@ const TOOL_CATEGORIES = [
       { icon: BarChart, label: "Regex Tester", desc: "Test regular expressions live", href: "/tools/regex-tester", badge: "New" },
       { icon: Database, label: "SQL Formatter", desc: "Format & beautify SQL queries", href: "/tools/sql-formatter", badge: "New" },
       { icon: Shuffle, label: "UUID Generator", desc: "Generate v4 UUIDs in bulk", href: "/tools/uuid-generator" },
+      { icon: ArrowLeftRight, label: "YAML ↔ JSON Converter", desc: "Convert between YAML and JSON instantly", href: "/tools/yaml-json", badge: "New" },
+      { icon: Clock, label: "Time Zone Converter", desc: "Convert time between world timezones", href: "/tools/timezone-converter", badge: "New" },
     ],
   },
   {
@@ -84,6 +87,7 @@ const TOOL_CATEGORIES = [
     color: "text-pink-400",
     bg: "bg-pink-400/10 border-pink-400/20",
     tools: [
+      { icon: Globe, label: "OG / Twitter Card Preview", desc: "Preview social share cards for any URL", href: "/tools/og-image-preview", badge: "New" },
       { icon: Globe, label: "Meta Tag Generator", desc: "Optimise meta titles & descriptions", href: "/tools/meta-tag-generator", badge: "New" },
       { icon: Link2, label: "URL Slug Generator", desc: "Clean, SEO-friendly slugs", href: "/tools/url-slug-generator", badge: "New" },
       { icon: TrendingUp, label: "Keyword Density", desc: "Check keyword frequency", href: "/tools/keyword-density", badge: "New" },
