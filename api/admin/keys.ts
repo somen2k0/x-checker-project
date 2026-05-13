@@ -3,9 +3,9 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 const RAPIDAPI_HOST = "gmailnator.p.rapidapi.com";
 
 const HARDCODED_KEYS = [
-  // "bbea6a9443mshdfc8d058f9d97efp1571dajsndb43135538fa",
- // "894c8f0b44msh483bb59b42c084ap15db0bjsne64fe8ccbbd4",
- // "e9b0fdba6bmsh970f41e51594567p178216jsn8158f0ea5df7",
+  "bbea6a9443mshdfc8d058f9d97efp1571dajsndb43135538fa",
+  "894c8f0b44msh483bb59b42c084ap15db0bjsne64fe8ccbbd4",
+  "e9b0fdba6bmsh970f41e51594567p178216jsn8158f0ea5df7",
 ];
 
 function maskKey(key: string): string {
