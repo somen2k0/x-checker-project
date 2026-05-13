@@ -7,6 +7,15 @@ import {
 
 const RAPIDAPI_HOST = "gmailnator.p.rapidapi.com";
 
+/** Parse route from the raw URL — more reliable than req.query.path on Vercel */
+function getRoute(req: VercelRequest): string {
+  const raw = req.url ?? "";
+  const withoutQuery = raw.split("?")[0] ?? "";
+  // Strip leading /api/admin/ or /api/admin
+  const stripped = withoutQuery.replace(/^\/api\/admin\/?/, "");
+  return stripped;
+}
+
 async function checkAuth(req: VercelRequest): Promise<boolean> {
   const pw = await getAdminPassword();
   if (!pw) return false;
@@ -43,8 +52,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === "OPTIONS") { res.status(204).end(); return; }
 
-  const segments = Array.isArray(req.query["path"]) ? req.query["path"] : [req.query["path"] ?? ""];
-  const route = segments.join("/");
+  const route = getRoute(req);
   const method = req.method ?? "GET";
 
   // ── /admin/status — no auth required ────────────────────────────────────────
@@ -54,7 +62,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  // ── /admin/setup — no auth required (only works when no password exists) ────
+  // ── /admin/setup — no auth required ─────────────────────────────────────────
   if (route === "setup" && method === "POST") {
     const existing = await getAdminPassword();
     if (existing) { res.status(409).json({ error: "Admin password already set. Use /admin/password to change it." }); return; }
@@ -231,12 +239,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  // ── /admin/keys/:index ───────────────────────────────────────────────────────
-  if (segments[0] === "keys" && segments[1] && segments[1] !== "add" && method === "DELETE") {
+  // ── /admin/keys/:index (DELETE) ──────────────────────────────────────────────
+  const keysDeleteMatch = route.match(/^keys\/(\d+)$/);
+  if (keysDeleteMatch && method === "DELETE") {
     const { source } = req.query as { source?: string };
-    const index = parseInt(segments[1]);
-    if (isNaN(index)) { res.status(400).json({ error: "Invalid index." }); return; }
-    if (source === "env") { res.status(400).json({ error: "Cannot delete environment variable keys from the admin panel. Remove them from your Vercel environment variables." }); return; }
+    const index = parseInt(keysDeleteMatch[1]!);
+    if (source === "env") { res.status(400).json({ error: "Cannot delete environment variable keys. Remove them from your Vercel environment variables." }); return; }
     const existing = await getDbKeys();
     if (index < 0 || index >= existing.length) { res.status(404).json({ error: "Key not found." }); return; }
     const updated = existing.filter((_, i) => i !== index);
@@ -245,5 +253,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  res.status(404).json({ error: "Not found." });
+  res.status(404).json({ error: `Route not found: ${method} /admin/${route}` });
 }
