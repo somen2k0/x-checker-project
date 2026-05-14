@@ -37,7 +37,7 @@ interface MailTmFullMsg extends MailTmMsg {
 }
 
 type Tab = "disposable" | "tempgmail" | "gmail";
-type DisposableProvider = "guerrilla" | "outlook" | "hotmail" | "mailtm";
+type DisposableProvider = "guerrilla" | "onesecmail" | "mailtm";
 
 const REFRESH_MS = 15000;
 
@@ -410,42 +410,38 @@ function GuerrillaSection() {
   );
 }
 
-// ── Tab 1b: Outlook / Hotmail via temp.tf ─────────────────────────
+// ── Tab 1b: 1secmail — multiple free domains ────────────────────────
 
-function TempTfDisposableSection({ provider }: { provider: "outlook" | "hotmail" }) {
-  const [email, setEmail] = useState<string | null>(null);
-  const [messages, setMessages] = useState<TempTfMessage[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [generating, setGenerating] = useState(false);
+interface OneSecInbox { login: string; domain: string; email: string; domains: string[]; }
+interface OneSecMessage { id: number; from: string; subject: string; date: string; }
+interface OneSecFullMessage extends OneSecMessage { body?: string; htmlBody?: string; textBody?: string; }
+
+function OneSecMailSection() {
+  const [inbox, setInbox] = useState<OneSecInbox | null>(null);
+  const [messages, setMessages] = useState<OneSecMessage[]>([]);
+  const [selected, setSelected] = useState<OneSecFullMessage | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [creating, setCreating] = useState(false);
   const [loadingMsgs, setLoadingMsgs] = useState(false);
+  const [loadingMsg, setLoadingMsg] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [countdown, setCountdown] = useState(REFRESH_MS / 1000);
+  const [showCustomUser, setShowCustomUser] = useState(false);
+  const [customUser, setCustomUser] = useState("");
+  const [showDomainDrop, setShowDomainDrop] = useState(false);
   const { toast } = useToast();
-  const initialized = useRef(false);
   const refreshTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
-  const emailRef = useRef<string | null>(null);
+  const initialized = useRef(false);
+  const inboxRef = useRef<OneSecInbox | null>(null);
 
-  const selected = messages.find((m) => m.id === selectedId) ?? null;
-
-  const isOutlook = provider === "outlook";
-  const colorCls  = isOutlook ? "text-blue-400"   : "text-orange-400";
-  const bgCls     = isOutlook ? "bg-blue-400/10 border-blue-400/20"   : "bg-orange-400/10 border-orange-400/20";
-  const btnCls    = isOutlook ? "bg-blue-500 hover:bg-blue-400 text-white" : "bg-orange-500 hover:bg-orange-400 text-white";
-  const badgeCls  = isOutlook ? "bg-blue-500 text-white" : "bg-orange-500 text-white";
-  const autoCls   = isOutlook ? "bg-blue-400/10 border-blue-400/20 text-blue-400" : "bg-orange-400/10 border-orange-400/20 text-orange-400";
-
-  const fetchMessages = useCallback(async (addr: string, silent = false) => {
+  const fetchInbox = useCallback(async (login: string, domain: string, silent = false) => {
     if (!silent) setLoadingMsgs(true);
     try {
-      const r = await fetch("/api/temptf/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: addr }),
-      });
-      const d = await r.json() as { messages?: TempTfMessage[]; error?: string };
+      const r = await fetch(`/api/onesecmail/inbox?login=${encodeURIComponent(login)}&domain=${encodeURIComponent(domain)}`);
       if (r.ok) {
+        const d = await r.json() as { messages?: OneSecMessage[] };
         const incoming = d.messages ?? [];
         setMessages((prev) => {
           const byId = new Map(prev.map((m) => [m.id, m]));
@@ -453,210 +449,292 @@ function TempTfDisposableSection({ provider }: { provider: "outlook" | "hotmail"
           return Array.from(byId.values()).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         });
         setError(null);
-      } else if (r.status === 429) {
-        if (!silent) setError("Rate limited — please wait a moment.");
-      } else {
-        if (!silent) setError(d.error ?? "Inbox check failed.");
       }
-    } catch { if (!silent) setError("Network error."); }
-    finally { if (!silent) setLoadingMsgs(false); }
+    } catch {} finally { if (!silent) setLoadingMsgs(false); }
   }, []);
 
-  const stopPolling = useCallback(() => {
-    if (refreshTimer.current) { clearInterval(refreshTimer.current); refreshTimer.current = null; }
-    if (countdownTimer.current) { clearInterval(countdownTimer.current); countdownTimer.current = null; }
-  }, []);
-
-  const startPolling = useCallback((addr: string) => {
-    stopPolling();
+  const startPolling = useCallback((login: string, domain: string) => {
+    if (refreshTimer.current) clearInterval(refreshTimer.current);
+    if (countdownTimer.current) clearInterval(countdownTimer.current);
     setCountdown(REFRESH_MS / 1000);
     refreshTimer.current = setInterval(() => {
-      if (emailRef.current) fetchMessages(emailRef.current, true);
+      if (inboxRef.current) fetchInbox(inboxRef.current.login, inboxRef.current.domain, true);
       setCountdown(REFRESH_MS / 1000);
     }, REFRESH_MS);
     countdownTimer.current = setInterval(() => setCountdown((c) => (c <= 1 ? REFRESH_MS / 1000 : c - 1)), 1000);
-  }, [fetchMessages, stopPolling]);
+  }, [fetchInbox]);
 
-  const generate = useCallback(async () => {
-    stopPolling();
-    setGenerating(true);
-    setError(null);
-    setEmail(null);
-    setMessages([]);
-    setSelectedId(null);
-    emailRef.current = null;
+  const createInbox = useCallback(async () => {
+    setCreating(true); setError(null); setMessages([]); setSelected(null); setSelectedId(null);
+    if (refreshTimer.current) clearInterval(refreshTimer.current);
+    if (countdownTimer.current) clearInterval(countdownTimer.current);
+    inboxRef.current = null;
     try {
-      const r = await fetch(`/api/temptf/generate?type=plus&providers=${provider}`);
-      const d = await r.json() as { email?: string; error?: string };
-      if (!r.ok || !d.email) { setError(d.error ?? "Failed to generate address."); return; }
-      emailRef.current = d.email;
-      setEmail(d.email);
-      await fetchMessages(d.email);
-      startPolling(d.email);
-    } catch { setError("Network error."); }
-    finally { setGenerating(false); }
-  }, [fetchMessages, startPolling, stopPolling, provider]);
+      const r = await fetch("/api/onesecmail/new");
+      const d = await r.json() as OneSecInbox & { error?: string };
+      if (!r.ok || !d.email) { setError(d.error ?? "Could not create inbox."); return; }
+      inboxRef.current = d;
+      setInbox(d);
+      await fetchInbox(d.login, d.domain);
+      startPolling(d.login, d.domain);
+      toast({ title: "Inbox ready!", description: d.email });
+    } catch { setError("Network error. Please try again."); }
+    finally { setCreating(false); }
+  }, [fetchInbox, startPolling, toast]);
+
+  const openMessage = async (msg: OneSecMessage) => {
+    if (!inbox) return;
+    setSelectedId(msg.id); setLoadingMsg(true); setSelected(null);
+    try {
+      const r = await fetch(`/api/onesecmail/message/${msg.id}?login=${encodeURIComponent(inbox.login)}&domain=${encodeURIComponent(inbox.domain)}`);
+      if (r.ok) {
+        const d = await r.json() as OneSecFullMessage;
+        setSelected(d);
+      } else {
+        setSelected({ ...msg, body: "" });
+        toast({ title: "Could not load message", variant: "destructive" });
+      }
+    } catch {
+      setSelected({ ...msg, body: "" });
+    } finally { setLoadingMsg(false); }
+  };
+
+  const switchDomain = useCallback(async (newDomain: string) => {
+    if (!inbox) return;
+    setShowDomainDrop(false);
+    const r = await fetch("/api/onesecmail/set-address", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ login: inbox.login, domain: newDomain }),
+    });
+    const d = await r.json() as OneSecInbox & { error?: string };
+    if (!r.ok) { toast({ title: "Error", description: d.error ?? "Could not switch domain.", variant: "destructive" }); return; }
+    inboxRef.current = d;
+    setInbox(d); setMessages([]); setSelected(null); setSelectedId(null);
+    startPolling(d.login, d.domain);
+    toast({ title: "Domain switched!", description: d.email });
+  }, [inbox, toast, startPolling]);
+
+  const setCustomUsername = useCallback(async () => {
+    if (!inbox || !customUser.trim()) return;
+    const r = await fetch("/api/onesecmail/set-address", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ login: customUser.trim(), domain: inbox.domain }),
+    });
+    const d = await r.json() as OneSecInbox & { error?: string };
+    if (!r.ok) { toast({ title: "Error", description: d.error ?? "Could not update address.", variant: "destructive" }); return; }
+    inboxRef.current = d;
+    setInbox(d); setMessages([]); setSelected(null); setSelectedId(null); setCustomUser(""); setShowCustomUser(false);
+    startPolling(d.login, d.domain);
+    toast({ title: "Address updated!", description: d.email });
+  }, [inbox, customUser, toast, startPolling]);
 
   const copyAddress = () => {
-    if (!email) return;
-    navigator.clipboard.writeText(email);
+    if (!inbox) return;
+    navigator.clipboard.writeText(inbox.email);
     setCopied(true); setTimeout(() => setCopied(false), 2000);
-    toast({ title: "Copied!", description: email });
+    toast({ title: "Copied!", description: inbox.email });
   };
 
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
-    generate();
-  }, [generate]);
+    createInbox();
+  }, [createInbox]);
 
-  useEffect(() => () => stopPolling(), [stopPolling]);
+  useEffect(() => () => {
+    if (refreshTimer.current) clearInterval(refreshTimer.current);
+    if (countdownTimer.current) clearInterval(countdownTimer.current);
+  }, []);
+
+  const getBody = (msg: OneSecFullMessage): { content: string; type: "html" | "text" } => {
+    if (msg.htmlBody) return { content: msg.htmlBody, type: "html" };
+    if (msg.textBody) return { content: msg.textBody, type: "text" };
+    if (msg.body) return { content: msg.body, type: "text" };
+    return { content: "", type: "text" };
+  };
 
   return (
     <div className="space-y-4">
       <div className="rounded-xl border border-border/60 bg-card/40 p-4 space-y-3">
         <div className="flex items-start gap-3">
-          <div className={`h-9 w-9 rounded-lg ${bgCls} flex items-center justify-center shrink-0 mt-0.5`}>
-            <Mail className={`h-4 w-4 ${colorCls}`} />
+          <div className="h-9 w-9 rounded-lg bg-green-400/10 border border-green-400/20 flex items-center justify-center shrink-0 mt-0.5">
+            <Mail className="h-4 w-4 text-green-400" />
           </div>
           <div className="flex-1 min-w-0 space-y-1">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold">
-              Your temporary @{provider}.com address
-            </p>
-            {generating ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" /> Generating address…
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold">Your temporary email address</p>
+            {inbox ? (
+              <div className="flex flex-wrap items-center gap-0.5 font-mono text-base font-semibold">
+                <span className="text-foreground">{inbox.login}</span>
+                <span className="text-muted-foreground">@</span>
+                <span className="text-green-400">{inbox.domain}</span>
               </div>
-            ) : email ? (
-              <p className="font-mono text-base font-semibold text-foreground break-all">{email}</p>
             ) : (
-              <p className="text-sm text-muted-foreground/60">—</p>
+              <div className="h-6 bg-muted/60 rounded animate-pulse w-56 mt-1" />
             )}
           </div>
-          {email && (
-            <div className="flex items-center gap-1 text-[10px] text-muted-foreground shrink-0 mt-1">
-              <Clock className="h-3 w-3" />{countdown}s
+          <div className="flex items-center gap-1 text-[10px] text-muted-foreground shrink-0 mt-1">
+            <Clock className="h-3 w-3" />{countdown}s
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2 items-center">
+          <Button onClick={copyAddress} disabled={!inbox} size="sm"
+            className="text-xs gap-1.5 bg-green-500 hover:bg-green-400 text-black font-semibold">
+            {copied ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied ? "Copied!" : "Copy Address"}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => inbox && fetchInbox(inbox.login, inbox.domain)} disabled={loadingMsgs || !inbox} className="text-xs gap-1.5">
+            <RefreshCw className={`h-3.5 w-3.5 ${loadingMsgs ? "animate-spin" : ""}`} />Refresh
+          </Button>
+          <Button variant="outline" size="sm" onClick={createInbox} disabled={creating} className="text-xs gap-1.5">
+            <Shuffle className="h-3.5 w-3.5" />{creating ? "Creating…" : "New Address"}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setShowCustomUser((v) => !v)} disabled={!inbox} className="text-xs gap-1.5">
+            <Settings2 className="h-3.5 w-3.5" />Custom Username
+          </Button>
+
+          {inbox && (
+            <div className="relative">
+              <Button variant="outline" size="sm" onClick={() => setShowDomainDrop((v) => !v)} className="text-xs gap-1.5">
+                <Zap className="h-3.5 w-3.5 text-green-400" />@{inbox.domain}
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+              {showDomainDrop && (
+                <div className="absolute top-full left-0 mt-1 z-50 bg-card border border-border/60 rounded-xl shadow-xl overflow-hidden min-w-52">
+                  {inbox.domains.map((d) => (
+                    <button key={d} onClick={() => switchDomain(d)}
+                      className={`w-full text-left px-4 py-2 text-xs hover:bg-muted/60 transition-colors font-mono ${d === inbox.domain ? "text-green-400 font-semibold bg-green-400/5" : "text-foreground/80"}`}>
+                      @{d}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
-        <div className="flex flex-wrap gap-2 pt-1 border-t border-border/40">
-          <Button onClick={copyAddress} disabled={!email} size="sm" className={`text-xs gap-1.5 font-semibold ${btnCls}`}>
-            {copied ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-            {copied ? "Copied!" : "Copy"}
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => email && fetchMessages(email)} disabled={loadingMsgs || !email} className="text-xs gap-1.5">
-            <RefreshCw className={`h-3.5 w-3.5 ${loadingMsgs ? "animate-spin" : ""}`} />Refresh
-          </Button>
-          <Button variant="outline" size="sm" onClick={generate} disabled={generating} className="text-xs gap-1.5">
-            <Shuffle className="h-3.5 w-3.5" />{generating ? "Generating…" : "New Address"}
-          </Button>
-        </div>
+
+        {showCustomUser && (
+          <div className="flex gap-2 items-center pt-1 border-t border-border/40">
+            <input
+              value={customUser}
+              onChange={(e) => setCustomUser(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && setCustomUsername()}
+              placeholder="Enter custom username…"
+              className="flex-1 min-w-0 rounded-lg border border-border/60 bg-background/60 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-green-400/30"
+            />
+            <Button size="sm" onClick={setCustomUsername} disabled={!customUser.trim()} className="text-xs bg-green-500 hover:bg-green-400 text-black font-semibold shrink-0">Set</Button>
+            <Button size="sm" variant="ghost" onClick={() => { setShowCustomUser(false); setCustomUser(""); }} className="text-xs shrink-0">Cancel</Button>
+          </div>
+        )}
       </div>
 
       {error && (
-        <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-4 flex items-center gap-3">
-          <AlertCircle className="h-5 w-5 text-orange-400 shrink-0" />
-          <p className="text-sm text-orange-300 flex-1">{error}</p>
-          <Button size="sm" variant="outline" onClick={() => email ? fetchMessages(email) : generate()} disabled={loadingMsgs || generating}
-            className="text-xs gap-1.5 border-orange-500/40 text-orange-300 hover:bg-orange-500/10 shrink-0">
-            <RefreshCw className={`h-3.5 w-3.5 ${loadingMsgs ? "animate-spin" : ""}`} />Retry
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 flex items-center gap-3">
+          <AlertCircle className="h-5 w-5 text-red-400 shrink-0" />
+          <p className="text-sm text-red-300 flex-1">{error}</p>
+          <Button size="sm" variant="outline" onClick={createInbox} disabled={creating}
+            className="text-xs gap-1.5 border-red-500/40 text-red-300 hover:bg-red-500/10 shrink-0">
+            <RefreshCw className={`h-3.5 w-3.5 ${creating ? "animate-spin" : ""}`} />Retry
           </Button>
         </div>
       )}
 
-      {email && (
-        <div className="grid md:grid-cols-5 gap-3 min-h-[340px]">
-          <div className="md:col-span-2 rounded-xl border border-border/60 bg-card/30 overflow-hidden flex flex-col">
-            <div className="px-4 py-3 border-b border-border/50 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Inbox className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-xs font-semibold text-foreground/70 uppercase tracking-wide">Inbox</span>
-                {messages.length > 0 && <span className={`h-4 min-w-4 px-1 text-[10px] ${badgeCls} rounded-full flex items-center justify-center font-bold`}>{messages.length}</span>}
-              </div>
-              <button onClick={() => email && fetchMessages(email)} disabled={loadingMsgs}
-                className="h-7 w-7 rounded-md border border-border/60 bg-muted/30 hover:bg-muted/60 flex items-center justify-center transition-colors disabled:opacity-50">
-                <RefreshCw className={`h-3.5 w-3.5 text-muted-foreground ${loadingMsgs ? "animate-spin" : ""}`} />
-              </button>
+      <div className="grid md:grid-cols-5 gap-3 min-h-[380px]">
+        <div className="md:col-span-2 rounded-xl border border-border/60 bg-card/30 overflow-hidden flex flex-col">
+          <div className="px-4 py-3 border-b border-border/50 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Inbox className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-xs font-semibold text-foreground/70 uppercase tracking-wide">Inbox</span>
+              {messages.length > 0 && <span className="h-4 min-w-4 px-1 text-[10px] bg-green-500 text-black rounded-full flex items-center justify-center font-bold">{messages.length}</span>}
             </div>
-            <div className="flex-1 overflow-y-auto">
-              {loadingMsgs && messages.length === 0 && (
-                <div className="flex items-center justify-center py-10 gap-2 text-muted-foreground text-sm">
-                  <Loader2 className="h-4 w-4 animate-spin" /> Checking inbox…
-                </div>
-              )}
-              {!loadingMsgs && messages.length === 0 && !error && (
-                <div className="flex flex-col items-center justify-center py-8 gap-2 text-center px-4">
-                  <MailOpen className="h-7 w-7 text-muted-foreground/20" />
-                  <p className="text-sm text-muted-foreground/60">No messages yet</p>
-                  <p className="text-xs text-muted-foreground/40">Send an email here — auto-checks every {REFRESH_MS / 1000}s</p>
-                </div>
-              )}
-              {messages.map((msg) => (
-                <button key={msg.id} onClick={() => setSelectedId(selectedId === msg.id ? null : msg.id)}
-                  className={`w-full text-left px-4 py-3 transition-colors hover:bg-muted/30 border-b border-border/30 last:border-b-0 ${selectedId === msg.id ? "bg-muted/20" : ""}`}>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-foreground/70 truncate">{msg.from || "Unknown"}</p>
-                      <p className="text-sm truncate mt-0.5 font-semibold text-foreground">{msg.subject || "(No subject)"}</p>
-                    </div>
-                    <span className="text-[10px] text-muted-foreground/50 shrink-0 mt-0.5">{timeAgo(msg.date)}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
+            <button onClick={() => inbox && fetchInbox(inbox.login, inbox.domain)} disabled={loadingMsgs}
+              className="h-7 w-7 rounded-md border border-border/60 bg-muted/30 hover:bg-muted/60 flex items-center justify-center transition-colors disabled:opacity-50">
+              <RefreshCw className={`h-3.5 w-3.5 text-muted-foreground ${loadingMsgs ? "animate-spin" : ""}`} />
+            </button>
           </div>
-
-          <div className="md:col-span-3 rounded-xl border border-border/60 bg-card/30 overflow-hidden flex flex-col">
-            {selected ? (
-              <>
-                <div className="px-4 py-3 border-b border-border/50 flex items-center gap-3 bg-muted/20">
-                  <button onClick={() => setSelectedId(null)} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0">
-                    <ArrowLeft className="h-3.5 w-3.5" /> Back
-                  </button>
-                  <div className="flex-1 min-w-0 text-right">
-                    <p className="text-sm font-semibold truncate">{selected.subject || "(No subject)"}</p>
-                    <p className="text-xs text-muted-foreground truncate">{selected.from}</p>
-                  </div>
-                </div>
-                <div className="flex-1 overflow-auto p-4" style={{ maxHeight: "340px" }}>
-                  {selected.body ? (
-                    selected.bodyContentType === "html" ? (
-                      <div className="prose prose-invert prose-sm max-w-none text-sm" dangerouslySetInnerHTML={{ __html: selected.body }} />
-                    ) : (
-                      <pre className="text-sm text-foreground/80 whitespace-pre-wrap font-sans leading-relaxed">{selected.body}</pre>
-                    )
-                  ) : (
-                    <p className="text-sm text-muted-foreground/60">(Empty message)</p>
-                  )}
-                </div>
-              </>
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center py-8 text-center px-6 gap-3">
-                <div className="h-12 w-12 rounded-xl bg-muted/40 border border-border/50 flex items-center justify-center">
-                  <Mail className="h-6 w-6 text-muted-foreground/30" />
-                </div>
-                <p className="text-sm text-muted-foreground/60">Select a message to read it</p>
-                {email && (
-                  <div className={`flex items-center gap-2 text-xs ${autoCls} rounded-lg px-3 py-2`}>
-                    <Clock className="h-3.5 w-3.5 shrink-0" />
-                    Auto-refreshing every {REFRESH_MS / 1000}s
-                  </div>
-                )}
+          <div className="flex-1 overflow-y-auto">
+            {loadingMsgs && messages.length === 0 && (
+              <div className="flex items-center justify-center py-10 gap-2 text-muted-foreground text-sm">
+                <Loader2 className="h-4 w-4 animate-spin" /> Checking inbox…
               </div>
             )}
+            {!loadingMsgs && messages.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-10 gap-2 text-center px-4">
+                <MailOpen className="h-8 w-8 text-muted-foreground/20" />
+                <p className="text-sm text-muted-foreground/60">No messages yet</p>
+                <p className="text-xs text-muted-foreground/40">Send an email to this address and it will appear here</p>
+              </div>
+            )}
+            {messages.map((msg) => (
+              <button key={msg.id} onClick={() => openMessage(msg)}
+                className={`w-full text-left px-4 py-3 transition-colors hover:bg-muted/30 border-b border-border/30 last:border-b-0 ${selectedId === msg.id ? "bg-muted/20" : ""}`}>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-foreground/70 truncate">{msg.from || "Unknown"}</p>
+                    <p className="text-sm truncate mt-0.5 font-semibold text-foreground">{msg.subject || "(No subject)"}</p>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground/50 shrink-0 mt-0.5">{timeAgo(msg.date)}</span>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
-      )}
+
+        <div className="md:col-span-3 rounded-xl border border-border/60 bg-card/30 overflow-hidden flex flex-col">
+          {selected ? (
+            <>
+              <div className="px-4 py-3 border-b border-border/50 flex items-center gap-3 bg-muted/20">
+                <button onClick={() => { setSelected(null); setSelectedId(null); }} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  <ArrowLeft className="h-3.5 w-3.5" /> Back
+                </button>
+                <div className="flex-1 min-w-0 text-right">
+                  <p className="text-sm font-semibold truncate">{selected.subject || "(No subject)"}</p>
+                  <p className="text-xs text-muted-foreground truncate">{selected.from}</p>
+                </div>
+              </div>
+              <div className="flex-1 overflow-auto p-4" style={{ maxHeight: "360px" }}>
+                {(() => { const { content, type } = getBody(selected); return content ? (
+                  type === "html"
+                    ? <div className="prose prose-invert prose-sm max-w-none text-sm" dangerouslySetInnerHTML={{ __html: content }} />
+                    : <pre className="text-sm text-foreground/80 whitespace-pre-wrap font-sans leading-relaxed">{content}</pre>
+                ) : <p className="text-sm text-muted-foreground">(Empty message)</p>; })()}
+              </div>
+            </>
+          ) : loadingMsg ? (
+            <div className="flex items-center justify-center py-10 gap-2 text-muted-foreground text-sm flex-1">
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center py-10 text-center px-6 gap-3">
+              <div className="h-12 w-12 rounded-xl bg-muted/40 border border-border/50 flex items-center justify-center">
+                <Mail className="h-6 w-6 text-muted-foreground/30" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground/60">Select a message to read it</p>
+                <p className="text-xs text-muted-foreground/40 mt-1">Messages appear automatically when received</p>
+              </div>
+              {inbox && (
+                <div className="flex items-center gap-2 text-xs bg-green-400/10 border border-green-400/20 text-green-400 rounded-lg px-3 py-2">
+                  <Clock className="h-3.5 w-3.5 shrink-0" />
+                  Auto-refreshing every {REFRESH_MS / 1000}s
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
 
       <div className="flex flex-wrap gap-2">
         {[
-          { icon: CheckCircle2, label: "No API key needed" },
-          { icon: Mail,         label: `Real @${provider}.com address` },
-          { icon: Clock,        label: `Auto-refresh ${REFRESH_MS / 1000}s` },
-          { icon: Zap,          label: "Full message body" },
+          { icon: Zap, label: `${inbox?.domains?.length ?? 7} domains available` },
+          { icon: Clock, label: `Auto-refresh ${REFRESH_MS / 1000}s` },
+          { icon: Settings2, label: "Custom usernames" },
+          { icon: Mail, label: "No signup needed" },
         ].map(({ icon: Ic, label }) => (
           <div key={label} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground bg-muted/40 border border-border/50 rounded-full px-3 py-1">
-            <Ic className={`h-3 w-3 ${colorCls}`} />{label}
+            <Ic className="h-3 w-3 text-green-400" />{label}
           </div>
         ))}
       </div>
@@ -943,10 +1021,9 @@ function MailTmSection() {
 // ── Tab 1: Disposable Inbox — provider selector wrapper ────────────
 
 const DISPOSABLE_PROVIDERS = [
-  { id: "guerrilla" as const, label: "Guerrilla Mail", badge: "9 domains",      activeBg: "bg-cyan-400/10 border-cyan-400/30 text-cyan-400" },
-  { id: "outlook"   as const, label: "Outlook",        badge: "outlook.com",    activeBg: "bg-blue-400/10 border-blue-400/30 text-blue-400" },
-  { id: "hotmail"   as const, label: "Hotmail",         badge: "hotmail.com",   activeBg: "bg-orange-400/10 border-orange-400/30 text-orange-400" },
-  { id: "mailtm"    as const, label: "mail.tm",          badge: "custom domains", activeBg: "bg-purple-400/10 border-purple-400/30 text-purple-400" },
+  { id: "guerrilla"  as const, label: "Guerrilla Mail", badge: "9 domains",      activeBg: "bg-cyan-400/10 border-cyan-400/30 text-cyan-400" },
+  { id: "onesecmail" as const, label: "1secMail",        badge: "7 domains",      activeBg: "bg-green-400/10 border-green-400/30 text-green-400" },
+  { id: "mailtm"     as const, label: "mail.tm",          badge: "custom domains", activeBg: "bg-purple-400/10 border-purple-400/30 text-purple-400" },
 ];
 
 function DisposableInboxTab() {
@@ -972,7 +1049,7 @@ function DisposableInboxTab() {
       </div>
 
       {provider === "guerrilla" && <GuerrillaSection />}
-      {(provider === "outlook" || provider === "hotmail") && <TempTfDisposableSection key={provider} provider={provider} />}
+      {provider === "onesecmail" && <OneSecMailSection />}
       {provider === "mailtm" && <MailTmSection />}
     </div>
   );

@@ -196,7 +196,7 @@ function NavItem({ category, currentPath }: { category: typeof NAV_CATEGORIES[nu
 }
 
 const TEMP_MAIL_ITEMS = [
-  { icon: Inbox,  label: "Temp Email",   href: "/tools/temp-mail/disposable",  desc: "Anonymous throwaway inbox" },
+  { icon: Inbox,  label: "Temp Email",   href: "/tools/temp-mail/tempemail",  desc: "Anonymous throwaway inbox" },
   { icon: Mail,   label: "Temp Gmail",   href: "/tools/temp-mail/tempgmail",   desc: "Real temporary Gmail address" },
   { icon: Hash,   label: "Gmail Tricks",      href: "/tools/temp-mail/gmail-tricks", desc: "Dot & plus-tag variants" },
 ];

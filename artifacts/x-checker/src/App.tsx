@@ -115,8 +115,11 @@ function TrackedRouter() {
       <Route path="/tools/email-character-counter" component={EmailCharacterCounter} />
       <Route path="/tools/email-signature-generator" component={EmailSignatureGenerator} />
       <Route path="/tools/email-validator" component={EmailValidator} />
-      <Route path="/tools/temp-mail/disposable">
+      <Route path="/tools/temp-mail/tempemail">
         {() => <TempGmail defaultTab="disposable" />}
+      </Route>
+      <Route path="/tools/temp-mail/disposable">
+        {() => <Redirect to="/tools/temp-mail/tempemail" />}
       </Route>
       <Route path="/tools/temp-mail/tempgmail">
         {() => <TempGmail defaultTab="tempgmail" />}
@@ -125,7 +128,7 @@ function TrackedRouter() {
         {() => <TempGmail defaultTab="gmail" />}
       </Route>
       <Route path="/tools/temp-mail">
-        {() => <Redirect to="/tools/temp-mail/disposable" />}
+        {() => <Redirect to="/tools/temp-mail/tempemail" />}
       </Route>
       <Route path="/tools/temp-gmail">
         {() => <Redirect to="/tools/temp-mail/tempgmail" />}

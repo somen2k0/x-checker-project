@@ -102,7 +102,7 @@ const TOOL_CATEGORIES = [
     color: "text-cyan-400",
     bg: "bg-cyan-400/10 border-cyan-400/20",
     tools: [
-      { icon: Inbox, label: "Temp Email", desc: "Disposable throwaway inbox", href: "/tools/temp-mail/disposable", badge: "New" },
+      { icon: Inbox, label: "Temp Email", desc: "Disposable throwaway inbox", href: "/tools/temp-mail/tempemail", badge: "New" },
       { icon: Mail, label: "Temp Gmail", desc: "Real temporary Gmail address", href: "/tools/temp-mail/tempgmail", badge: "New" },
       { icon: Hash, label: "Gmail Tricks", desc: "Dot & plus-tag address variants", href: "/tools/temp-mail/gmail-tricks" },
       { icon: Pencil, label: "Subject Line Generator", desc: "AI-powered subject lines", href: "/tools/subject-line-generator" },
@@ -127,7 +127,7 @@ const BADGE_STYLES: Record<string, string> = {
 const NAV = [
   { href: "/", label: "Home", icon: Home },
   { href: "/tools", label: "Tools", icon: Wrench },
-  { href: "/tools/temp-mail/disposable", label: "Temp Mail", icon: Inbox },
+  { href: "/tools/temp-mail/tempemail", label: "Temp Mail", icon: Inbox },
   { href: "/about", label: "About", icon: Info },
 ];
 
@@ -158,7 +158,7 @@ export function MobileNav() {
         <div className="flex items-stretch h-14">
           {NAV.map(({ href, label, icon: Icon }) => {
             const isTools = href === "/tools";
-            const isTempMail = href === "/tools/temp-mail/disposable";
+            const isTempMail = href === "/tools/temp-mail/tempemail";
             const active = isTools
               ? drawerOpen || location === href
               : isTempMail

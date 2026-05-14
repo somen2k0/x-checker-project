@@ -8,6 +8,7 @@ import tempMailRouter from "./temp-mail";
 import temptfRouter from "./temptf";
 import adminRouter from "./admin";
 import ogPreviewRouter from "./og-preview";
+import onesecmailRouter from "./onesecmail";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(tempMailRouter);
 router.use(temptfRouter);
 router.use(adminRouter);
 router.use(ogPreviewRouter);
+router.use(onesecmailRouter);
 
 export default router;
