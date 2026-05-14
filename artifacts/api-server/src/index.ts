@@ -1,5 +1,10 @@
+import { checkEnv } from "./lib/env-check";
 import app from "./app";
 import { logger } from "./lib/logger";
+
+// Validate environment variables before anything else.
+// Crashes with a clear error message if required vars are missing.
+checkEnv();
 
 const rawPort = process.env["PORT"];
 

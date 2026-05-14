@@ -7,9 +7,8 @@ const router: IRouter = Router();
 const UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
-const BEARER =
-  process.env.TWITTER_BEARER_TOKEN ??
-  "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA";
+// Required: validated at startup in src/lib/env-check.ts
+const BEARER = process.env.TWITTER_BEARER_TOKEN!;
 
 const GRAPHQL_FEATURES = JSON.stringify({
   hidden_profile_subscriptions_enabled: true,
