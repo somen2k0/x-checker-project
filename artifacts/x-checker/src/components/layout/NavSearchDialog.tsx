@@ -46,13 +46,10 @@ export function NavSearchDialog() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="hidden md:flex items-center gap-2 h-8 px-3 rounded-md border border-border/60 bg-muted/30 hover:bg-muted/60 transition-colors text-muted-foreground text-xs shrink-0 min-w-[160px]"
+        title="Search tools (⌘K)"
+        className="hidden md:flex items-center justify-center h-8 w-8 rounded-md border border-border/60 bg-muted/30 hover:bg-muted/60 transition-colors text-muted-foreground shrink-0"
       >
-        <Search className="h-3.5 w-3.5 shrink-0" />
-        <span className="flex-1 text-left">Search tools…</span>
-        <span className="hidden xl:flex items-center gap-0.5 text-[10px] text-muted-foreground/50 border border-border/50 rounded px-1 py-0.5">
-          <Command className="h-2.5 w-2.5" />K
-        </span>
+        <Search className="h-3.5 w-3.5" />
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
