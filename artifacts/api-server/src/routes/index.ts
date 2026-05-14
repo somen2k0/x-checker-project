@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { aiRateLimiter } from "../middlewares/security";
 import healthRouter from "./health";
 import accountsRouter from "./accounts";
 import bioRouter from "./bio";
@@ -15,7 +16,6 @@ const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(accountsRouter);
-router.use(bioRouter);
 router.use(contactRouter);
 router.use(tempGmailRouter);
 router.use(tempMailRouter);
@@ -23,6 +23,9 @@ router.use(temptfRouter);
 router.use(adminRouter);
 router.use(ogPreviewRouter);
 router.use(onesecmailRouter);
-router.use(aiDetectorRouter);
+
+// AI-powered routes: 10 requests per IP per hour
+router.use(aiRateLimiter, bioRouter);
+router.use(aiRateLimiter, aiDetectorRouter);
 
 export default router;
