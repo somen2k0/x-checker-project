@@ -25,7 +25,7 @@ const TOOL_CATEGORIES = [
     color: "text-purple-400",
     bg: "bg-purple-400/10 border-purple-400/20",
     tools: [
-      { icon: Sparkles, label: "AI Bio Generator", desc: "Generate 3 X bios instantly", href: "/tools?tab=bio", badge: "AI" },
+      { icon: Sparkles, label: "AI Bio Generator", desc: "Generate 3 X bios instantly", href: "/tools/bio-generator", badge: "AI" },
       { icon: Sparkles, label: "Bio Ideas", desc: "100+ ready-made bio templates", href: "/tools/bio-ideas", badge: "Popular" },
       { icon: Smile, label: "Funny Bios", desc: "Witty, humorous bio ideas", href: "/tools/funny-bios" },
       { icon: Briefcase, label: "Professional Bios", desc: "Bios for career builders", href: "/tools/professional-bios" },
@@ -39,9 +39,9 @@ const TOOL_CATEGORIES = [
     color: "text-blue-400",
     bg: "bg-blue-400/10 border-blue-400/20",
     tools: [
-      { icon: Search, label: "Account Checker", desc: "Bulk-check 100 X accounts", href: "/tools?tab=checker", badge: "Popular" },
-      { icon: Link2, label: "Profile Link Generator", desc: "Convert usernames to links", href: "/tools?tab=links" },
-      { icon: AtSign, label: "Handle Formatter", desc: "Add/remove @ prefix in bulk", href: "/tools?tab=at" },
+      { icon: Search, label: "Account Checker", desc: "Bulk-check 100 X accounts", href: "/tools/x-account-checker", badge: "Popular" },
+      { icon: Link2, label: "Profile Link Generator", desc: "Convert usernames to links", href: "/tools/profile-link-generator" },
+      { icon: AtSign, label: "Handle Formatter", desc: "Add/remove @ prefix in bulk", href: "/tools/at-formatter" },
       { icon: AtSign, label: "Username Generator", desc: "Unique X handle ideas", href: "/tools/username-generator" },
       { icon: Users, label: "Display Name Ideas", desc: "Curated X display names", href: "/tools/name-ideas" },
     ],

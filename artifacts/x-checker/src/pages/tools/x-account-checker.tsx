@@ -188,10 +188,18 @@ export default function XAccountChecker() {
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2.5 min-w-0">
                             {r.status === "active" && r.profileImageUrl ? (
-                              <Avatar className="h-8 w-8 border border-border/50 shrink-0">
-                                <AvatarImage src={r.profileImageUrl} alt={r.username} />
-                                <AvatarFallback className="text-[10px] bg-muted">{r.username[0]?.toUpperCase()}</AvatarFallback>
-                              </Avatar>
+                              <a
+                                href={`https://x.com/${r.username}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="shrink-0 ring-0 hover:ring-2 hover:ring-primary/40 rounded-full transition-all"
+                                title={`View @${r.username} on X`}
+                              >
+                                <Avatar className="h-8 w-8 border border-border/50">
+                                  <AvatarImage src={r.profileImageUrl} alt={r.username} />
+                                  <AvatarFallback className="text-[10px] bg-muted">{r.username[0]?.toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                              </a>
                             ) : (
                               <div className="h-8 w-8 rounded-full bg-muted/60 border border-border/50 flex items-center justify-center shrink-0">
                                 <span className="text-[10px] font-medium text-muted-foreground">{r.username[0]?.toUpperCase()}</span>
