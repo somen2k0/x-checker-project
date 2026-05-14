@@ -9,7 +9,7 @@ import {
   Type, BarChart2, Users, FileJson, Lock, TrendingUp, Globe,
   Mail, ShieldCheck, Pencil, FileText, Shield, Tag, Clock, Inbox,
   Minimize2, Code2, KeyRound, Regex, Database, Shuffle, ArrowLeftRight,
-  ScanSearch,
+  ScanSearch, EyeOff, MailWarning, AlertOctagon, BookOpen,
 } from "lucide-react";
 import { TOTAL_LIVE } from "@/lib/tools-registry";
 

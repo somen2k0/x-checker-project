@@ -1,0 +1,114 @@
+We now have real analytics showing Temp Mail and Email tools are the highest-engagement traffic category.
+
+Update the sitemap strategy to prioritize the Email/Privacy ecosystem more aggressively for SEO crawling and indexing.
+
+SITEMAP IMPROVEMENTS
+
+1. Increase priority for Temp Mail pages
+
+Change:
+
+/tools/temp-mail/disposable
+priority: 0.95
+
+/tools/temp-mail/tempgmail
+priority: 0.9
+
+/tools/temp-mail/gmail-tricks
+priority: 0.85
+
+Reason:
+These are currently the strongest traffic and engagement pages.
+
+2. Add dedicated Temp Mail landing page
+
+Add:
+https://xtoolkit.live/tools/temp-mail
+
+priority: 1.0
+changefreq: daily
+
+Reason:
+This is currently the most important product page and should be treated as a primary SEO landing page.
+
+3. Add blog articles to sitemap
+
+All blog pages must be included:
+
+/blog
+/blog/best-temp-mail-services
+/blog/is-temp-mail-safe
+/blog/temp-mail-vs-gmail
+/blog/what-is-disposable-email
+etc.
+
+Reason:
+Blog articles strengthen topical authority and internal linking.
+
+4. Add image sitemap support
+
+Generate sitemap-images.xml for:
+
+* OG preview images
+* blog thumbnails
+* category banners
+* tool preview images
+
+Then reference it from robots.txt.
+
+5. Add sitemap index
+
+Move to:
+
+* sitemap-tools.xml
+* sitemap-blog.xml
+* sitemap-pages.xml
+* sitemap-images.xml
+
+Then create:
+sitemap.xml (index file)
+
+Reason:
+Better scaling and crawl organization as the platform grows.
+
+6. Dynamic lastmod dates
+
+Automatically update <lastmod> whenever:
+
+* tool content changes
+* FAQs change
+* blog articles update
+* metadata updates
+
+Reason:
+Helps Google detect fresh content faster.
+
+7. Improve crawl priority hierarchy
+
+Highest priority:
+
+* homepage
+* tools/temp-mail
+* email-tools
+* developer-tools
+
+Medium:
+
+* individual utility tools
+
+Lower:
+
+* legal pages
+* pricing
+* static pages
+
+8. Add hreflang-ready structure
+
+Prepare sitemap architecture for future localization support.
+
+9. Validate sitemap generation automatically
+
+Add automatic XML validation during build/deploy to prevent malformed sitemap output.
+
+Goal:
+Turn the sitemap into a strategic SEO infrastructure layer instead of only a URL list.

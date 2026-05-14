@@ -56,6 +56,21 @@ import AiDetector from "@/pages/tools/ai-detector";
 import ProfileLinkGenerator from "@/pages/tools/profile-link-generator";
 import AtFormatter from "@/pages/tools/at-formatter";
 import BioGenerator from "@/pages/tools/bio-generator";
+// Privacy tools
+import MaskedEmailGenerator from "@/pages/tools/masked-email-generator";
+import EmailPrivacyChecker from "@/pages/tools/email-privacy-checker";
+import SpamRiskChecker from "@/pages/tools/spam-risk-checker";
+import EmailLeakChecker from "@/pages/tools/email-leak-checker";
+import AliasEmailExplainer from "@/pages/tools/alias-email-explainer";
+import DisposableEmailGuide from "@/pages/tools/disposable-email-guide";
+// Blog
+import BlogIndex from "@/pages/blog/index";
+import WhatIsDisposableEmail from "@/pages/blog/what-is-disposable-email";
+import BestTempMailServices from "@/pages/blog/best-temp-mail-services";
+import TempMailVsGmail from "@/pages/blog/temp-mail-vs-gmail";
+import IsTempMailSafe from "@/pages/blog/is-temp-mail-safe";
+import WhyWebsitesAskEmailVerification from "@/pages/blog/why-websites-ask-email-verification";
+import TempGmailExplained from "@/pages/blog/temp-gmail-explained";
 // Category pages
 import AiWritingTools from "@/pages/categories/ai-writing-tools";
 import SocialMediaTools from "@/pages/categories/social-media-tools";
@@ -137,6 +152,23 @@ function TrackedRouter() {
       <Route path="/tools/temp-gmail">
         {() => <Redirect to="/tools/temp-mail/tempgmail" />}
       </Route>
+
+      {/* Privacy tools */}
+      <Route path="/tools/masked-email-generator" component={MaskedEmailGenerator} />
+      <Route path="/tools/email-privacy-checker" component={EmailPrivacyChecker} />
+      <Route path="/tools/spam-risk-checker" component={SpamRiskChecker} />
+      <Route path="/tools/email-leak-checker" component={EmailLeakChecker} />
+      <Route path="/tools/alias-email-explainer" component={AliasEmailExplainer} />
+      <Route path="/tools/disposable-email-guide" component={DisposableEmailGuide} />
+
+      {/* Blog */}
+      <Route path="/blog" component={BlogIndex} />
+      <Route path="/blog/what-is-disposable-email" component={WhatIsDisposableEmail} />
+      <Route path="/blog/best-temp-mail-services" component={BestTempMailServices} />
+      <Route path="/blog/temp-mail-vs-gmail" component={TempMailVsGmail} />
+      <Route path="/blog/is-temp-mail-safe" component={IsTempMailSafe} />
+      <Route path="/blog/why-websites-ask-email-verification" component={WhyWebsitesAskEmailVerification} />
+      <Route path="/blog/temp-gmail-explained" component={TempGmailExplained} />
 
       {/* Social media X tools — dedicated pages */}
       <Route path="/tools/x-account-checker" component={XAccountChecker} />
