@@ -556,6 +556,98 @@ export default function JsonFormatter() {
             </div>
           </section>
 
+          {/* ── Quick Reference ── */}
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold">JSON Quick Reference</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Parse, format, and query JSON across languages and the command line:
+            </p>
+            <div className="space-y-3">
+              {([
+                {
+                  lang: "js",
+                  color: "text-yellow-400",
+                  bg: "bg-yellow-400/8 border-yellow-400/20",
+                  label: "JavaScript / TypeScript",
+                  snippets: [
+                    { comment: "Parse a JSON string into an object", code: `const data = JSON.parse('{"name":"Alex","score":42}');` },
+                    { comment: "Stringify with 2-space indentation (pretty-print)", code: `JSON.stringify(data, null, 2);` },
+                    { comment: "Stringify only selected keys", code: `JSON.stringify(data, ["name"], 2);` },
+                    { comment: "Deep clone an object via JSON round-trip", code: `const clone = JSON.parse(JSON.stringify(original));` },
+                    { comment: "Safe parse — catch invalid JSON without crashing", code: `function safeParse(str) {\n  try { return JSON.parse(str); } catch { return null; }\n}` },
+                  ],
+                },
+                {
+                  lang: "python",
+                  color: "text-blue-400",
+                  bg: "bg-blue-400/8 border-blue-400/20",
+                  label: "Python 3",
+                  snippets: [
+                    { comment: "Parse a JSON string", code: `import json\ndata = json.loads('{"name": "Alex", "score": 42}')` },
+                    { comment: "Pretty-print to string", code: `json.dumps(data, indent=2)` },
+                    { comment: "Pretty-print with sorted keys", code: `json.dumps(data, indent=2, sort_keys=True)` },
+                    { comment: "Read JSON from a file", code: `with open("data.json") as f:\n    data = json.load(f)` },
+                    { comment: "Write JSON to a file", code: `with open("out.json", "w") as f:\n    json.dump(data, f, indent=2)` },
+                  ],
+                },
+                {
+                  lang: "jq",
+                  color: "text-cyan-400",
+                  bg: "bg-cyan-400/8 border-cyan-400/20",
+                  label: "jq (command line)",
+                  snippets: [
+                    { comment: "Pretty-print a JSON file", code: `jq . data.json` },
+                    { comment: "Extract a top-level key", code: `jq '.name' data.json` },
+                    { comment: "Extract a nested key", code: `jq '.user.email' data.json` },
+                    { comment: "Get all items from an array", code: `jq '.users[]' data.json` },
+                    { comment: "Filter array items by condition", code: `jq '.users[] | select(.active == true)' data.json` },
+                    { comment: "Format curl API response on the fly", code: `curl -s https://api.example.com/users | jq .` },
+                    { comment: "Minify JSON (compact output)", code: `jq -c . data.json` },
+                    { comment: "Extract multiple fields into a new object", code: `jq '{id: .id, name: .name}' data.json` },
+                  ],
+                },
+                {
+                  lang: "node",
+                  color: "text-green-400",
+                  bg: "bg-green-400/8 border-green-400/20",
+                  label: "Node.js (file I/O)",
+                  snippets: [
+                    { comment: "Read and parse a JSON file synchronously", code: `const data = JSON.parse(require("fs").readFileSync("data.json", "utf8"));` },
+                    { comment: "Import JSON directly (ESM / Node 20+)", code: `import data from "./data.json" assert { type: "json" };` },
+                    { comment: "Write formatted JSON to a file", code: `require("fs").writeFileSync("out.json", JSON.stringify(data, null, 2));` },
+                    { comment: "Pretty-print to console", code: `console.log(JSON.stringify(data, null, 2));` },
+                  ],
+                },
+                {
+                  lang: "php",
+                  color: "text-purple-400",
+                  bg: "bg-purple-400/8 border-purple-400/20",
+                  label: "PHP",
+                  snippets: [
+                    { comment: "Decode JSON string to associative array", code: `$data = json_decode('{"name":"Alex"}', true);` },
+                    { comment: "Encode array to JSON string", code: `$json = json_encode($data);` },
+                    { comment: "Pretty-print JSON output", code: `$json = json_encode($data, JSON_PRETTY_PRINT);` },
+                    { comment: "Encode with Unicode characters preserved", code: `json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);` },
+                  ],
+                },
+              ] as const).map(({ lang, color, bg, label, snippets }) => (
+                <div key={lang} className={`rounded-xl border ${bg} overflow-hidden`}>
+                  <div className="px-4 py-2.5 border-b border-border/30">
+                    <span className={`text-[10px] font-bold uppercase tracking-wider ${color}`}>{label}</span>
+                  </div>
+                  <div className="divide-y divide-border/20">
+                    {snippets.map(({ comment, code }) => (
+                      <div key={comment} className="px-4 py-2.5">
+                        <p className="text-[10px] text-muted-foreground/60 mb-1"># {comment}</p>
+                        <pre className="font-mono text-[11px] text-foreground/80 whitespace-pre-wrap break-all leading-relaxed">{code}</pre>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
         </div>
       </div>
     </MiniToolLayout>
