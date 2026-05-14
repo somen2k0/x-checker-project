@@ -1,6 +1,7 @@
 {
   "buildCommand": "pnpm install --frozen-lockfile && PORT=5000 BASE_PATH=/ pnpm --filter @workspace/x-checker run build && pnpm --filter @workspace/api-server run build",
   "outputDirectory": "artifacts/x-checker/dist/public",
+
   "headers": [
     {
       "source": "/(.*)",
@@ -27,7 +28,7 @@
         },
         {
           "key": "Strict-Transport-Security",
-          "value": "max-age=31536000; includeSubDomains; preload"
+          "value": "max-age=63072000; includeSubDomains; preload"
         },
         {
           "key": "X-DNS-Prefetch-Control",
@@ -40,8 +41,28 @@
       ]
     }
   ],
+
   "rewrites": [
     { "source": "/api/:path*", "destination": "/api/[...path]" },
+
+    { "source": "/.env",             "destination": "/api/blocked" },
+    { "source": "/.env.local",       "destination": "/api/blocked" },
+    { "source": "/.env.production",  "destination": "/api/blocked" },
+    { "source": "/.env.development", "destination": "/api/blocked" },
+    { "source": "/.git",             "destination": "/api/blocked" },
+    { "source": "/.git/:path*",      "destination": "/api/blocked" },
+    { "source": "/.htaccess",        "destination": "/api/blocked" },
+    { "source": "/config",           "destination": "/api/blocked" },
+    { "source": "/config/:path*",    "destination": "/api/blocked" },
+    { "source": "/wp-admin",         "destination": "/api/blocked" },
+    { "source": "/wp-admin/:path*",  "destination": "/api/blocked" },
+    { "source": "/phpinfo",          "destination": "/api/blocked" },
+    { "source": "/phpinfo.php",      "destination": "/api/blocked" },
+    { "source": "/server.js",        "destination": "/api/blocked" },
+    { "source": "/package.json",     "destination": "/api/blocked" },
+    { "source": "/package-lock.json","destination": "/api/blocked" },
+    { "source": "/pnpm-lock.yaml",   "destination": "/api/blocked" },
+
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
