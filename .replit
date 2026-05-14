@@ -4,7 +4,7 @@ modules = ["nodejs-24"]
 router = "application"
 deploymentTarget = "autoscale"
 run = ["bash", "-c", "PORT=5000 NODE_ENV=production pnpm --filter @workspace/api-server run start"]
-build = ["bash", "-c", "PORT=5000 BASE_PATH=/ pnpm --filter @workspace/x-checker run build && pnpm --filter @workspace/api-server run build"]
+build = ["bash", "-c", "pnpm install && PORT=5000 BASE_PATH=/ pnpm --filter @workspace/x-checker run build && pnpm --filter @workspace/api-server run build"]
 
 [deployment.postBuild]
 args = ["pnpm", "store", "prune"]

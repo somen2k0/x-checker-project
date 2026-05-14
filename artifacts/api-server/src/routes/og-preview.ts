@@ -31,7 +31,7 @@ function resolveUrl(base: string, relative: string): string {
   }
 }
 
-router.post("/api/og-preview", async (req, res) => {
+router.post("/og-preview", async (req, res) => {
   const { url } = req.body as { url?: string };
 
   if (!url || typeof url !== "string") {
