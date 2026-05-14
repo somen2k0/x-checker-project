@@ -10,7 +10,7 @@ interface FeedbackModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const WEB3FORMS_KEY = "fd2adb78-fc5c-4351-997d-858d9632050f";
+const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_KEY as string | undefined;
 
 export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
   const [name, setName] = useState("");
@@ -22,6 +22,10 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
 
   const handleSubmit = async () => {
     if (!message.trim()) return;
+    if (!WEB3FORMS_KEY) {
+      setError("Feedback is not configured. Please contact the site owner.");
+      return;
+    }
     setLoading(true);
     setError("");
     try {

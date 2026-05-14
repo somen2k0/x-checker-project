@@ -5,6 +5,11 @@ import path from "path";
 import { fileURLToPath } from "url";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import {
+  securityHeaders,
+  rateLimiter,
+  inputSanitizer,
+} from "./middlewares/security";
 
 const app: Express = express();
 
@@ -27,11 +32,13 @@ app.use(
     },
   }),
 );
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-app.use("/api", router);
+app.use(securityHeaders);
+app.use(cors());
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
+
+app.use("/api", rateLimiter, inputSanitizer, router);
 
 if (process.env.NODE_ENV === "production") {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
