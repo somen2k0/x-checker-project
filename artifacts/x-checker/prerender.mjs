@@ -12,11 +12,10 @@
  * Also auto-generates dist/public/sitemap-tools.xml from tools-manifest.json
  * so the sitemap stays in sync with the tool list automatically.
  *
- * ─── Adding a new tool ────────────────────────────────────────────────────
+ * Adding a new tool:
  *  1. Add an entry to src/lib/tools-manifest.json
  *  2. Add the icon to ICON_MAP in src/lib/tools-registry.ts
  *  Done — this script picks up the new tool on the next build.
- * ─────────────────────────────────────────────────────────────────────────
  */
 
 import { readFileSync, writeFileSync, mkdirSync } from "fs";
@@ -28,7 +27,7 @@ const DIST = join(__dirname, "dist/public");
 const SITE_URL = "https://xtoolkit.live";
 const TODAY = new Date().toISOString().split("T")[0];
 
-// ─── Load tools manifest (single source of truth) ────────────────────────────
+// Load tools manifest (single source of truth)
 const toolsManifest = JSON.parse(
   readFileSync(join(__dirname, "src/lib/tools-manifest.json"), "utf-8"),
 );
@@ -36,7 +35,7 @@ const toolsManifest = JSON.parse(
 // Only live tools (skip isComingSoon)
 const LIVE_TOOLS = toolsManifest.filter((t) => !t.isComingSoon);
 
-// ─── Category metadata (mirrors tools-registry.ts) ───────────────────────────
+// Category metadata (mirrors tools-registry.ts)
 const CATEGORY_LABELS = {
   "social-media": "Social Media Tools",
   "ai-writing": "AI Writing Tools",
@@ -46,7 +45,7 @@ const CATEGORY_LABELS = {
   email: "Email Tools",
 };
 
-// ─── Static pages (non-tool routes) ─────────────────────────────────────────
+// Static pages (non-tool routes)
 const STATIC_PAGES = [
   {
     path: "/",
@@ -217,7 +216,7 @@ const TEMP_MAIL_SUB_ROUTES = [
   },
 ];
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function escapeHtml(str) {
   return str
@@ -227,59 +226,79 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;");
 }
 
-function buildToolSchema(tool, canonicalUrl) {
-  const schemas = [
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      name: tool.label,
-      url: canonicalUrl,
-      description: tool.seoDescription || tool.description,
-      applicationCategory: "UtilitiesApplication",
-      operatingSystem: "Web",
-      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-      isPartOf: { "@type": "WebSite", name: "X Toolkit", url: SITE_URL + "/" },
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        { "@type": "ListItem", position: 1, name: "X Toolkit", item: SITE_URL + "/" },
-        { "@type": "ListItem", position: 2, name: "Tools", item: SITE_URL + "/tools" },
-        { "@type": "ListItem", position: 3, name: tool.label, item: canonicalUrl },
-      ],
-    },
-  ];
+/**
+ * Maps tool category → schema.org applicationCategory value.
+ * Gives each tool the most accurate category for Google Rich Results.
+ */
+const CATEGORY_TO_APP_CATEGORY = {
+  "social-media":    "SocialNetworkingApplication",
+  "ai-writing":      "UtilitiesApplication",
+  "text-formatting": "UtilitiesApplication",
+  "developer":       "DeveloperApplication",
+  "seo":             "BusinessApplication",
+  "email":           "CommunicationApplication",
+};
 
-  return schemas
-    .map(
-      (s) =>
-        `    <script type="application/ld+json">\n    ${JSON.stringify(s, null, 2)
-          .split("\n")
-          .join("\n    ")}\n    </script>`,
-    )
-    .join("\n");
+/**
+ * Strips homepage-only JSON-LD blocks (WebApplication, ItemList) from the
+ * template HTML so they don't appear on tool/static pages — only the homepage
+ * should carry those schemas.
+ */
+function stripHomepageSchemas(html) {
+  return html.replace(
+    /<script type="application\/ld\+json">[\s\S]*?"@type":\s*"(?:WebApplication|ItemList)"[\s\S]*?<\/script>\n?/g,
+    "",
+  );
 }
 
-function buildHomepageSchema(page) {
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "X Toolkit",
-    url: SITE_URL + "/",
-    description: page.description,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${SITE_URL}/tools?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
-  };
-  return `    <script type="application/ld+json">\n    ${JSON.stringify(schema, null, 2)
+function jsonLdTag(obj) {
+  return `    <script type="application/ld+json">\n    ${JSON.stringify(obj, null, 2)
     .split("\n")
     .join("\n    ")}\n    </script>`;
+}
+
+/**
+ * Builds the SoftwareApplication + BreadcrumbList schemas for a tool page.
+ * All recommended properties are included to pass Google Rich Results Test.
+ */
+function buildToolSchema(tool, canonicalUrl) {
+  const appCategory =
+    CATEGORY_TO_APP_CATEGORY[tool.category] ?? "UtilitiesApplication";
+
+  const softwareApp = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: tool.label,
+    url: canonicalUrl,
+    description: tool.seoDescription || tool.description,
+    applicationCategory: appCategory,
+    operatingSystem: "Web",
+    softwareVersion: "1.0",
+    screenshot: `${SITE_URL}/opengraph.jpg`,
+    author: {
+      "@type": "Organization",
+      name: "X Toolkit",
+      url: SITE_URL + "/",
+    },
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/OnlineOnly",
+    },
+  };
+
+  const breadcrumb = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "X Toolkit", item: SITE_URL + "/" },
+      { "@type": "ListItem", position: 2, name: "Tools", item: SITE_URL + "/tools" },
+      { "@type": "ListItem", position: 3, name: tool.label, item: canonicalUrl },
+    ],
+  };
+
+  return [jsonLdTag(softwareApp), jsonLdTag(breadcrumb)].join("\n");
 }
 
 function buildNoscript(page, tool) {
@@ -338,7 +357,9 @@ function generatePageHtml(template, { path, title, description, isHomepage, cate
   const safeTitle = escapeHtml(title);
   const safeDesc = escapeHtml(description);
 
-  let html = template;
+  // For non-homepage pages, strip the homepage-only schemas (WebApplication,
+  // ItemList) so they don't pollute tool and static pages.
+  let html = isHomepage ? template : stripHomepageSchemas(template);
 
   html = html.replace(/<title>[^<]*<\/title>/, `<title>${safeTitle}</title>`);
   html = html.replace(/(<meta\s+name="description"\s+content=")[^"]*(")/,  `$1${safeDesc}$2`);
@@ -349,11 +370,14 @@ function generatePageHtml(template, { path, title, description, isHomepage, cate
   html = html.replace(/(<meta\s+name="twitter:description"\s+content=")[^"]*(")/,  `$1${safeDesc}$2`);
   html = html.replace(/(<link\s+rel="canonical"\s+href=")[^"]*(")/,  `$1${canonicalUrl}$2`);
 
+  // Tool and category pages get SoftwareApplication + BreadcrumbList.
+  // Homepage already has complete schemas from the template — no injection needed.
   let schemaBlock = "";
-  if (isHomepage) {
-    schemaBlock = buildHomepageSchema({ description });
-  } else if (tool || category) {
-    schemaBlock = buildToolSchema(tool || { label: title, seoDescription: description, id: "" }, canonicalUrl);
+  if (!isHomepage && (tool || category)) {
+    schemaBlock = buildToolSchema(
+      tool || { label: title, seoDescription: description, id: "", category },
+      canonicalUrl,
+    );
   }
 
   const noscriptBlock = buildNoscript({ path, title, description, isHomepage }, tool);
@@ -363,7 +387,7 @@ function generatePageHtml(template, { path, title, description, isHomepage, cate
   return html;
 }
 
-// ─── Auto-generate sitemap-tools.xml from manifest ───────────────────────────
+// Auto-generate sitemap-tools.xml from manifest
 
 function generateSitemapTools() {
   const DEFAULT_PRIORITY = {
@@ -410,7 +434,7 @@ ${subRouteEntries}
 `;
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+// Main
 
 function main() {
   console.log(`🔍 Reading built index.html template…`);

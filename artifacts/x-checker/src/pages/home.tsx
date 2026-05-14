@@ -89,7 +89,7 @@ export default function Home() {
     <Layout>
       <SeoHead
         title={`X Toolkit — ${TOTAL_LIVE}+ Free Tools for X, SEO, Developers & Creators`}
-        description="39+ free online tools for X (Twitter), SEO, developers & creators: X account checker, AI bio generator, JSON formatter, Base64, JWT decoder, temp mail, URL slug generator & more. No signup, instant results."
+        description="55+ free online tools for X (Twitter), SEO, developers & creators: X account checker, AI bio generator, JSON formatter, Base64, JWT decoder, temp mail, URL slug generator & more. No signup, instant results."
         path="/"
       />
       {/* ── Hero ── */}
