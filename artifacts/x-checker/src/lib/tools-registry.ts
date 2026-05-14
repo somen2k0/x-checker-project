@@ -3,7 +3,7 @@ import {
   Hash, MessageSquare, Type, BarChart2, Users, FileJson, Lock,
   TrendingUp, Globe, Code2, Mail, ShieldCheck, Pencil, FileText,
   Shield, Tag, Minimize2, KeyRound, Regex, Database, Shuffle,
-  Clock, ArrowLeftRight,
+  Clock, ArrowLeftRight, ScanSearch,
   type LucideIcon,
 } from "lucide-react";
 
@@ -128,6 +128,16 @@ export const ALL_TOOLS: Tool[] = [
   },
 
   // ── AI Writing ────────────────────────────────────────────────────
+  {
+    id: "ai-detector",
+    label: "AI Text Detector & Humanizer",
+    description: "Detect if text was written by AI and rewrite it to sound naturally human. Powered by Llama 3.3 70B.",
+    href: "/tools/ai-detector",
+    category: "ai-writing",
+    icon: ScanSearch,
+    badge: "AI",
+    tags: ["ai", "detector", "humanizer", "chatgpt", "rewrite", "content", "groq", "llama"],
+  },
   {
     id: "bio-generator",
     label: "AI Bio Generator",

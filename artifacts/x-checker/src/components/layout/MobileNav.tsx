@@ -5,7 +5,7 @@ import {
   Sparkles, Users, Type, Code2, TrendingUp, AtSign, Smile, Briefcase, Palette,
   Hash, MessageSquare as MessageSquareIcon, BarChart2, FileJson, Lock, Link2,
   Globe, Mail, ShieldCheck, Pencil, Inbox, Minimize2, KeyRound, Database,
-  Shuffle, Shield, Tag, FileText, BarChart, Clock, ArrowLeftRight,
+  Shuffle, Shield, Tag, FileText, BarChart, Clock, ArrowLeftRight, ScanSearch,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ const TOOL_CATEGORIES = [
     color: "text-purple-400",
     bg: "bg-purple-400/10 border-purple-400/20",
     tools: [
+      { icon: ScanSearch, label: "AI Text Detector & Humanizer", desc: "Detect AI content & rewrite it human", href: "/tools/ai-detector", badge: "AI" },
       { icon: Sparkles, label: "AI Bio Generator", desc: "Generate 3 X bios instantly", href: "/tools/bio-generator", badge: "AI" },
       { icon: Sparkles, label: "Bio Ideas", desc: "100+ ready-made bio templates", href: "/tools/bio-ideas", badge: "Popular" },
       { icon: Smile, label: "Funny Bios", desc: "Witty, humorous bio ideas", href: "/tools/funny-bios" },

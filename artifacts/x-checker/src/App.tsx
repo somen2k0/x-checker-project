@@ -52,6 +52,7 @@ import EmailSignatureGenerator from "@/pages/tools/email-signature-generator";
 import EmailValidator from "@/pages/tools/email-validator";
 import TempGmail from "@/pages/tools/temp-gmail";
 import XAccountChecker from "@/pages/tools/x-account-checker";
+import AiDetector from "@/pages/tools/ai-detector";
 import ProfileLinkGenerator from "@/pages/tools/profile-link-generator";
 import AtFormatter from "@/pages/tools/at-formatter";
 import BioGenerator from "@/pages/tools/bio-generator";
@@ -94,6 +95,9 @@ function TrackedRouter() {
       <Route path="/tools/sql-formatter" component={SqlFormatter} />
       <Route path="/tools/url-encoder" component={UrlEncoder} />
       <Route path="/tools/uuid-generator" component={UuidGenerator} />
+
+      {/* AI Tools */}
+      <Route path="/tools/ai-detector" component={AiDetector} />
 
       {/* New Tools */}
       <Route path="/tools/case-converter" component={CaseConverter} />

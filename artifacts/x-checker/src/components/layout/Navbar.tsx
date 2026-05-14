@@ -9,6 +9,7 @@ import {
   Type, BarChart2, Users, FileJson, Lock, TrendingUp, Globe,
   Mail, ShieldCheck, Pencil, FileText, Shield, Tag, Clock, Inbox,
   Minimize2, Code2, KeyRound, Regex, Database, Shuffle, ArrowLeftRight,
+  ScanSearch,
 } from "lucide-react";
 import { TOTAL_LIVE } from "@/lib/tools-registry";
 
@@ -29,6 +30,7 @@ const NAV_CATEGORIES = [
     tools: [
       { icon: Search, label: "Account Checker", href: "/tools/x-account-checker", badge: "Popular" },
       { icon: Sparkles, label: "AI Bio Generator", href: "/tools/bio-generator", badge: "AI" },
+      { icon: ScanSearch, label: "AI Text Detector & Humanizer", href: "/tools/ai-detector", badge: "AI" },
       { icon: Link2, label: "Profile Link Generator", href: "/tools/profile-link-generator" },
       { icon: AtSign, label: "@ Formatter", href: "/tools/at-formatter" },
       { icon: AtSign, label: "Username Generator", href: "/tools/username-generator" },
