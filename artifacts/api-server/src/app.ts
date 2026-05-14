@@ -13,6 +13,10 @@ import {
 
 const app: Express = express();
 
+// Trust the first hop from a reverse proxy (Vercel, nginx) so that
+// express-rate-limit reads the real client IP from X-Forwarded-For.
+app.set("trust proxy", 1);
+
 app.use(
   pinoHttp({
     logger,

@@ -51,10 +51,6 @@ export const rateLimiter = rateLimit({
   legacyHeaders: false,
   statusCode: 429,
   message: { error: "Too many requests. Please try again in a minute." },
-  keyGenerator: (req) =>
-    (req.headers["x-forwarded-for"] as string | undefined)
-      ?.split(",")[0]
-      ?.trim() ?? req.ip ?? "unknown",
 });
 
 // ─── Input Sanitization ──────────────────────────────────────────────────────
