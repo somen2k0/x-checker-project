@@ -170,14 +170,92 @@ export default function XAccountChecker() {
               </Button>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
+              {/* ── Mobile: card list ── */}
+              <div className="sm:hidden divide-y divide-border/40">
+                {results.map((r) => (
+                  <div key={r.username} className="px-4 py-3.5 flex flex-col gap-2.5">
+                    {/* Top row: avatar + name + status */}
+                    <div className="flex items-center gap-3">
+                      {r.status === "active" && r.profileImageUrl ? (
+                        <a
+                          href={`https://x.com/${r.username}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0 ring-0 hover:ring-2 hover:ring-primary/40 rounded-full transition-all"
+                          title={`View @${r.username} on X`}
+                        >
+                          <Avatar className="h-10 w-10 border border-border/50">
+                            <AvatarImage src={r.profileImageUrl} alt={r.username} />
+                            <AvatarFallback className="text-xs bg-muted">{r.username[0]?.toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                        </a>
+                      ) : (
+                        <div className="h-10 w-10 rounded-full bg-muted/60 border border-border/50 flex items-center justify-center shrink-0">
+                          <span className="text-xs font-medium text-muted-foreground">{r.username[0]?.toUpperCase()}</span>
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <span className="font-semibold text-sm">@{r.username}</span>
+                          {r.isVerified && <BadgeCheck className="h-3.5 w-3.5 text-primary shrink-0" />}
+                        </div>
+                        {r.displayName && (
+                          <div className="text-xs text-muted-foreground truncate">{r.displayName}</div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {getStatusIcon(r.status)}
+                        {getStatusBadge(r.status)}
+                      </div>
+                    </div>
+                    {/* Stats row */}
+                    {r.status === "active" && (r.followerCount != null || r.followingCount != null || r.createdAt) && (
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground pl-1 flex-wrap">
+                        {r.followerCount != null && (
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            <span className="text-foreground font-medium">{formatCount(r.followerCount)}</span> followers
+                          </span>
+                        )}
+                        {r.followingCount != null && (
+                          <span className="flex items-center gap-1">
+                            <span className="text-foreground font-medium">{formatCount(r.followingCount)}</span> following
+                          </span>
+                        )}
+                        {r.createdAt && (
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            Joined {formatDate(r.createdAt)}
+                          </span>
+                        )}
+                        {r.status === "active" && (
+                          <a
+                            href={`https://x.com/${r.username}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-primary hover:underline ml-auto"
+                          >
+                            <ExternalLink className="h-3 w-3" /> View profile
+                          </a>
+                        )}
+                      </div>
+                    )}
+                    {r.status !== "active" && (
+                      <div className="text-xs text-muted-foreground/50 pl-1">No additional data available</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* ── Desktop: table ── */}
+              <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border/50 bg-muted/30">
                       <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Account</th>
                       <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Status</th>
-                      <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hidden sm:table-cell">Followers</th>
-                      <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hidden sm:table-cell">Following</th>
+                      <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Followers</th>
+                      <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Following</th>
                       <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hidden md:table-cell">Joined</th>
                       <th className="w-8" />
                     </tr>
@@ -222,7 +300,7 @@ export default function XAccountChecker() {
                             {getStatusBadge(r.status)}
                           </div>
                         </td>
-                        <td className="px-4 py-3 hidden sm:table-cell">
+                        <td className="px-4 py-3">
                           {r.followerCount != null ? (
                             <span className="flex items-center gap-1.5 text-sm text-foreground/80">
                               <Users className="h-3.5 w-3.5 text-muted-foreground" />
@@ -232,7 +310,7 @@ export default function XAccountChecker() {
                             <span className="text-muted-foreground/40 text-xs">—</span>
                           )}
                         </td>
-                        <td className="px-4 py-3 hidden sm:table-cell">
+                        <td className="px-4 py-3">
                           {r.followingCount != null ? (
                             <span className="text-sm text-foreground/80">{formatCount(r.followingCount)}</span>
                           ) : (
