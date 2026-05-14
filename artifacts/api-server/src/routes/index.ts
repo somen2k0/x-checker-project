@@ -5,6 +5,7 @@ import bioRouter from "./bio";
 import contactRouter from "./contact";
 import tempGmailRouter from "./temp-gmail";
 import tempMailRouter from "./temp-mail";
+import temptfRouter from "./temptf";
 import adminRouter from "./admin";
 import ogPreviewRouter from "./og-preview";
 
@@ -16,6 +17,7 @@ router.use(bioRouter);
 router.use(contactRouter);
 router.use(tempGmailRouter);
 router.use(tempMailRouter);
+router.use(temptfRouter);
 router.use(adminRouter);
 router.use(ogPreviewRouter);
 
