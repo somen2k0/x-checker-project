@@ -23,8 +23,21 @@ interface GuerrillaFullMessage { body: string; from?: string; subject?: string; 
 interface GmailnatorMessage { mid: string; from?: string; subject?: string; date?: string; content?: string; }
 interface GmailnatorFullMessage { content?: string; from?: string; subject?: string; date?: string; }
 
+interface MailTmMsg {
+  id: string;
+  from: { address: string; name?: string };
+  subject: string;
+  seen: boolean;
+  createdAt: string;
+  intro?: string;
+}
+interface MailTmFullMsg extends MailTmMsg {
+  html?: string[];
+  text?: string;
+}
 
 type Tab = "disposable" | "tempgmail" | "gmail";
+type DisposableProvider = "guerrilla" | "outlook" | "hotmail" | "mailtm";
 
 const REFRESH_MS = 15000;
 
@@ -71,9 +84,9 @@ const relatedTools = [
   { title: "Email Character Counter", href: "/tools/email-character-counter", description: "Count subject and body characters." },
 ];
 
-// ── Tab 1: Disposable Inbox (Guerrilla Mail) ───────────────────────
+// ── Tab 1a: Guerrilla Mail ─────────────────────────────────────────
 
-function DisposableInboxTab() {
+function GuerrillaSection() {
   const [inbox, setInbox] = useState<GuerrillaInbox | null>(null);
   const [messages, setMessages] = useState<GuerrillaMessage[]>([]);
   const [selected, setSelected] = useState<GuerrillaFullMessage | null>(null);
@@ -393,6 +406,574 @@ function DisposableInboxTab() {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+// ── Tab 1b: Outlook / Hotmail via temp.tf ─────────────────────────
+
+function TempTfDisposableSection({ provider }: { provider: "outlook" | "hotmail" }) {
+  const [email, setEmail] = useState<string | null>(null);
+  const [messages, setMessages] = useState<TempTfMessage[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [loadingMsgs, setLoadingMsgs] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [countdown, setCountdown] = useState(REFRESH_MS / 1000);
+  const { toast } = useToast();
+  const initialized = useRef(false);
+  const refreshTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const emailRef = useRef<string | null>(null);
+
+  const selected = messages.find((m) => m.id === selectedId) ?? null;
+
+  const isOutlook = provider === "outlook";
+  const colorCls  = isOutlook ? "text-blue-400"   : "text-orange-400";
+  const bgCls     = isOutlook ? "bg-blue-400/10 border-blue-400/20"   : "bg-orange-400/10 border-orange-400/20";
+  const btnCls    = isOutlook ? "bg-blue-500 hover:bg-blue-400 text-white" : "bg-orange-500 hover:bg-orange-400 text-white";
+  const badgeCls  = isOutlook ? "bg-blue-500 text-white" : "bg-orange-500 text-white";
+  const autoCls   = isOutlook ? "bg-blue-400/10 border-blue-400/20 text-blue-400" : "bg-orange-400/10 border-orange-400/20 text-orange-400";
+
+  const fetchMessages = useCallback(async (addr: string, silent = false) => {
+    if (!silent) setLoadingMsgs(true);
+    try {
+      const r = await fetch("/api/temptf/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: addr }),
+      });
+      const d = await r.json() as { messages?: TempTfMessage[]; error?: string };
+      if (r.ok) {
+        const incoming = d.messages ?? [];
+        setMessages((prev) => {
+          const byId = new Map(prev.map((m) => [m.id, m]));
+          incoming.forEach((m) => byId.set(m.id, m));
+          return Array.from(byId.values()).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        });
+        setError(null);
+      } else if (r.status === 429) {
+        if (!silent) setError("Rate limited — please wait a moment.");
+      } else {
+        if (!silent) setError(d.error ?? "Inbox check failed.");
+      }
+    } catch { if (!silent) setError("Network error."); }
+    finally { if (!silent) setLoadingMsgs(false); }
+  }, []);
+
+  const stopPolling = useCallback(() => {
+    if (refreshTimer.current) { clearInterval(refreshTimer.current); refreshTimer.current = null; }
+    if (countdownTimer.current) { clearInterval(countdownTimer.current); countdownTimer.current = null; }
+  }, []);
+
+  const startPolling = useCallback((addr: string) => {
+    stopPolling();
+    setCountdown(REFRESH_MS / 1000);
+    refreshTimer.current = setInterval(() => {
+      if (emailRef.current) fetchMessages(emailRef.current, true);
+      setCountdown(REFRESH_MS / 1000);
+    }, REFRESH_MS);
+    countdownTimer.current = setInterval(() => setCountdown((c) => (c <= 1 ? REFRESH_MS / 1000 : c - 1)), 1000);
+  }, [fetchMessages, stopPolling]);
+
+  const generate = useCallback(async () => {
+    stopPolling();
+    setGenerating(true);
+    setError(null);
+    setEmail(null);
+    setMessages([]);
+    setSelectedId(null);
+    emailRef.current = null;
+    try {
+      const r = await fetch(`/api/temptf/generate?type=plus&providers=${provider}`);
+      const d = await r.json() as { email?: string; error?: string };
+      if (!r.ok || !d.email) { setError(d.error ?? "Failed to generate address."); return; }
+      emailRef.current = d.email;
+      setEmail(d.email);
+      await fetchMessages(d.email);
+      startPolling(d.email);
+    } catch { setError("Network error."); }
+    finally { setGenerating(false); }
+  }, [fetchMessages, startPolling, stopPolling, provider]);
+
+  const copyAddress = () => {
+    if (!email) return;
+    navigator.clipboard.writeText(email);
+    setCopied(true); setTimeout(() => setCopied(false), 2000);
+    toast({ title: "Copied!", description: email });
+  };
+
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+    generate();
+  }, [generate]);
+
+  useEffect(() => () => stopPolling(), [stopPolling]);
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-xl border border-border/60 bg-card/40 p-4 space-y-3">
+        <div className="flex items-start gap-3">
+          <div className={`h-9 w-9 rounded-lg ${bgCls} flex items-center justify-center shrink-0 mt-0.5`}>
+            <Mail className={`h-4 w-4 ${colorCls}`} />
+          </div>
+          <div className="flex-1 min-w-0 space-y-1">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold">
+              Your temporary @{provider}.com address
+            </p>
+            {generating ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Generating address…
+              </div>
+            ) : email ? (
+              <p className="font-mono text-base font-semibold text-foreground break-all">{email}</p>
+            ) : (
+              <p className="text-sm text-muted-foreground/60">—</p>
+            )}
+          </div>
+          {email && (
+            <div className="flex items-center gap-1 text-[10px] text-muted-foreground shrink-0 mt-1">
+              <Clock className="h-3 w-3" />{countdown}s
+            </div>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2 pt-1 border-t border-border/40">
+          <Button onClick={copyAddress} disabled={!email} size="sm" className={`text-xs gap-1.5 font-semibold ${btnCls}`}>
+            {copied ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied ? "Copied!" : "Copy"}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => email && fetchMessages(email)} disabled={loadingMsgs || !email} className="text-xs gap-1.5">
+            <RefreshCw className={`h-3.5 w-3.5 ${loadingMsgs ? "animate-spin" : ""}`} />Refresh
+          </Button>
+          <Button variant="outline" size="sm" onClick={generate} disabled={generating} className="text-xs gap-1.5">
+            <Shuffle className="h-3.5 w-3.5" />{generating ? "Generating…" : "New Address"}
+          </Button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="rounded-xl border border-orange-500/30 bg-orange-500/10 p-4 flex items-center gap-3">
+          <AlertCircle className="h-5 w-5 text-orange-400 shrink-0" />
+          <p className="text-sm text-orange-300 flex-1">{error}</p>
+          <Button size="sm" variant="outline" onClick={() => email ? fetchMessages(email) : generate()} disabled={loadingMsgs || generating}
+            className="text-xs gap-1.5 border-orange-500/40 text-orange-300 hover:bg-orange-500/10 shrink-0">
+            <RefreshCw className={`h-3.5 w-3.5 ${loadingMsgs ? "animate-spin" : ""}`} />Retry
+          </Button>
+        </div>
+      )}
+
+      {email && (
+        <div className="grid md:grid-cols-5 gap-3 min-h-[340px]">
+          <div className="md:col-span-2 rounded-xl border border-border/60 bg-card/30 overflow-hidden flex flex-col">
+            <div className="px-4 py-3 border-b border-border/50 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Inbox className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs font-semibold text-foreground/70 uppercase tracking-wide">Inbox</span>
+                {messages.length > 0 && <span className={`h-4 min-w-4 px-1 text-[10px] ${badgeCls} rounded-full flex items-center justify-center font-bold`}>{messages.length}</span>}
+              </div>
+              <button onClick={() => email && fetchMessages(email)} disabled={loadingMsgs}
+                className="h-7 w-7 rounded-md border border-border/60 bg-muted/30 hover:bg-muted/60 flex items-center justify-center transition-colors disabled:opacity-50">
+                <RefreshCw className={`h-3.5 w-3.5 text-muted-foreground ${loadingMsgs ? "animate-spin" : ""}`} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {loadingMsgs && messages.length === 0 && (
+                <div className="flex items-center justify-center py-10 gap-2 text-muted-foreground text-sm">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Checking inbox…
+                </div>
+              )}
+              {!loadingMsgs && messages.length === 0 && !error && (
+                <div className="flex flex-col items-center justify-center py-8 gap-2 text-center px-4">
+                  <MailOpen className="h-7 w-7 text-muted-foreground/20" />
+                  <p className="text-sm text-muted-foreground/60">No messages yet</p>
+                  <p className="text-xs text-muted-foreground/40">Send an email here — auto-checks every {REFRESH_MS / 1000}s</p>
+                </div>
+              )}
+              {messages.map((msg) => (
+                <button key={msg.id} onClick={() => setSelectedId(selectedId === msg.id ? null : msg.id)}
+                  className={`w-full text-left px-4 py-3 transition-colors hover:bg-muted/30 border-b border-border/30 last:border-b-0 ${selectedId === msg.id ? "bg-muted/20" : ""}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-foreground/70 truncate">{msg.from || "Unknown"}</p>
+                      <p className="text-sm truncate mt-0.5 font-semibold text-foreground">{msg.subject || "(No subject)"}</p>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground/50 shrink-0 mt-0.5">{timeAgo(msg.date)}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="md:col-span-3 rounded-xl border border-border/60 bg-card/30 overflow-hidden flex flex-col">
+            {selected ? (
+              <>
+                <div className="px-4 py-3 border-b border-border/50 flex items-center gap-3 bg-muted/20">
+                  <button onClick={() => setSelectedId(null)} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0">
+                    <ArrowLeft className="h-3.5 w-3.5" /> Back
+                  </button>
+                  <div className="flex-1 min-w-0 text-right">
+                    <p className="text-sm font-semibold truncate">{selected.subject || "(No subject)"}</p>
+                    <p className="text-xs text-muted-foreground truncate">{selected.from}</p>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-auto p-4" style={{ maxHeight: "340px" }}>
+                  {selected.body ? (
+                    selected.bodyContentType === "html" ? (
+                      <div className="prose prose-invert prose-sm max-w-none text-sm" dangerouslySetInnerHTML={{ __html: selected.body }} />
+                    ) : (
+                      <pre className="text-sm text-foreground/80 whitespace-pre-wrap font-sans leading-relaxed">{selected.body}</pre>
+                    )
+                  ) : (
+                    <p className="text-sm text-muted-foreground/60">(Empty message)</p>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center py-8 text-center px-6 gap-3">
+                <div className="h-12 w-12 rounded-xl bg-muted/40 border border-border/50 flex items-center justify-center">
+                  <Mail className="h-6 w-6 text-muted-foreground/30" />
+                </div>
+                <p className="text-sm text-muted-foreground/60">Select a message to read it</p>
+                {email && (
+                  <div className={`flex items-center gap-2 text-xs ${autoCls} rounded-lg px-3 py-2`}>
+                    <Clock className="h-3.5 w-3.5 shrink-0" />
+                    Auto-refreshing every {REFRESH_MS / 1000}s
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-2">
+        {[
+          { icon: CheckCircle2, label: "No API key needed" },
+          { icon: Mail,         label: `Real @${provider}.com address` },
+          { icon: Clock,        label: `Auto-refresh ${REFRESH_MS / 1000}s` },
+          { icon: Zap,          label: "Full message body" },
+        ].map(({ icon: Ic, label }) => (
+          <div key={label} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground bg-muted/40 border border-border/50 rounded-full px-3 py-1">
+            <Ic className={`h-3 w-3 ${colorCls}`} />{label}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Tab 1c: mail.tm ────────────────────────────────────────────────
+
+function MailTmSection() {
+  const [inboxState, setInboxState] = useState<{ address: string; token: string } | null>(null);
+  const [messages, setMessages] = useState<MailTmMsg[]>([]);
+  const [selected, setSelected] = useState<MailTmFullMsg | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [loadingMsgs, setLoadingMsgs] = useState(false);
+  const [loadingMsg, setLoadingMsg] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [countdown, setCountdown] = useState(REFRESH_MS / 1000);
+  const { toast } = useToast();
+  const initialized = useRef(false);
+  const refreshTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const tokenRef = useRef<string | null>(null);
+
+  const unread = messages.filter((m) => !m.seen).length;
+
+  const fetchMessages = useCallback(async (token: string, silent = false) => {
+    if (!silent) setLoadingMsgs(true);
+    try {
+      const r = await fetch("/api/temp-mail/messages", {
+        headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+      });
+      if (!r.ok) { if (!silent) setError("Could not fetch messages."); return; }
+      const d = await r.json() as { messages?: MailTmMsg[] };
+      const incoming = d.messages ?? [];
+      setMessages((prev) => {
+        const byId = new Map(prev.map((m) => [m.id, m]));
+        incoming.forEach((m) => byId.set(m.id, { ...byId.get(m.id), ...m }));
+        return Array.from(byId.values()).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      });
+      setError(null);
+    } catch { if (!silent) setError("Network error."); }
+    finally { if (!silent) setLoadingMsgs(false); }
+  }, []);
+
+  const stopPolling = useCallback(() => {
+    if (refreshTimer.current) { clearInterval(refreshTimer.current); refreshTimer.current = null; }
+    if (countdownTimer.current) { clearInterval(countdownTimer.current); countdownTimer.current = null; }
+  }, []);
+
+  const startPolling = useCallback((token: string) => {
+    stopPolling();
+    setCountdown(REFRESH_MS / 1000);
+    refreshTimer.current = setInterval(() => {
+      if (tokenRef.current) fetchMessages(tokenRef.current, true);
+      setCountdown(REFRESH_MS / 1000);
+    }, REFRESH_MS);
+    countdownTimer.current = setInterval(() => setCountdown((c) => (c <= 1 ? REFRESH_MS / 1000 : c - 1)), 1000);
+  }, [fetchMessages, stopPolling]);
+
+  const createInbox = useCallback(async () => {
+    stopPolling();
+    setCreating(true); setError(null); setMessages([]); setSelected(null); setSelectedId(null);
+    tokenRef.current = null;
+    try {
+      const r = await fetch("/api/temp-mail/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const d = await r.json() as { address?: string; token?: string; error?: string };
+      if (!r.ok || !d.address || !d.token) { setError(d.error ?? "Could not create inbox."); return; }
+      tokenRef.current = d.token;
+      setInboxState({ address: d.address, token: d.token });
+      await fetchMessages(d.token);
+      startPolling(d.token);
+    } catch { setError("Network error. Please try again."); }
+    finally { setCreating(false); }
+  }, [fetchMessages, startPolling, stopPolling]);
+
+  const openMessage = async (msgId: string) => {
+    if (!inboxState) return;
+    setSelectedId(msgId);
+    setLoadingMsg(true);
+    setSelected(null);
+    try {
+      const r = await fetch(`/api/temp-mail/messages/${msgId}`, {
+        headers: { Authorization: `Bearer ${inboxState.token}`, Accept: "application/json" },
+      });
+      if (r.ok) {
+        const d = await r.json() as MailTmFullMsg;
+        setSelected(d);
+        setMessages((ms) => ms.map((m) => m.id === msgId ? { ...m, seen: true } : m));
+      } else {
+        toast({ title: "Could not load message", variant: "destructive" });
+      }
+    } catch { toast({ title: "Network error", variant: "destructive" }); }
+    finally { setLoadingMsg(false); }
+  };
+
+  const copyAddress = () => {
+    if (!inboxState) return;
+    navigator.clipboard.writeText(inboxState.address);
+    setCopied(true); setTimeout(() => setCopied(false), 2000);
+    toast({ title: "Copied!", description: inboxState.address });
+  };
+
+  useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+    createInbox();
+  }, [createInbox]);
+
+  useEffect(() => () => stopPolling(), [stopPolling]);
+
+  const getBody = (msg: MailTmFullMsg): { content: string; type: "html" | "text" } => {
+    if (msg.html && msg.html.length > 0) return { content: msg.html.join(""), type: "html" };
+    if (msg.text) return { content: msg.text, type: "text" };
+    return { content: "", type: "text" };
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-xl border border-border/60 bg-card/40 p-4 space-y-3">
+        <div className="flex items-start gap-3">
+          <div className="h-9 w-9 rounded-lg bg-purple-400/10 border border-purple-400/20 flex items-center justify-center shrink-0 mt-0.5">
+            <Mail className="h-4 w-4 text-purple-400" />
+          </div>
+          <div className="flex-1 min-w-0 space-y-1">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold">Your mail.tm address</p>
+            {creating ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Creating inbox…
+              </div>
+            ) : inboxState ? (
+              <div className="flex flex-wrap items-baseline gap-0 font-mono text-base font-semibold">
+                <span className="text-foreground">{inboxState.address.split("@")[0]}</span>
+                <span className="text-muted-foreground">@</span>
+                <span className="text-purple-400">{inboxState.address.split("@")[1]}</span>
+              </div>
+            ) : (
+              <div className="h-6 bg-muted/60 rounded animate-pulse w-48 mt-1" />
+            )}
+          </div>
+          <div className="flex items-center gap-1 text-[10px] text-muted-foreground shrink-0 mt-1">
+            <Clock className="h-3 w-3" />{countdown}s
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2 pt-1 border-t border-border/40">
+          <Button onClick={copyAddress} disabled={!inboxState} size="sm" className="text-xs gap-1.5 bg-purple-500 hover:bg-purple-400 text-white font-semibold">
+            {copied ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+            {copied ? "Copied!" : "Copy Address"}
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => inboxState && fetchMessages(inboxState.token)} disabled={loadingMsgs || !inboxState} className="text-xs gap-1.5">
+            <RefreshCw className={`h-3.5 w-3.5 ${loadingMsgs ? "animate-spin" : ""}`} />Refresh
+          </Button>
+          <Button variant="outline" size="sm" onClick={createInbox} disabled={creating} className="text-xs gap-1.5">
+            <Shuffle className="h-3.5 w-3.5" />{creating ? "Creating…" : "New Address"}
+          </Button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 flex items-center gap-3">
+          <AlertCircle className="h-5 w-5 text-red-400 shrink-0" />
+          <p className="text-sm text-red-300 flex-1">{error}</p>
+          <Button size="sm" variant="outline" onClick={createInbox} disabled={creating}
+            className="text-xs gap-1.5 border-red-500/40 text-red-300 hover:bg-red-500/10 shrink-0">
+            <RefreshCw className={`h-3.5 w-3.5 ${creating ? "animate-spin" : ""}`} />Retry
+          </Button>
+        </div>
+      )}
+
+      <div className="grid md:grid-cols-5 gap-3 min-h-[380px]">
+        <div className="md:col-span-2 rounded-xl border border-border/60 bg-card/30 overflow-hidden flex flex-col">
+          <div className="px-4 py-3 border-b border-border/50 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Inbox className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-xs font-semibold text-foreground/70 uppercase tracking-wide">Inbox</span>
+              {unread > 0 && <span className="h-4 min-w-4 px-1 text-[10px] bg-purple-500 text-white rounded-full flex items-center justify-center font-bold">{unread}</span>}
+            </div>
+            <button onClick={() => inboxState && fetchMessages(inboxState.token)} disabled={loadingMsgs}
+              className="h-7 w-7 rounded-md border border-border/60 bg-muted/30 hover:bg-muted/60 flex items-center justify-center transition-colors disabled:opacity-50">
+              <RefreshCw className={`h-3.5 w-3.5 text-muted-foreground ${loadingMsgs ? "animate-spin" : ""}`} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            {loadingMsgs && messages.length === 0 && (
+              <div className="flex items-center justify-center py-10 gap-2 text-muted-foreground text-sm">
+                <Loader2 className="h-4 w-4 animate-spin" /> Checking inbox…
+              </div>
+            )}
+            {!loadingMsgs && messages.length === 0 && !error && (
+              <div className="flex flex-col items-center justify-center py-8 gap-2 text-center px-4">
+                <MailOpen className="h-7 w-7 text-muted-foreground/20" />
+                <p className="text-sm text-muted-foreground/60">No messages yet</p>
+                <p className="text-xs text-muted-foreground/40">Send an email to this address</p>
+              </div>
+            )}
+            {messages.map((msg) => (
+              <button key={msg.id} onClick={() => openMessage(msg.id)}
+                className={`w-full text-left px-4 py-3 transition-colors hover:bg-muted/30 border-b border-border/30 last:border-b-0 ${selectedId === msg.id ? "bg-muted/20" : ""}`}>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-foreground/70 truncate">{msg.from?.address || "Unknown"}</p>
+                    <p className={`text-sm truncate mt-0.5 ${!msg.seen ? "font-semibold text-foreground" : "text-foreground/70"}`}>
+                      {msg.subject || "(No subject)"}
+                    </p>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground/50 shrink-0 mt-0.5">{timeAgo(msg.createdAt)}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="md:col-span-3 rounded-xl border border-border/60 bg-card/30 overflow-hidden flex flex-col">
+          {selected ? (
+            <>
+              <div className="px-4 py-3 border-b border-border/50 flex items-center gap-3 bg-muted/20">
+                <button onClick={() => { setSelected(null); setSelectedId(null); }} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  <ArrowLeft className="h-3.5 w-3.5" /> Back
+                </button>
+                <div className="flex-1 min-w-0 text-right">
+                  <p className="text-sm font-semibold truncate">{selected.subject || "(No subject)"}</p>
+                  <p className="text-xs text-muted-foreground truncate">{selected.from?.address}</p>
+                </div>
+              </div>
+              <div className="flex-1 overflow-auto p-4" style={{ maxHeight: "360px" }}>
+                {(() => {
+                  const { content, type } = getBody(selected);
+                  return content ? (
+                    type === "html" ? (
+                      <div className="prose prose-invert prose-sm max-w-none text-sm" dangerouslySetInnerHTML={{ __html: content }} />
+                    ) : (
+                      <pre className="text-sm text-foreground/80 whitespace-pre-wrap font-sans leading-relaxed">{content}</pre>
+                    )
+                  ) : <p className="text-sm text-muted-foreground">(Empty message)</p>;
+                })()}
+              </div>
+            </>
+          ) : loadingMsg ? (
+            <div className="flex items-center justify-center py-10 gap-2 text-muted-foreground text-sm flex-1">
+              <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center py-10 text-center px-6 gap-3">
+              <div className="h-12 w-12 rounded-xl bg-muted/40 border border-border/50 flex items-center justify-center">
+                <Mail className="h-6 w-6 text-muted-foreground/30" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground/60">Select a message to read it</p>
+                <p className="text-xs text-muted-foreground/40 mt-1">Messages appear automatically when received</p>
+              </div>
+              {inboxState && (
+                <div className="flex items-center gap-2 text-xs bg-purple-400/10 border border-purple-400/20 text-purple-400 rounded-lg px-3 py-2">
+                  <Clock className="h-3.5 w-3.5 shrink-0" />
+                  Auto-refreshing every {REFRESH_MS / 1000}s
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {[
+          { icon: Zap, label: "Unique domains" },
+          { icon: Clock, label: `Auto-refresh ${REFRESH_MS / 1000}s` },
+          { icon: Mail, label: "No signup needed" },
+          { icon: Settings2, label: "Full message body" },
+        ].map(({ icon: Ic, label }) => (
+          <div key={label} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground bg-muted/40 border border-border/50 rounded-full px-3 py-1">
+            <Ic className="h-3 w-3 text-purple-400" />{label}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── Tab 1: Disposable Inbox — provider selector wrapper ────────────
+
+const DISPOSABLE_PROVIDERS = [
+  { id: "guerrilla" as const, label: "Guerrilla Mail", badge: "9 domains",      activeBg: "bg-cyan-400/10 border-cyan-400/30 text-cyan-400" },
+  { id: "outlook"   as const, label: "Outlook",        badge: "outlook.com",    activeBg: "bg-blue-400/10 border-blue-400/30 text-blue-400" },
+  { id: "hotmail"   as const, label: "Hotmail",         badge: "hotmail.com",   activeBg: "bg-orange-400/10 border-orange-400/30 text-orange-400" },
+  { id: "mailtm"    as const, label: "mail.tm",          badge: "custom domains", activeBg: "bg-purple-400/10 border-purple-400/30 text-purple-400" },
+];
+
+function DisposableInboxTab() {
+  const [provider, setProvider] = useState<DisposableProvider>("guerrilla");
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        {DISPOSABLE_PROVIDERS.map((p) => (
+          <button
+            key={p.id}
+            onClick={() => setProvider(p.id)}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-medium transition-all ${
+              provider === p.id
+                ? p.activeBg
+                : "border-border/50 text-muted-foreground hover:border-border hover:text-foreground bg-transparent"
+            }`}
+          >
+            {p.label}
+            <span className="font-mono text-[10px] opacity-60">{p.badge}</span>
+          </button>
+        ))}
+      </div>
+
+      {provider === "guerrilla" && <GuerrillaSection />}
+      {(provider === "outlook" || provider === "hotmail") && <TempTfDisposableSection key={provider} provider={provider} />}
+      {provider === "mailtm" && <MailTmSection />}
     </div>
   );
 }

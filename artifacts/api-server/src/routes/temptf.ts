@@ -8,14 +8,18 @@ const HEADERS = { "Content-Type": "application/json", "Accept": "application/jso
 // GET /api/temptf/generate
 // Returns a fresh @gmail.com address using the dot trick.
 router.get("/temptf/generate", async (req, res) => {
-  const { type } = req.query as { type?: string };
+  const { type, providers } = req.query as { type?: string; providers?: string };
 
-  // dot=1 → u.s.e.r@gmail.com style (pure dot variant)
-  // plus=1 → user+abc@gmail.com style
-  // Default to dot trick unless "plus" is requested
-  const usePlus = type === "plus";
-  const useDot  = !usePlus;
-  const params  = new URLSearchParams({ providers: "gmail" });
+  // Supported providers: gmail, outlook, hotmail
+  // Outlook/Hotmail only support plus trick; Gmail supports both dot and plus
+  const validProviders = ["gmail", "outlook", "hotmail"];
+  const provider = validProviders.includes(providers ?? "") ? (providers as string) : "gmail";
+  const isGmail  = provider === "gmail";
+
+  const usePlus = type === "plus" || !isGmail; // non-gmail always uses plus
+  const useDot  = isGmail && !usePlus;
+
+  const params  = new URLSearchParams({ providers: provider });
   if (useDot)  params.set("dot",  "1");
   if (usePlus) params.set("plus", "1");
 
