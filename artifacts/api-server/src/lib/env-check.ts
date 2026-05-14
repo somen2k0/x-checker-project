@@ -32,8 +32,9 @@ const OPTIONAL: EnvVar[] = [
   {
     name: "RAPIDAPI_KEYS",
     description:
-      "Comma-separated RapidAPI keys for additional tools. " +
-      "Without them, RapidAPI-backed tools will return 503. Get keys at https://rapidapi.com",
+      "Comma-separated RapidAPI keys for the optional Gmailnator integration " +
+      "(gmailnator.p.rapidapi.com). The frontend Temp Gmail tool uses temp.tf instead " +
+      "and does NOT require this key. Get keys at https://rapidapi.com",
   },
   {
     name: "WEB3FORMS_KEY",

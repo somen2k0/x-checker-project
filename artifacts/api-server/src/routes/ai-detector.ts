@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { fetchWithGroqKeyRotation, hasGroqKeys } from "../lib/groq-keys";
 import { AI_MAX_INPUT_CHARS } from "../middlewares/ai-protection";
 
 const router = Router();
@@ -8,29 +9,20 @@ const DETECT_MODEL = "llama-3.3-70b-versatile";
 const HUMANIZE_MODEL = "llama-3.3-70b-versatile";
 const MAX_TOKENS = 500;
 
-function getGroqKeys(): string[] {
-  const raw = process.env.GROQ_API_KEY ?? "";
-  return raw.split(",").map((k) => k.trim()).filter(Boolean);
-}
-
 async function callGroq(
   model: string,
   prompt: string,
   res: import("express").Response,
 ): Promise<string | null> {
-  const keys = getGroqKeys();
-  if (keys.length === 0) {
+  if (!hasGroqKeys()) {
     res.status(503).json({ error: "Service not configured. Please contact the administrator." });
     return null;
   }
 
-  for (let i = 0; i < keys.length; i++) {
-    const r = await fetch(GROQ_URL, {
+  const { res: apiRes, exhausted } = await fetchWithGroqKeyRotation((key) =>
+    fetch(GROQ_URL, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${keys[i]}`,
-        "Content-Type": "application/json",
-      },
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model,
         max_tokens: MAX_TOKENS,
@@ -38,34 +30,31 @@ async function callGroq(
         messages: [{ role: "user", content: prompt }],
       }),
       signal: AbortSignal.timeout(30000),
-    });
+    }),
+  );
 
-    if (r.status === 429 && i < keys.length - 1) continue;
-
-    if (!r.ok) {
-      if (r.status === 429) {
-        res.status(429).json({ error: "Service is rate-limited. Please try again in a moment." });
-        return null;
-      }
-      if (r.status === 401) {
-        res.status(503).json({ error: "Service misconfigured. Please contact the administrator." });
-        return null;
-      }
-      const e = (await r.json().catch(() => ({}))) as {
-        error?: { message?: string };
-      };
-      res.status(500).json({ error: e?.error?.message ?? "Groq API error" });
+  if (exhausted || !apiRes.ok) {
+    if (apiRes.status === 503) {
+      res.status(503).json({ error: "Service not configured. Please contact the administrator." });
       return null;
     }
-
-    const data = (await r.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
-    return data.choices?.[0]?.message?.content ?? "";
+    if (apiRes.status === 429) {
+      res.status(429).json({ error: "Service is rate-limited. Please try again in a moment." });
+      return null;
+    }
+    if (apiRes.status === 401) {
+      res.status(503).json({ error: "Service misconfigured. Please contact the administrator." });
+      return null;
+    }
+    const e = (await apiRes.json().catch(() => ({}))) as { error?: { message?: string } };
+    res.status(500).json({ error: e?.error?.message ?? "Groq API error" });
+    return null;
   }
 
-  res.status(429).json({ error: "Service is rate-limited. Please try again in a moment." });
-  return null;
+  const data = (await apiRes.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+  return data.choices?.[0]?.message?.content ?? "";
 }
 
 router.post("/ai-detector/detect", async (req, res) => {
@@ -75,12 +64,8 @@ router.post("/ai-detector/detect", async (req, res) => {
     res.status(400).json({ error: "Please provide at least 30 characters of text." });
     return;
   }
-
-  // AI protection middleware enforces AI_MAX_INPUT_CHARS globally
   if (text.length > AI_MAX_INPUT_CHARS) {
-    res.status(400).json({
-      error: `Text too long. Maximum ${AI_MAX_INPUT_CHARS} characters.`,
-    });
+    res.status(400).json({ error: `Text too long. Maximum ${AI_MAX_INPUT_CHARS} characters.` });
     return;
   }
 
@@ -114,7 +99,6 @@ Return ONLY valid JSON (no markdown), exactly:
       res.status(500).json({ error: "Failed to parse detection result. Please try again." });
       return;
     }
-
     res.json(parsed);
   } catch (err) {
     req.log.error({ err }, "ai-detector detect failed");
@@ -129,11 +113,8 @@ router.post("/ai-detector/humanize", async (req, res) => {
     res.status(400).json({ error: "Please provide at least 30 characters of text." });
     return;
   }
-
   if (text.length > AI_MAX_INPUT_CHARS) {
-    res.status(400).json({
-      error: `Text too long. Maximum ${AI_MAX_INPUT_CHARS} characters.`,
-    });
+    res.status(400).json({ error: `Text too long. Maximum ${AI_MAX_INPUT_CHARS} characters.` });
     return;
   }
 
@@ -143,8 +124,7 @@ router.post("/ai-detector/humanize", async (req, res) => {
     academic:     "academic but readable — precise and structured with a real voice",
     creative:     "creative and expressive — vivid, personal, varied rhythm",
   };
-
-  const tone = styleGuide[style ?? "casual"] ?? styleGuide.casual;
+  const tone = styleGuide[style ?? "casual"] ?? styleGuide["casual"]!;
 
   const prompt = `Rewrite the following AI-generated text to sound human. Style: ${tone}.
 Rules: use contractions, vary sentence length, remove AI filler phrases, use active voice, keep all facts.
@@ -158,7 +138,6 @@ ${text.trim()}
   try {
     const result = await callGroq(HUMANIZE_MODEL, prompt, res);
     if (result === null) return;
-
     res.json({ humanized: result.trim() });
   } catch (err) {
     req.log.error({ err }, "ai-detector humanize failed");
