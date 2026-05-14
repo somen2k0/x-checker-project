@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useLocation, Link } from "wouter";
 import {
   Home, Wrench, Info, Search, X, ChevronRight,
@@ -144,7 +144,7 @@ const NAV = [
   { href: "/", label: "Home", icon: Home },
   { href: "/tools", label: "Tools", icon: Wrench },
   { href: "/tools/temp-mail", label: "Temp Mail", icon: Inbox },
-  { href: "/about", label: "About", icon: Info },
+  { href: "#search", label: "Search", icon: Search },
 ];
 
 export function MobileNav() {
@@ -152,6 +152,7 @@ export function MobileNav() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [tempMailOpen, setTempMailOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const filteredTools = useMemo(() => {
     if (!search.trim()) return null;
@@ -167,6 +168,11 @@ export function MobileNav() {
   const handleToolClick = () => {
     setDrawerOpen(false);
     setSearch("");
+  };
+
+  const openSearch = () => {
+    setDrawerOpen(true);
+    setTimeout(() => searchInputRef.current?.focus(), 200);
   };
 
   return (
@@ -207,6 +213,21 @@ export function MobileNav() {
                   }`}
                 >
                   <Icon className={`h-5 w-5 transition-transform ${active ? "scale-110" : ""}`} />
+                  {label}
+                </button>
+              );
+            }
+
+            if (href === "#search") {
+              return (
+                <button
+                  key="search"
+                  onClick={openSearch}
+                  className={`flex-1 h-full flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors ${
+                    drawerOpen ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon className={`h-5 w-5 transition-transform ${drawerOpen ? "scale-110" : ""}`} />
                   {label}
                 </button>
               );
@@ -303,6 +324,7 @@ export function MobileNav() {
             <div className="relative mt-2">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50 pointer-events-none" />
               <Input
+                ref={searchInputRef}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search tools…"
