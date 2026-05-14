@@ -364,11 +364,6 @@ export function Navbar() {
               <MessageSquare className="h-3.5 w-3.5" />
               <span className="hidden xl:inline">Feedback</span>
             </Button>
-            <Link href="/tools">
-              <Button size="sm" className="hidden md:flex text-xs h-8 shadow-sm shadow-primary/20 whitespace-nowrap px-3">
-                Browse All →
-              </Button>
-            </Link>
             {/* Mobile hamburger */}
             <button
               className="md:hidden p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
@@ -497,11 +492,6 @@ export function Navbar() {
                 Feedback
               </button>
 
-              <div className="pt-2 pb-1">
-                <Link href="/tools" onClick={closeMenu}>
-                  <Button className="w-full text-sm h-10">Browse All Tools →</Button>
-                </Link>
-              </div>
             </div>
           </div>
         )}
