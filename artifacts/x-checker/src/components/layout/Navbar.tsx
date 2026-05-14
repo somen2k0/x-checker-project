@@ -10,6 +10,7 @@ import {
   Mail, ShieldCheck, Pencil, FileText, Shield, Tag, Clock, Inbox,
   Minimize2, Code2, KeyRound, Regex, Database, Shuffle, ArrowLeftRight,
   ScanSearch, EyeOff, MailWarning, AlertOctagon, BookOpen, Newspaper,
+  Calendar, ClipboardList, Gauge, FlaskConical, ShieldAlert,
 } from "lucide-react";
 import { TOTAL_LIVE } from "@/lib/tools-registry";
 import { NavSearchDialog } from "@/components/layout/NavSearchDialog";
@@ -41,8 +42,11 @@ const NAV_CATEGORIES = [
       { icon: Type, label: "Font Preview", href: "/tools/font-preview" },
       { icon: BarChart2, label: "Character Counter", href: "/tools/character-counter" },
       { icon: Type, label: "Case Converter", href: "/tools/case-converter", badge: "New" },
+      { icon: Users, label: "Follower Analyzer", href: "/tools/follower-analyzer", badge: "New" },
+      { icon: Calendar, label: "Tweet Scheduler", href: "/tools/tweet-scheduler", badge: "New" },
+      { icon: ClipboardList, label: "Profile Audit", href: "/tools/profile-audit", badge: "New" },
     ],
-    comingSoon: ["Follower Analyzer", "Tweet Scheduler", "Profile Audit"],
+    comingSoon: [],
   },
   {
     key: "dev-tools",
@@ -78,8 +82,11 @@ const NAV_CATEGORIES = [
       { icon: TrendingUp, label: "Keyword Density", href: "/tools/keyword-density", badge: "New" },
       { icon: Shield, label: "Robots.txt Generator", href: "/tools/robots-txt-generator", badge: "New" },
       { icon: Tag, label: "Sitemap Validator", href: "/tools/sitemap-validator", badge: "New" },
+      { icon: Gauge, label: "Page Speed Checker", href: "/tools/page-speed-checker", badge: "New" },
+      { icon: Link2, label: "Backlink Analyzer", href: "/tools/backlink-analyzer", badge: "New" },
+      { icon: Code2, label: "Schema Generator", href: "/tools/schema-generator", badge: "New" },
     ],
-    comingSoon: ["Page Speed Checker", "Backlink Analyzer", "Schema Generator"],
+    comingSoon: [],
   },
   {
     key: "email",
@@ -93,8 +100,11 @@ const NAV_CATEGORIES = [
       { icon: Hash, label: "Email Character Counter", href: "/tools/email-character-counter" },
       { icon: ShieldCheck, label: "Email Validator", href: "/tools/email-validator" },
       { icon: FileText, label: "Plain Text Formatter", href: "/tools/plain-text-formatter" },
+      { icon: FlaskConical, label: "Email A/B Tester", href: "/tools/email-ab-tester", badge: "New" },
+      { icon: ShieldAlert, label: "Spam Score Checker", href: "/tools/spam-score-checker", badge: "New" },
+      { icon: Newspaper, label: "Newsletter Template", href: "/tools/newsletter-template-generator", badge: "New" },
     ],
-    comingSoon: ["Email A/B Tester", "Spam Score Checker", "Newsletter Template Generator"],
+    comingSoon: [],
   },
 ];
 

@@ -7,6 +7,7 @@ import {
   Globe, Mail, ShieldCheck, Pencil, Inbox, Minimize2, KeyRound, Database,
   Shuffle, Shield, Tag, FileText, BarChart, Clock, ArrowLeftRight, ScanSearch,
   EyeOff, MailWarning, AlertOctagon, BookOpen,
+  Calendar, ClipboardList, Gauge, FlaskConical, ShieldAlert, Newspaper,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,9 @@ const TOOL_CATEGORIES = [
       { icon: AtSign, label: "Handle Formatter", desc: "Add/remove @ prefix in bulk", href: "/tools/at-formatter" },
       { icon: AtSign, label: "Username Generator", desc: "Unique X handle ideas", href: "/tools/username-generator" },
       { icon: Users, label: "Display Name Ideas", desc: "Curated X display names", href: "/tools/name-ideas" },
+      { icon: Users, label: "Follower Analyzer", desc: "Analyze follower ratio & engagement", href: "/tools/follower-analyzer", badge: "New" },
+      { icon: Calendar, label: "Tweet Scheduler", desc: "Plan & export your content calendar", href: "/tools/tweet-scheduler", badge: "New" },
+      { icon: ClipboardList, label: "Profile Audit", desc: "Score and improve your X profile", href: "/tools/profile-audit", badge: "New" },
     ],
   },
   {
@@ -95,6 +99,9 @@ const TOOL_CATEGORIES = [
       { icon: TrendingUp, label: "Keyword Density", desc: "Check keyword frequency", href: "/tools/keyword-density", badge: "New" },
       { icon: Shield, label: "Robots.txt Generator", desc: "Generate robots.txt rules", href: "/tools/robots-txt-generator", badge: "New" },
       { icon: Tag, label: "Sitemap Validator", desc: "Validate XML sitemaps", href: "/tools/sitemap-validator", badge: "New" },
+      { icon: Gauge, label: "Page Speed Checker", desc: "Audit your site speed & Core Web Vitals", href: "/tools/page-speed-checker", badge: "New" },
+      { icon: Link2, label: "Backlink Analyzer", desc: "Check backlink quality & spam signals", href: "/tools/backlink-analyzer", badge: "New" },
+      { icon: Code2, label: "Schema Generator", desc: "Generate JSON-LD structured data markup", href: "/tools/schema-generator", badge: "New" },
     ],
   },
   {
@@ -111,6 +118,9 @@ const TOOL_CATEGORIES = [
       { icon: ShieldCheck, label: "Email Validator", desc: "Validate format & MX records", href: "/tools/email-validator" },
       { icon: Mail, label: "Email Signature Generator", desc: "Professional email signature builder", href: "/tools/email-signature-generator" },
       { icon: FileText, label: "Plain Text Formatter", desc: "Convert HTML email to plain text", href: "/tools/plain-text-formatter" },
+      { icon: FlaskConical, label: "Email A/B Tester", desc: "Compare subject lines & predict winner", href: "/tools/email-ab-tester", badge: "New" },
+      { icon: ShieldAlert, label: "Spam Score Checker", desc: "Check email content for spam triggers", href: "/tools/spam-score-checker", badge: "New" },
+      { icon: Newspaper, label: "Newsletter Template", desc: "Generate responsive HTML email templates", href: "/tools/newsletter-template-generator", badge: "New" },
     ],
   },
 ];

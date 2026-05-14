@@ -63,6 +63,16 @@ import SpamRiskChecker from "@/pages/tools/spam-risk-checker";
 import EmailLeakChecker from "@/pages/tools/email-leak-checker";
 import AliasEmailExplainer from "@/pages/tools/alias-email-explainer";
 import DisposableEmailGuide from "@/pages/tools/disposable-email-guide";
+// New coming-soon → live tools
+import FollowerAnalyzer from "@/pages/tools/follower-analyzer";
+import TweetScheduler from "@/pages/tools/tweet-scheduler";
+import ProfileAudit from "@/pages/tools/profile-audit";
+import PageSpeedChecker from "@/pages/tools/page-speed-checker";
+import BacklinkAnalyzer from "@/pages/tools/backlink-analyzer";
+import SchemaGenerator from "@/pages/tools/schema-generator";
+import EmailAbTester from "@/pages/tools/email-ab-tester";
+import SpamScoreChecker from "@/pages/tools/spam-score-checker";
+import NewsletterTemplateGenerator from "@/pages/tools/newsletter-template-generator";
 // Blog
 import BlogIndex from "@/pages/blog/index";
 import WhatIsDisposableEmail from "@/pages/blog/what-is-disposable-email";
@@ -169,6 +179,17 @@ function TrackedRouter() {
       <Route path="/blog/is-temp-mail-safe" component={IsTempMailSafe} />
       <Route path="/blog/why-websites-ask-email-verification" component={WhyWebsitesAskEmailVerification} />
       <Route path="/blog/temp-gmail-explained" component={TempGmailExplained} />
+
+      {/* Previously coming-soon — now live */}
+      <Route path="/tools/follower-analyzer" component={FollowerAnalyzer} />
+      <Route path="/tools/tweet-scheduler" component={TweetScheduler} />
+      <Route path="/tools/profile-audit" component={ProfileAudit} />
+      <Route path="/tools/page-speed-checker" component={PageSpeedChecker} />
+      <Route path="/tools/backlink-analyzer" component={BacklinkAnalyzer} />
+      <Route path="/tools/schema-generator" component={SchemaGenerator} />
+      <Route path="/tools/email-ab-tester" component={EmailAbTester} />
+      <Route path="/tools/spam-score-checker" component={SpamScoreChecker} />
+      <Route path="/tools/newsletter-template-generator" component={NewsletterTemplateGenerator} />
 
       {/* Social media X tools — dedicated pages */}
       <Route path="/tools/x-account-checker" component={XAccountChecker} />
