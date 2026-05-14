@@ -12,6 +12,7 @@ import {
   ScanSearch, EyeOff, MailWarning, AlertOctagon, BookOpen, Newspaper,
 } from "lucide-react";
 import { TOTAL_LIVE } from "@/lib/tools-registry";
+import { NavSearchDialog } from "@/components/layout/NavSearchDialog";
 
 const BADGE_STYLES: Record<string, string> = {
   Popular: "bg-amber-400/15 text-amber-400 border-amber-400/30",
@@ -351,6 +352,7 @@ export function Navbar() {
 
           {/* Right side */}
           <div className="flex items-center gap-1.5 shrink-0">
+            <NavSearchDialog />
             <div className="hidden xl:flex items-center gap-1.5 text-xs text-muted-foreground">
               <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-[11px]">All systems operational</span>
