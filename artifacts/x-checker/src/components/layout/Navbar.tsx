@@ -30,6 +30,7 @@ const NAV_CATEGORIES = [
       { icon: Search, label: "Account Checker", href: "/tools/x-account-checker", badge: "Popular" },
       { icon: Sparkles, label: "AI Bio Generator", href: "/tools/bio-generator", badge: "AI" },
       { icon: Link2, label: "Profile Link Generator", href: "/tools/profile-link-generator" },
+      { icon: AtSign, label: "@ Formatter", href: "/tools/at-formatter" },
       { icon: AtSign, label: "Username Generator", href: "/tools/username-generator" },
       { icon: Users, label: "Display Name Ideas", href: "/tools/name-ideas" },
       { icon: Hash, label: "Hashtag Formatter", href: "/tools/hashtag-formatter" },
