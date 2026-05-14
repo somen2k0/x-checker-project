@@ -3,75 +3,107 @@ import { Router } from "express";
 const router = Router();
 const MAIL_TM = "https://api.mail.tm";
 
+const TM_HEADERS = {
+  "Content-Type": "application/json",
+  Accept: "application/json",
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+};
+
 function randomPass(): string {
-  return Math.random().toString(36).slice(2) + "Xk9!" + Math.random().toString(36).slice(2);
+  return "P" + Math.random().toString(36).slice(2, 10) + "!x" + Math.random().toString(36).slice(2, 6) + "9Z";
+}
+
+function randomUser(): string {
+  const chars = "abcdefghijklmnopqrstuvwxyz";
+  const digits = "0123456789";
+  let s = "";
+  for (let i = 0; i < 8; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  for (let i = 0; i < 4; i++) s += digits[Math.floor(Math.random() * digits.length)];
+  return s;
+}
+
+// Domain cache: refreshed every 5 minutes
+let domainCache: string[] = [];
+let domainCacheAt = 0;
+const DOMAIN_TTL = 5 * 60 * 1000;
+
+async function getTmDomains(): Promise<string[]> {
+  if (domainCache.length > 0 && Date.now() - domainCacheAt < DOMAIN_TTL) return domainCache;
+  try {
+    const r = await fetch(`${MAIL_TM}/domains?page=1`, {
+      headers: TM_HEADERS,
+      signal: AbortSignal.timeout(10000),
+    });
+    if (r.ok) {
+      const data = await r.json() as { "hydra:member"?: Array<{ domain: string; isActive?: boolean }> };
+      const list = (data["hydra:member"] ?? []).filter(d => d.isActive !== false).map(d => d.domain);
+      if (list.length > 0) { domainCache = list; domainCacheAt = Date.now(); return list; }
+    }
+  } catch { /* fall through to fallback */ }
+  return domainCache.length > 0 ? domainCache : ["mailto.plus", "fexbox.org", "txcct.com"];
 }
 
 // ── Temp Mail tab (mail.tm) ───────────────────────────────────────
 
-router.get("/temp-mail/domains", async (req, res) => {
-  try {
-    const r = await fetch(`${MAIL_TM}/domains`, {
-      headers: { Accept: "application/json" },
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!r.ok) { res.json({ domains: [] }); return; }
-    const data = await r.json() as { "hydra:member"?: Array<{ domain: string }> };
-    res.json({ domains: (data["hydra:member"] ?? []).map((d) => d.domain) });
-  } catch {
-    res.json({ domains: [] });
-  }
+router.get("/temp-mail/domains", async (_req, res) => {
+  res.json({ domains: await getTmDomains() });
 });
 
 router.post("/temp-mail/create", async (req, res) => {
   const { username, domain } = req.body as { username?: string; domain?: string };
 
   try {
-    let targetDomain = domain;
-    if (!targetDomain) {
+    const domains = await getTmDomains();
+    const targetDomain = domain || domains[0];
+    if (!targetDomain) { res.status(502).json({ error: "No mail.tm domains available right now." }); return; }
+
+    // Retry up to 4 times with different usernames (address may already be taken)
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const user = attempt === 0 && username?.trim()
+        ? username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "")
+        : randomUser();
+      const address = `${user}@${targetDomain}`;
+      const password = randomPass();
+
+      let cr: Response;
       try {
-        const dr = await fetch(`${MAIL_TM}/domains`, {
-          headers: { Accept: "application/json", "Cache-Control": "no-cache" },
-          signal: AbortSignal.timeout(8000),
+        cr = await fetch(`${MAIL_TM}/accounts`, {
+          method: "POST",
+          headers: TM_HEADERS,
+          body: JSON.stringify({ address, password }),
+          signal: AbortSignal.timeout(12000),
         });
-        if (dr.status === 200) {
-          const dd = await dr.json() as { "hydra:member"?: Array<{ domain: string }> };
-          targetDomain = dd["hydra:member"]?.[0]?.domain;
-        }
-      } catch { /* fall through */ }
-    }
-    if (!targetDomain) targetDomain = "wshu.net";
-    if (!targetDomain) { res.status(502).json({ error: "Could not get domain." }); return; }
+      } catch { continue; }
 
-    const user = username?.trim().toLowerCase() || Math.random().toString(36).slice(2, 10);
-    const address = `${user}@${targetDomain}`;
-    const password = randomPass();
+      if (cr.status === 422 || cr.status === 409) continue; // username taken — retry
 
-    const cr = await fetch(`${MAIL_TM}/accounts`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ address, password }),
-      signal: AbortSignal.timeout(12000),
-    });
+      if (!cr.ok) {
+        const txt = await cr.text().catch(() => "");
+        req.log.warn({ status: cr.status, body: txt.slice(0, 200) }, "mail.tm create failed");
+        if (cr.status === 429) { res.status(429).json({ error: "mail.tm is rate-limiting this server. Please try again in a moment." }); return; }
+        if (cr.status >= 500) { res.status(502).json({ error: "mail.tm is temporarily unavailable. Please try again." }); return; }
+        continue;
+      }
 
-    if (!cr.ok) {
-      const txt = await cr.text().catch(() => "");
-      req.log.warn({ status: cr.status, body: txt }, "mail.tm create failed");
-      res.status(502).json({ error: "Could not create inbox. The username may be taken — try again." });
+      const account = await cr.json() as { id: string; address: string };
+
+      let tr: Response;
+      try {
+        tr = await fetch(`${MAIL_TM}/token`, {
+          method: "POST",
+          headers: TM_HEADERS,
+          body: JSON.stringify({ address, password }),
+          signal: AbortSignal.timeout(10000),
+        });
+      } catch { res.status(502).json({ error: "Could not authenticate inbox. Please try again." }); return; }
+
+      if (!tr.ok) { res.status(502).json({ error: "Could not authenticate inbox. Please try again." }); return; }
+      const tokenData = await tr.json() as { token: string };
+      res.json({ id: account.id, address: account.address, token: tokenData.token });
       return;
     }
-    const account = await cr.json() as { id: string; address: string };
 
-    const tr = await fetch(`${MAIL_TM}/token`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ address, password }),
-      signal: AbortSignal.timeout(10000),
-    });
-    if (!tr.ok) { res.status(502).json({ error: "Could not authenticate inbox." }); return; }
-    const tokenData = await tr.json() as { token: string; id: string };
-
-    res.json({ id: account.id, address: account.address, token: tokenData.token });
+    res.status(502).json({ error: "Could not create inbox after several attempts. Please try again." });
   } catch (err) {
     req.log.error({ err }, "temp-mail create error");
     res.status(500).json({ error: "Could not create inbox. Please try again." });
