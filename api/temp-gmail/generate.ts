@@ -1,6 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { fetchWithRotation, rapidHeaders, BASE_URL } from "../_lib/rapidapi";
-import { increment, logActivity } from "../_lib/admin-db";
 
 // Verified eType mappings against the live Gmailnator API:
 // [2] = dot trick  (@gmail.com with dots)
@@ -49,7 +48,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
 
-  void increment("tempgmail:generates");
-  void logActivity("tempgmail_generate");
   res.status(200).json({ email: data.email, type });
 }

@@ -1,7 +1,5 @@
 import { Router } from "express";
 import { fetchWithKeyRotation } from "../lib/rapidapi-keys";
-import { increment } from "../lib/stats";
-import { logActivity } from "../lib/activity-log";
 
 const router = Router();
 
@@ -63,8 +61,6 @@ router.post("/temp-gmail/generate", async (req, res) => {
     return;
   }
 
-  void increment("tempgmail:generates");
-  void logActivity("tempgmail_generate");
   res.json({ email: data.email, type: resolvedType });
 });
 

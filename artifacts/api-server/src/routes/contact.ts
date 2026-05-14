@@ -1,12 +1,11 @@
 import { Router } from "express";
-import { getConfig } from "../lib/config-db";
 
 const router = Router();
 
 const WEB3FORMS_URL = "https://api.web3forms.com/submit";
 
 router.post("/contact", async (req, res) => {
-  const accessKey = (await getConfig("web3forms_key")) ?? process.env.WEB3FORMS_KEY;
+  const accessKey = process.env.WEB3FORMS_KEY;
   if (!accessKey) {
     res.status(503).json({ error: "Contact form is not configured." });
     return;
