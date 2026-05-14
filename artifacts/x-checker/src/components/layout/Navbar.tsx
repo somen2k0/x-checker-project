@@ -459,18 +459,45 @@ export function Navbar() {
                   <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${mobileExpanded === "temp-mail" ? "rotate-180" : ""}`} />
                 </button>
                 {mobileExpanded === "temp-mail" && (
-                  <div className="px-2 py-2 space-y-0.5 bg-muted/10">
-                    {TEMP_MAIL_ITEMS.map(({ icon: Icon, label, href, desc }) => (
-                      <Link key={href} href={href} onClick={closeMenu}>
-                        <div className="flex items-center gap-2.5 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors cursor-pointer">
-                          <Icon className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium text-foreground">{label}</div>
-                            <div className="text-xs text-muted-foreground truncate">{desc}</div>
-                          </div>
-                        </div>
+                  <div className="px-2 py-2 bg-muted/10">
+                    {/* Inbox Tools */}
+                    <div className="flex items-center justify-between px-3 pt-1 pb-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-400">Inbox Tools</span>
+                      <Link href="/email-tools" onClick={closeMenu}>
+                        <span className="text-[10px] text-muted-foreground hover:text-foreground transition-colors cursor-pointer">All Email Tools →</span>
                       </Link>
-                    ))}
+                    </div>
+                    <div className="space-y-0.5 mb-2">
+                      {TEMP_MAIL_ITEMS.map(({ icon: Icon, label, href, desc }) => (
+                        <Link key={href} href={href} onClick={closeMenu}>
+                          <div className="flex items-center gap-2.5 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors cursor-pointer">
+                            <Icon className="h-3.5 w-3.5 text-cyan-400 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-foreground">{label}</div>
+                              <div className="text-xs text-muted-foreground truncate">{desc}</div>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                    {/* Privacy Tools */}
+                    <div className="h-px bg-border/40 mx-1 mb-2" />
+                    <div className="px-3 pb-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400">Privacy Tools</span>
+                    </div>
+                    <div className="space-y-0.5">
+                      {PRIVACY_ITEMS.map(({ icon: Icon, label, href, desc }) => (
+                        <Link key={href} href={href} onClick={closeMenu}>
+                          <div className="flex items-center gap-2.5 px-3 py-2 rounded-md hover:bg-muted/60 transition-colors cursor-pointer">
+                            <Icon className="h-3.5 w-3.5 text-purple-400 shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-foreground">{label}</div>
+                              <div className="text-xs text-muted-foreground truncate">{desc}</div>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
