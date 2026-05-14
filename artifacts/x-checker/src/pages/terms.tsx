@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
+import { SeoHead } from "@/components/SeoHead";
 import { Link } from "wouter";
 import { FileText } from "lucide-react";
 
@@ -140,12 +140,13 @@ If changes are material, we will make reasonable efforts to notify users (e.g., 
 ];
 
 export default function Terms() {
-  useEffect(() => {
-    document.title = "Terms of Service — X Toolkit";
-  }, []);
-
   return (
     <Layout>
+      <SeoHead
+        title="Terms of Service — X Toolkit"
+        description="Terms of Service for X Toolkit. Free to use, no account required. Read our usage policies and service terms."
+        path="/terms"
+      />
       <div className="max-w-3xl mx-auto px-4 md:px-8 py-12 md:py-16">
 
         {/* Header */}

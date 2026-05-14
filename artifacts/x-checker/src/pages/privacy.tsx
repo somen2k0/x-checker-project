@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
+import { SeoHead } from "@/components/SeoHead";
 import { Link } from "wouter";
 import { Shield } from "lucide-react";
 
@@ -126,12 +126,13 @@ To exercise any of these rights, contact us using the Feedback form.`,
 ];
 
 export default function Privacy() {
-  useEffect(() => {
-    document.title = "Privacy Policy — X Toolkit";
-  }, []);
-
   return (
     <Layout>
+      <SeoHead
+        title="Privacy Policy — X Toolkit"
+        description="X Toolkit's privacy policy. We collect the absolute minimum necessary to operate the service. No usernames, results, or personal data are ever stored."
+        path="/privacy"
+      />
       <div className="max-w-3xl mx-auto px-4 md:px-8 py-12 md:py-16">
 
         {/* Header */}

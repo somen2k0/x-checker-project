@@ -1,6 +1,6 @@
-import { useEffect } from "react";
 import { Link } from "wouter";
 import { Layout } from "@/components/layout/Layout";
+import { SeoHead } from "@/components/SeoHead";
 import { Button } from "@/components/ui/button";
 import {
   Shield, Zap, Heart, Search, Sparkles, Link2, AtSign, ArrowRight,
@@ -60,12 +60,13 @@ const categories = [
 ];
 
 export default function About() {
-  useEffect(() => {
-    document.title = "About X Toolkit — Free Tools for X, Developers & SEO";
-  }, []);
-
   return (
     <Layout>
+      <SeoHead
+        title="About X Toolkit — Free Tools for X, Developers & SEO"
+        description="Learn about X Toolkit — a free, privacy-first collection of 39+ tools for X (Twitter) creators, SEO professionals, and developers. No ads, no signup, no data stored."
+        path="/about"
+      />
       <div className="max-w-4xl mx-auto px-4 md:px-8 py-12 md:py-16">
 
         {/* Header */}

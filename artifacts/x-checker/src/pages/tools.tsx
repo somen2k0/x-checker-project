@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { SeoHead } from "@/components/SeoHead";
 import { Link } from "wouter";
 import { useSearchParams } from "@/hooks/use-search-params";
 import { useCheckAccounts, type AccountCheckResult } from "@workspace/api-client-react";
@@ -54,10 +55,6 @@ function formatDate(iso: string): string {
 }
 
 export default function Tools() {
-  useEffect(() => {
-    document.title = "X Account Checker & Tools — Check X Status, Generate Bios | X Toolkit";
-  }, []);
-
   const defaultTab = useSearchParams().get("tab") ?? "checker";
 
   // ── X Account Tools state ─────────────────────────────────────────
@@ -196,6 +193,11 @@ export default function Tools() {
   // ─────────────────────────────────────────────────────────────────
   return (
     <Layout>
+      <SeoHead
+        title="X Account Checker & Free Tools — Check X Status, Generate Bios | X Toolkit"
+        description="Check X (Twitter) account status in bulk, generate AI bios, format tweets, and access 39+ free tools for X, SEO, developers & creators. No signup, instant results."
+        path="/tools"
+      />
       <div className="max-w-5xl mx-auto px-4 md:px-8 py-8">
 
         {/* ── Page header + search ── */}

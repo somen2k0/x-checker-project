@@ -1,6 +1,6 @@
-import { useEffect } from "react";
 import { Link } from "wouter";
 import { Layout } from "@/components/layout/Layout";
+import { SeoHead } from "@/components/SeoHead";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -62,10 +62,6 @@ function StarRating({ count }: { count: number }) {
 }
 
 export default function Home() {
-  useEffect(() => {
-    document.title = `X Toolkit — ${TOTAL_LIVE}+ Free Tools for X, SEO, Developers & Creators`;
-  }, []);
-
   const popularTools = getPopularTools();
   const newTools = getNewTools();
   const socialTools = getToolsByCategory("social-media");
@@ -73,6 +69,11 @@ export default function Home() {
 
   return (
     <Layout>
+      <SeoHead
+        title={`X Toolkit — ${TOTAL_LIVE}+ Free Tools for X, SEO, Developers & Creators`}
+        description="39+ free online tools for X (Twitter), SEO, developers & creators: X account checker, AI bio generator, JSON formatter, Base64, JWT decoder, temp mail, URL slug generator & more. No signup, instant results."
+        path="/"
+      />
       {/* ── Hero ── */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
