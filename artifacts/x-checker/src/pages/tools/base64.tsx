@@ -547,6 +547,87 @@ export default function Base64Tool() {
             </p>
           </section>
 
+          {/* ── Command-line Quick Reference ── */}
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold">Command-line Quick Reference</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              One-liners for Base64 encoding and decoding across common environments:
+            </p>
+            <div className="space-y-3">
+              {[
+                {
+                  lang: "bash",
+                  color: "text-green-400",
+                  bg: "bg-green-400/8 border-green-400/20",
+                  label: "Bash / Linux / macOS",
+                  snippets: [
+                    { comment: "Encode a string", code: 'echo -n "Hello, World!" | base64' },
+                    { comment: "Decode a Base64 string", code: 'echo "SGVsbG8sIFdvcmxkIQ==" | base64 --decode' },
+                    { comment: "Encode a file", code: "base64 input.txt > output.b64" },
+                    { comment: "Decode a file", code: "base64 --decode output.b64 > restored.txt" },
+                  ],
+                },
+                {
+                  lang: "openssl",
+                  color: "text-blue-400",
+                  bg: "bg-blue-400/8 border-blue-400/20",
+                  label: "OpenSSL (cross-platform)",
+                  snippets: [
+                    { comment: "Encode a string", code: 'echo -n "Hello, World!" | openssl base64' },
+                    { comment: "Decode a Base64 string", code: 'echo "SGVsbG8sIFdvcmxkIQ==" | openssl base64 -d' },
+                    { comment: "Encode a file (no line wrapping)", code: "openssl base64 -A -in input.txt" },
+                  ],
+                },
+                {
+                  lang: "python",
+                  color: "text-yellow-400",
+                  bg: "bg-yellow-400/8 border-yellow-400/20",
+                  label: "Python 3",
+                  snippets: [
+                    { comment: "Encode", code: 'import base64\nbase64.b64encode(b"Hello, World!").decode()' },
+                    { comment: "Decode", code: 'base64.b64decode("SGVsbG8sIFdvcmxkIQ==").decode()' },
+                    { comment: "URL-safe encode (no + or /)", code: 'base64.urlsafe_b64encode(b"Hello, World!").decode()' },
+                  ],
+                },
+                {
+                  lang: "node",
+                  color: "text-emerald-400",
+                  bg: "bg-emerald-400/8 border-emerald-400/20",
+                  label: "Node.js",
+                  snippets: [
+                    { comment: "Encode", code: 'Buffer.from("Hello, World!").toString("base64")' },
+                    { comment: "Decode", code: 'Buffer.from("SGVsbG8sIFdvcmxkIQ==", "base64").toString()' },
+                    { comment: "URL-safe encode", code: 'Buffer.from("Hello").toString("base64url")' },
+                  ],
+                },
+                {
+                  lang: "powershell",
+                  color: "text-purple-400",
+                  bg: "bg-purple-400/8 border-purple-400/20",
+                  label: "PowerShell",
+                  snippets: [
+                    { comment: "Encode", code: '[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("Hello, World!"))' },
+                    { comment: "Decode", code: '[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String("SGVsbG8sIFdvcmxkIQ=="))' },
+                  ],
+                },
+              ].map(({ lang, color, bg, label, snippets }) => (
+                <div key={lang} className={`rounded-xl border ${bg} overflow-hidden`}>
+                  <div className={`px-4 py-2.5 border-b border-border/30 flex items-center gap-2`}>
+                    <span className={`text-[10px] font-bold uppercase tracking-wider ${color}`}>{label}</span>
+                  </div>
+                  <div className="divide-y divide-border/20">
+                    {snippets.map(({ comment, code }) => (
+                      <div key={comment} className="px-4 py-2.5">
+                        <p className="text-[10px] text-muted-foreground/60 mb-1"># {comment}</p>
+                        <pre className="font-mono text-[11px] text-foreground/80 whitespace-pre-wrap break-all leading-relaxed">{code}</pre>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
         </div>
       </div>
     </MiniToolLayout>
