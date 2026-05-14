@@ -35,22 +35,15 @@ router.get("/admin/keys", (req, res) => {
     .map((k) => k.trim())
     .filter((k) => k.length > 0);
 
-  const hardcodedKeys = [
-    "bbea6a9443mshdfc8d058f9d97efp1571dajsndb43135538fa",
-    "894c8f0b44msh483bb59b42c084ap15db0bjsne64fe8ccbbd4",
-    "e9b0fdba6bmsh970f41e51594567p178216jsn8158f0ea5df7",
-  ];
-
   const keys = [
     ...envKeys.map((k, i) => ({ masked: maskKey(k), source: "env" as const, index: i })),
-    ...hardcodedKeys.map((k, i) => ({ masked: maskKey(k), source: "hardcoded" as const, index: i })),
   ];
 
   res.json({
     keys,
     total: keys.length,
     envKeyCount: envKeys.length,
-    hardcodedKeyCount: hardcodedKeys.length,
+    hardcodedKeyCount: 0,
     envVarSet: envKeys.length > 0,
   });
 });
@@ -76,13 +69,7 @@ router.post("/admin/keys/test-server", async (req, res) => {
     .map((k) => k.trim())
     .filter((k) => k.length > 0);
 
-  const hardcodedKeys = [
-    "bbea6a9443mshdfc8d058f9d97efp1571dajsndb43135538fa",
-    "894c8f0b44msh483bb59b42c084ap15db0bjsne64fe8ccbbd4",
-    "e9b0fdba6bmsh970f41e51594567p178216jsn8158f0ea5df7",
-  ];
-
-  const pool = source === "env" ? envKeys : hardcodedKeys;
+  const pool = envKeys;
   const key = pool[index];
   if (!key) {
     res.status(404).json({ error: "Key not found at that index." });
@@ -133,8 +120,7 @@ router.post("/admin/keys", async (req, res) => {
 
   if (body.action === "test-server") {
     const envKeys = (process.env.RAPIDAPI_KEYS ?? "").split(",").map((k) => k.trim()).filter((k) => k.length > 0);
-    const hardcodedKeys = ["bbea6a9443mshdfc8d058f9d97efp1571dajsndb43135538fa","894c8f0b44msh483bb59b42c084ap15db0bjsne64fe8ccbbd4","e9b0fdba6bmsh970f41e51594567p178216jsn8158f0ea5df7"];
-    const pool = body.source === "env" ? envKeys : hardcodedKeys;
+    const pool = envKeys;
     const key = typeof body.index === "number" ? pool[body.index] : undefined;
     if (!key) { res.status(404).json({ error: "Key not found." }); return; }
     res.json(await doTest(key));
