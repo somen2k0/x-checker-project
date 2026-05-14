@@ -21,11 +21,35 @@ async function getDomains(): Promise<string[]> {
   return FALLBACK_DOMAINS;
 }
 
+const US_FIRST = [
+  "james","john","robert","michael","william","david","richard","joseph","thomas","charles",
+  "christopher","daniel","matthew","anthony","mark","donald","steven","paul","andrew","joshua",
+  "kenneth","kevin","brian","george","timothy","ronald","edward","jason","jeffrey","ryan",
+  "jacob","gary","nicholas","eric","jonathan","stephen","larry","justin","scott","brandon",
+  "mary","patricia","jennifer","linda","barbara","elizabeth","susan","jessica","sarah","karen",
+  "lisa","nancy","betty","margaret","sandra","ashley","dorothy","kimberly","emily","donna",
+  "michelle","carol","amanda","melissa","deborah","stephanie","rebecca","sharon","laura","cynthia",
+  "kathleen","amy","angela","shirley","anna","brenda","pamela","emma","nicole","helen",
+];
+
+const US_LAST = [
+  "smith","johnson","williams","brown","jones","garcia","miller","davis","rodriguez","martinez",
+  "hernandez","lopez","gonzalez","wilson","anderson","thomas","taylor","moore","jackson","martin",
+  "lee","perez","thompson","white","harris","sanchez","clark","ramirez","lewis","robinson",
+  "walker","young","allen","king","wright","scott","torres","nguyen","hill","flores",
+  "green","adams","nelson","baker","hall","rivera","campbell","mitchell","carter","roberts",
+  "phillips","evans","turner","diaz","parker","collins","edwards","stewart","flores","morris",
+  "murphy","cook","rogers","morgan","peterson","cooper","reed","bailey","bell","gomez",
+];
+
+function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
+
 function randomLogin(): string {
-  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-  let s = "";
-  for (let i = 0; i < 10; i++) s += chars[Math.floor(Math.random() * chars.length)];
-  return s;
+  const first = pick(US_FIRST);
+  const last  = pick(US_LAST);
+  const sep   = pick([".", "_", ""]);
+  const suffix = Math.random() < 0.35 ? String(Math.floor(Math.random() * 90 + 10)) : "";
+  return `${first}${sep}${last}${suffix}`;
 }
 
 router.get("/onesecmail/new", async (req, res) => {
