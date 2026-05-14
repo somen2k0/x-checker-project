@@ -1,5 +1,11 @@
 import { Router, type IRouter } from "express";
 import { aiRateLimiter } from "../middlewares/security";
+import {
+  aiDailyRateLimiter,
+  aiInputValidator,
+  aiResponseCache,
+  logAiUsage,
+} from "../middlewares/ai-protection";
 import healthRouter from "./health";
 import accountsRouter from "./accounts";
 import bioRouter from "./bio";
@@ -24,8 +30,21 @@ router.use(adminRouter);
 router.use(ogPreviewRouter);
 router.use(onesecmailRouter);
 
-// AI-powered routes: 10 requests per IP per hour
-router.use(aiRateLimiter, bioRouter);
-router.use(aiRateLimiter, aiDetectorRouter);
+// ─── AI routes — full protection stack ────────────────────────────────────────
+// Layer 1: 5 req/IP/hour     (express-rate-limit, standardHeaders)
+// Layer 2: 50 req/IP/day     (Map-based custom limiter)
+// Layer 3: input validation  (500 chars, HTML strip, prompt-injection block)
+// Layer 4: response cache    (in-memory 1-hour, saves API cost on repeated inputs)
+// Layer 5: usage logger      (logs every call + alerts on spikes)
+const aiProtection = [
+  aiRateLimiter,
+  aiDailyRateLimiter,
+  aiInputValidator,
+  aiResponseCache,
+  logAiUsage,
+];
+
+router.use(...aiProtection, bioRouter);
+router.use(...aiProtection, aiDetectorRouter);
 
 export default router;

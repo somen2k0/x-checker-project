@@ -1,8 +1,10 @@
 import { Router } from "express";
+import { AI_MAX_INPUT_CHARS } from "../middlewares/ai-protection";
 
 const router = Router();
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const MAX_TOKENS = 500;
 
 function getGroqKeys(): string[] {
   const raw = process.env.GROQ_API_KEY ?? "";
@@ -17,13 +19,23 @@ router.post("/generate-bio", async (req, res) => {
     return;
   }
 
+  // AI protection middleware already enforces AI_MAX_INPUT_CHARS, but we
+  // validate explicitly here too so the route is self-documenting.
+  if (topic.trim().length > AI_MAX_INPUT_CHARS) {
+    res.status(400).json({
+      error: `topic must be ${AI_MAX_INPUT_CHARS} characters or fewer.`,
+    });
+    return;
+  }
+
   const keys = getGroqKeys();
   if (keys.length === 0) {
     res.status(503).json({ error: "Service not configured. Please contact the administrator." });
     return;
   }
 
-  const toneText = tone && tone.trim().length > 0 ? tone.trim() : "professional and engaging";
+  const toneText =
+    tone && tone.trim().length > 0 ? tone.trim() : "professional and engaging";
 
   const prompt = `Generate 3 unique X (Twitter) bios based on the following topic: "${topic.trim()}".
 The tone should be: ${toneText}.
@@ -45,7 +57,7 @@ Example format: ["Bio one here", "Bio two here", "Bio three here"]`;
         },
         body: JSON.stringify({
           model: "llama-3.1-8b-instant",
-          max_tokens: 512,
+          max_tokens: MAX_TOKENS,
           messages: [{ role: "user", content: prompt }],
         }),
         signal: AbortSignal.timeout(15000),
@@ -59,7 +71,9 @@ Example format: ["Bio one here", "Bio two here", "Bio three here"]`;
     if (response.status === 429 && i < keys.length - 1) continue;
 
     if (!response.ok) {
-      const errData = (await response.json().catch(() => ({}))) as { error?: { message?: string } };
+      const errData = (await response.json().catch(() => ({}))) as {
+        error?: { message?: string };
+      };
       if (response.status === 429) {
         res.status(429).json({ error: "Service is rate-limited. Please try again in a moment." });
         return;
@@ -72,7 +86,9 @@ Example format: ["Bio one here", "Bio two here", "Bio three here"]`;
       return;
     }
 
-    const data = (await response.json()) as { choices?: Array<{ message?: { content?: string } }> };
+    const data = (await response.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
     const raw = data.choices?.[0]?.message?.content ?? "[]";
 
     let bios: string[] = [];

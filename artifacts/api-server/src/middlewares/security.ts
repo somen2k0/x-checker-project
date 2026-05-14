@@ -57,10 +57,10 @@ export const apiRateLimiter = rateLimit({
   message: RATE_LIMIT_MESSAGE,
 });
 
-/** AI tools: 10 requests per IP per hour — applied to bio + ai-detector routes */
+/** AI tools: 5 requests per IP per hour — applied to bio + ai-detector routes */
 export const aiRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 10,
+  max: 5,
   standardHeaders: true,
   legacyHeaders: false,
   statusCode: 429,
