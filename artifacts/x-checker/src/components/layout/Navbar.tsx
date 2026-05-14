@@ -27,9 +27,9 @@ const NAV_CATEGORIES = [
     bg: "bg-blue-400/10",
     href: "/tools",
     tools: [
-      { icon: Search, label: "Account Checker", href: "/tools?tab=checker", badge: "Popular" },
-      { icon: Sparkles, label: "AI Bio Generator", href: "/tools?tab=bio", badge: "AI" },
-      { icon: Link2, label: "Profile Link Generator", href: "/tools?tab=links" },
+      { icon: Search, label: "Account Checker", href: "/tools/x-account-checker", badge: "Popular" },
+      { icon: Sparkles, label: "AI Bio Generator", href: "/tools/bio-generator", badge: "AI" },
+      { icon: Link2, label: "Profile Link Generator", href: "/tools/profile-link-generator" },
       { icon: AtSign, label: "Username Generator", href: "/tools/username-generator" },
       { icon: Users, label: "Display Name Ideas", href: "/tools/name-ideas" },
       { icon: Hash, label: "Hashtag Formatter", href: "/tools/hashtag-formatter" },

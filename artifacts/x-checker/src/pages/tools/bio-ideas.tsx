@@ -108,7 +108,7 @@ const relatedTools = [
   { title: "Funny Twitter Bios", href: "/tools/funny-bios", description: "30+ funny bio templates to stand out with humor." },
   { title: "Professional Twitter Bios", href: "/tools/professional-bios", description: "Polished bio templates for every industry." },
   { title: "Aesthetic Bio Ideas", href: "/tools/aesthetic-bios", description: "Aesthetic bios with Unicode symbols and vibes." },
-  { title: "AI Bio Generator", href: "/tools?tab=bio", description: "Generate 3 personalized bios using AI." },
+  { title: "AI Bio Generator", href: "/tools/bio-generator", description: "Generate 3 personalized bios using AI." },
 ];
 
 export default function BioIdeas() {
@@ -184,7 +184,7 @@ export default function BioIdeas() {
 
         <p className="text-xs text-muted-foreground/70">
           Replace <span className="font-mono text-primary/80">[bracketed text]</span> with your specific details. For AI-generated personalized bios, try the{" "}
-          <a href="/tools?tab=bio" className="text-primary hover:underline">Bio Generator</a> tool.
+          <a href="/tools/bio-generator" className="text-primary hover:underline">Bio Generator</a> tool.
         </p>
       </div>
     </MiniToolLayout>

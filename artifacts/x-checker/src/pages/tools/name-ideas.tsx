@@ -84,8 +84,8 @@ const faqs = [
 const relatedTools = [
   { title: "Username Generator", href: "/tools/username-generator", description: "Generate @handle ideas from any keyword." },
   { title: "Bio Ideas Generator", href: "/tools/bio-ideas", description: "Get bio templates for your niche." },
-  { title: "Account Checker", href: "/tools?tab=checker", description: "Check if specific usernames are active on X." },
-  { title: "@ Formatter", href: "/tools?tab=at", description: "Bulk add/remove @ from username lists." },
+  { title: "Account Checker", href: "/tools/x-account-checker", description: "Check if specific usernames are active on X." },
+  { title: "@ Formatter", href: "/tools/at-formatter", description: "Bulk add/remove @ from username lists." },
 ];
 
 export default function NameIdeas() {

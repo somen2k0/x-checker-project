@@ -35,7 +35,7 @@ const relatedTools = [
   { title: "Tweet Thread Formatter", href: "/tools/tweet-formatter", description: "Split long text into a numbered tweet thread automatically." },
   { title: "Character Counter", href: "/tools/character-counter", description: "Count characters in real time against Twitter's limits." },
   { title: "Twitter Font Preview", href: "/tools/font-preview", description: "Preview text in Unicode font styles for your tweets." },
-  { title: "@ Formatter", href: "/tools?tab=at", description: "Bulk add or remove @ prefixes from username lists." },
+  { title: "@ Formatter", href: "/tools/at-formatter", description: "Bulk add or remove @ prefixes from username lists." },
 ];
 
 const EXAMPLES = ["digital marketing", "web design", "social media", "content creator", "startup life", "tech entrepreneur"];

@@ -55,9 +55,9 @@ const faqs = [
 
 const relatedTools = [
   { title: "Twitter Name Ideas", href: "/tools/name-ideas", description: "Curated display name ideas by niche." },
-  { title: "Account Checker", href: "/tools?tab=checker", description: "Check if specific X usernames are active on X." },
-  { title: "@ Formatter", href: "/tools?tab=at", description: "Bulk add or remove @ from username lists." },
-  { title: "Profile Link Generator", href: "/tools?tab=links", description: "Turn usernames into direct X profile links." },
+  { title: "Account Checker", href: "/tools/x-account-checker", description: "Check if specific X usernames are active on X." },
+  { title: "@ Formatter", href: "/tools/at-formatter", description: "Bulk add or remove @ from username lists." },
+  { title: "Profile Link Generator", href: "/tools/profile-link-generator", description: "Turn usernames into direct X profile links." },
 ];
 
 export default function UsernameGenerator() {
@@ -141,7 +141,7 @@ export default function UsernameGenerator() {
             <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-1 text-sm">
               <p className="font-semibold text-foreground/80 text-xs uppercase tracking-wide">Next step: Check availability</p>
               <p className="text-xs text-muted-foreground">
-                Copy a username and use the <a href="/tools?tab=checker" className="text-primary hover:underline">Account Checker</a> to see if it's already taken.
+                Copy a username and use the <a href="/tools/x-account-checker" className="text-primary hover:underline">Account Checker</a> to see if it's already taken.
               </p>
             </div>
           </div>

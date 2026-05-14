@@ -241,7 +241,7 @@ export default function Home() {
                 </li>
               ))}
             </ul>
-            <Link href="/tools?tab=checker">
+            <Link href="/tools/x-account-checker">
               <Button size="sm" className="shadow-sm shadow-primary/20">
                 Try Account Checker <ArrowRight className="h-3.5 w-3.5 ml-2" />
               </Button>

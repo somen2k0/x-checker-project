@@ -6,10 +6,10 @@ import { FeedbackModal } from "@/components/FeedbackModal";
 import { Search, Sparkles, Link2, AtSign, Mail, CheckCheck, Hash, MessageSquare, Type, BarChart2, Users, Smile, Briefcase, Palette, FileJson, Lock } from "lucide-react";
 
 const X_TOOLS = [
-  { icon: Search, label: "Account Checker", href: "/tools?tab=checker" },
-  { icon: Sparkles, label: "Bio Generator", href: "/tools?tab=bio" },
-  { icon: Link2, label: "Profile Links", href: "/tools?tab=links" },
-  { icon: AtSign, label: "@ Formatter", href: "/tools?tab=at" },
+  { icon: Search, label: "Account Checker", href: "/tools/x-account-checker" },
+  { icon: Sparkles, label: "Bio Generator", href: "/tools/bio-generator" },
+  { icon: Link2, label: "Profile Links", href: "/tools/profile-link-generator" },
+  { icon: AtSign, label: "@ Formatter", href: "/tools/at-formatter" },
 ];
 
 const CONTENT_TOOLS = [

@@ -71,7 +71,7 @@ const faqs = [
 const relatedTools = [
   { title: "Funny Twitter Bios", href: "/tools/funny-bios", description: "40+ funny bio templates for a lighter tone." },
   { title: "Bio Ideas Generator", href: "/tools/bio-ideas", description: "Bio templates organized by niche and role." },
-  { title: "AI Bio Generator", href: "/tools?tab=bio", description: "Generate 3 personalized bios using AI." },
+  { title: "AI Bio Generator", href: "/tools/bio-generator", description: "Generate 3 personalized bios using AI." },
   { title: "Character Counter", href: "/tools/character-counter", description: "Check your bio is under 160 characters." },
 ];
 

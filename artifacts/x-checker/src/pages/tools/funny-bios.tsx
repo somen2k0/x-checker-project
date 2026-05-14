@@ -68,7 +68,7 @@ const relatedTools = [
   { title: "Bio Ideas Generator", href: "/tools/bio-ideas", description: "Bio templates for developers, marketers, creators and more." },
   { title: "Professional Bios", href: "/tools/professional-bios", description: "Polished, industry-specific bio templates." },
   { title: "Aesthetic Bio Ideas", href: "/tools/aesthetic-bios", description: "Aesthetic bios with Unicode symbols and emojis." },
-  { title: "AI Bio Generator", href: "/tools?tab=bio", description: "Generate 3 personalized bios using AI." },
+  { title: "AI Bio Generator", href: "/tools/bio-generator", description: "Generate 3 personalized bios using AI." },
 ];
 
 export default function FunnyBios() {
