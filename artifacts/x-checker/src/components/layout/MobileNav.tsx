@@ -6,6 +6,7 @@ import {
   Hash, MessageSquare as MessageSquareIcon, BarChart2, FileJson, Lock, Link2,
   Globe, Mail, ShieldCheck, Pencil, Inbox, Minimize2, KeyRound, Database,
   Shuffle, Shield, Tag, FileText, BarChart, Clock, ArrowLeftRight, ScanSearch,
+  EyeOff, MailWarning, AlertOctagon, BookOpen,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
@@ -125,16 +126,31 @@ const BADGE_STYLES: Record<string, string> = {
   Soon: "bg-muted/60 text-muted-foreground border-border/50",
 };
 
+const TEMP_MAIL_SHEET_ITEMS = [
+  { icon: Inbox,        label: "Temp Email",            href: "/tools/temp-mail/tempemail",  desc: "Anonymous throwaway inbox",         color: "text-cyan-400" },
+  { icon: Mail,         label: "Temp Gmail",            href: "/tools/temp-mail/tempgmail",  desc: "Real temporary Gmail address",      color: "text-cyan-400" },
+  { icon: Hash,         label: "Gmail Tricks",          href: "/tools/temp-mail/gmail-tricks", desc: "Dot & plus-tag address variants", color: "text-cyan-400" },
+];
+
+const TEMP_PRIVACY_SHEET_ITEMS = [
+  { icon: EyeOff,       label: "Email Privacy Checker", href: "/tools/email-privacy-checker",  desc: "Score your address privacy",      color: "text-purple-400" },
+  { icon: MailWarning,  label: "Masked Email Generator",href: "/tools/masked-email-generator", desc: "Create anonymous aliases",         color: "text-purple-400" },
+  { icon: AlertOctagon, label: "Spam Risk Checker",     href: "/tools/spam-risk-checker",      desc: "Check your spam likelihood",      color: "text-purple-400" },
+  { icon: Shield,       label: "Email Leak Checker",    href: "/tools/email-leak-checker",     desc: "See if your email is exposed",    color: "text-purple-400" },
+  { icon: BookOpen,     label: "Alias Email Guide",     href: "/tools/alias-email-explainer",  desc: "How email aliases work",          color: "text-purple-400" },
+];
+
 const NAV = [
   { href: "/", label: "Home", icon: Home },
   { href: "/tools", label: "Tools", icon: Wrench },
-  { href: "/tools/temp-mail/tempemail", label: "Temp Mail", icon: Inbox },
+  { href: "/tools/temp-mail", label: "Temp Mail", icon: Inbox },
   { href: "/about", label: "About", icon: Info },
 ];
 
 export function MobileNav() {
   const [location] = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [tempMailOpen, setTempMailOpen] = useState(false);
   const [search, setSearch] = useState("");
 
   const filteredTools = useMemo(() => {
@@ -159,11 +175,11 @@ export function MobileNav() {
         <div className="flex items-stretch h-14">
           {NAV.map(({ href, label, icon: Icon }) => {
             const isTools = href === "/tools";
-            const isTempMail = href === "/tools/temp-mail/tempemail";
+            const isTempMail = href === "/tools/temp-mail";
             const active = isTools
               ? drawerOpen || location === href
               : isTempMail
-                ? location.startsWith("/tools/temp-mail")
+                ? tempMailOpen || location.startsWith("/tools/temp-mail")
                 : location === href;
 
             if (isTools) {
@@ -171,6 +187,21 @@ export function MobileNav() {
                 <button
                   key={href}
                   onClick={() => setDrawerOpen(true)}
+                  className={`flex-1 h-full flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors ${
+                    active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon className={`h-5 w-5 transition-transform ${active ? "scale-110" : ""}`} />
+                  {label}
+                </button>
+              );
+            }
+
+            if (isTempMail) {
+              return (
+                <button
+                  key={href}
+                  onClick={() => setTempMailOpen(true)}
                   className={`flex-1 h-full flex flex-col items-center justify-center gap-1 text-[10px] font-medium transition-colors ${
                     active ? "text-primary" : "text-muted-foreground hover:text-foreground"
                   }`}
@@ -196,6 +227,60 @@ export function MobileNav() {
           })}
         </div>
       </nav>
+
+      {/* Temp Mail Drawer */}
+      <Sheet open={tempMailOpen} onOpenChange={setTempMailOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl px-0 pb-20 flex flex-col [&>button]:hidden">
+          <SheetHeader className="px-4 pt-2 pb-3 border-b border-border/50 shrink-0">
+            <div className="flex items-center justify-between">
+              <SheetTitle className="text-base font-semibold flex items-center gap-2">
+                <Inbox className="h-4 w-4 text-cyan-400" />
+                Temp Mail
+              </SheetTitle>
+              <button
+                onClick={() => setTempMailOpen(false)}
+                className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </SheetHeader>
+          <div className="overflow-y-auto px-4 pt-3 pb-2">
+            {/* Inbox Tools */}
+            <p className="text-[10px] font-bold uppercase tracking-wider text-cyan-400 px-1 mb-2">Inbox Tools</p>
+            <div className="space-y-1 mb-4">
+              {TEMP_MAIL_SHEET_ITEMS.map(({ icon: Icon, label, href, desc, color }) => (
+                <Link key={href} href={href} onClick={() => setTempMailOpen(false)}>
+                  <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/60 active:bg-muted transition-colors cursor-pointer">
+                    <Icon className={`h-4 w-4 shrink-0 ${color}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium">{label}</div>
+                      <div className="text-xs text-muted-foreground">{desc}</div>
+                    </div>
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+            {/* Privacy Tools */}
+            <p className="text-[10px] font-bold uppercase tracking-wider text-purple-400 px-1 mb-2">Privacy Tools</p>
+            <div className="space-y-1">
+              {TEMP_PRIVACY_SHEET_ITEMS.map(({ icon: Icon, label, href, desc, color }) => (
+                <Link key={href} href={href} onClick={() => setTempMailOpen(false)}>
+                  <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/60 active:bg-muted transition-colors cursor-pointer">
+                    <Icon className={`h-4 w-4 shrink-0 ${color}`} />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium">{label}</div>
+                      <div className="text-xs text-muted-foreground">{desc}</div>
+                    </div>
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Tools Drawer */}
       <Sheet open={drawerOpen} onOpenChange={(v) => { setDrawerOpen(v); if (!v) setSearch(""); }}>
