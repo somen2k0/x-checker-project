@@ -51,6 +51,10 @@ import EmailCharacterCounter from "@/pages/tools/email-character-counter";
 import EmailSignatureGenerator from "@/pages/tools/email-signature-generator";
 import EmailValidator from "@/pages/tools/email-validator";
 import TempGmail from "@/pages/tools/temp-gmail";
+import XAccountChecker from "@/pages/tools/x-account-checker";
+import ProfileLinkGenerator from "@/pages/tools/profile-link-generator";
+import AtFormatter from "@/pages/tools/at-formatter";
+import BioGenerator from "@/pages/tools/bio-generator";
 // Category pages
 import AiWritingTools from "@/pages/categories/ai-writing-tools";
 import SocialMediaTools from "@/pages/categories/social-media-tools";
@@ -127,10 +131,11 @@ function TrackedRouter() {
         {() => <Redirect to="/tools/temp-mail/tempgmail" />}
       </Route>
 
-      {/* Canonical alias: /tools/x-account-checker → /tools?tab=checker */}
-      <Route path="/tools/x-account-checker">
-        {() => <Redirect to="/tools?tab=checker" />}
-      </Route>
+      {/* Social media X tools — dedicated pages */}
+      <Route path="/tools/x-account-checker" component={XAccountChecker} />
+      <Route path="/tools/profile-link-generator" component={ProfileLinkGenerator} />
+      <Route path="/tools/at-formatter" component={AtFormatter} />
+      <Route path="/tools/bio-generator" component={BioGenerator} />
 
       {/* Category landing pages */}
       <Route path="/ai-writing-tools" component={AiWritingTools} />
