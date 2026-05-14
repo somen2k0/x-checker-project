@@ -1,14 +1,14 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { MiniToolLayout } from "@/components/layout/MiniToolLayout";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, Copy, CheckCircle2, Sparkles, ShieldCheck, RefreshCw,
-  AlertCircle, ChevronDown, Eye, Wand2, Info,
+  AlertCircle, ChevronDown, Wand2,
 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
-
-const GROQ_KEY_LS = "groq_api_key";
+import { GroqKeyManager } from "@/components/GroqKeyManager";
+import { useGroqKeys } from "@/hooks/use-groq-keys";
 
 const FAQS = [
   { q: "What AI models does it detect?", a: "It detects text from all major AI models — ChatGPT, Claude, Gemini, Llama, Mistral, and others. It looks for universal AI writing patterns rather than model-specific fingerprints." },
@@ -77,8 +77,6 @@ interface DetectResult {
 export default function AiDetector() {
   const [tab, setTab] = useState<"detect" | "humanize">("detect");
   const [text, setText] = useState("");
-  const [apiKey, setApiKey] = useState(() => localStorage.getItem(GROQ_KEY_LS) ?? "");
-  const [showKey, setShowKey] = useState(false);
   const [detecting, setDetecting] = useState(false);
   const [humanizing, setHumanizing] = useState(false);
   const [detectResult, setDetectResult] = useState<DetectResult | null>(null);
@@ -88,43 +86,35 @@ export default function AiDetector() {
   const [copiedHuman, setCopiedHuman] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { callWithRotation, hasKeys } = useGroqKeys();
 
-  const saveKey = (k: string) => {
-    setApiKey(k);
-    if (k.trim()) localStorage.setItem(GROQ_KEY_LS, k.trim());
-    else localStorage.removeItem(GROQ_KEY_LS);
-  };
-
-  const handleError = (res: Response, data: { error?: string }) => {
+  const handleResponse = (res: Response, data: { error?: string }): boolean => {
     if (res.status === 401 || data.error === "invalid_api_key") {
-      setError("Invalid API key. Get a free key at console.groq.com");
-      return;
-    }
-    if (res.status === 429 || data.error === "rate_limited") {
-      setError("Rate limited. Please wait a moment and try again.");
-      return;
+      setError("Invalid API key. Check your key at console.groq.com");
+      return false;
     }
     if (data.error === "no_api_key") {
-      setError("Please enter your Groq API key above.");
-      return;
+      setError("Please add your Groq API key above.");
+      return false;
     }
-    setError(data.error ?? "Something went wrong. Please try again.");
+    if (!res.ok) {
+      setError(data.error ?? "Something went wrong. Please try again.");
+      return false;
+    }
+    return true;
   };
 
   const detect = async () => {
     if (!text.trim()) { toast({ title: "Enter some text first", variant: "destructive" }); return; }
-    if (!apiKey.trim()) { setError("Please enter your Groq API key above."); return; }
+    if (!hasKeys) { setError("Please add your Groq API key above."); return; }
     setDetecting(true); setDetectResult(null); setError(null);
     trackEvent("ai_detect", { chars: text.length });
     try {
-      const res = await fetch("/api/ai-detector/detect", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: text.trim(), apiKey: apiKey.trim() }),
-      });
-      const data = await res.json() as DetectResult & { error?: string };
-      if (!res.ok) { handleError(res, data); return; }
+      const result = await callWithRotation("/api/ai-detector/detect", { text: text.trim() });
+      if (result.exhausted) { setError("All API keys are rate-limited. Please wait a moment or add more keys."); return; }
+      if (result.networkError || !result.res) { setError("Network error. Please try again."); return; }
+      const data = await result.res.json() as DetectResult & { error?: string };
+      if (!handleResponse(result.res, data)) return;
       setDetectResult(data);
     } catch { setError("Network error. Please try again."); }
     finally { setDetecting(false); }
@@ -132,17 +122,15 @@ export default function AiDetector() {
 
   const humanize = async () => {
     if (!text.trim()) { toast({ title: "Enter some text first", variant: "destructive" }); return; }
-    if (!apiKey.trim()) { setError("Please enter your Groq API key above."); return; }
+    if (!hasKeys) { setError("Please add your Groq API key above."); return; }
     setHumanizing(true); setHumanized(""); setError(null);
     trackEvent("ai_humanize", { style: humanizeStyle, chars: text.length });
     try {
-      const res = await fetch("/api/ai-detector/humanize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: text.trim(), apiKey: apiKey.trim(), style: humanizeStyle }),
-      });
-      const data = await res.json() as { humanized?: string; error?: string };
-      if (!res.ok) { handleError(res, data as { error?: string }); return; }
+      const result = await callWithRotation("/api/ai-detector/humanize", { text: text.trim(), style: humanizeStyle });
+      if (result.exhausted) { setError("All API keys are rate-limited. Please wait a moment or add more keys."); return; }
+      if (result.networkError || !result.res) { setError("Network error. Please try again."); return; }
+      const data = await result.res.json() as { humanized?: string; error?: string };
+      if (!handleResponse(result.res, data)) return;
       setHumanized(data.humanized ?? "");
     } catch { setError("Network error. Please try again."); }
     finally { setHumanizing(false); }
@@ -175,35 +163,8 @@ export default function AiDetector() {
     >
       <div className="space-y-4">
 
-        {/* API Key */}
-        <div className="rounded-xl border border-border/60 bg-card/40 p-4 space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-semibold text-foreground/70 uppercase tracking-wide flex items-center gap-1.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-purple-400" />
-              Groq API Key
-            </label>
-            <a href="https://console.groq.com" target="_blank" rel="noopener noreferrer"
-              className="text-[11px] text-purple-400 hover:text-purple-300 underline underline-offset-2 transition-colors">
-              Get free key →
-            </a>
-          </div>
-          <div className="flex gap-2">
-            <input
-              type={showKey ? "text" : "password"}
-              value={apiKey}
-              onChange={(e) => saveKey(e.target.value)}
-              placeholder="gsk_…"
-              className="flex-1 min-w-0 rounded-lg border border-border/60 bg-background/60 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400/30 font-mono"
-            />
-            <Button variant="outline" size="sm" onClick={() => setShowKey((v) => !v)} className="text-xs shrink-0">
-              <Eye className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-          <p className="text-[11px] text-muted-foreground/60 flex items-center gap-1">
-            <Info className="h-3 w-3 shrink-0" />
-            Stored locally in your browser. Never sent to our servers.
-          </p>
-        </div>
+        {/* API Keys */}
+        <GroqKeyManager />
 
         {/* Tabs */}
         <div className="flex gap-1 p-1 rounded-xl bg-muted/40 border border-border/50">
@@ -229,7 +190,6 @@ export default function AiDetector() {
             </span>
           </div>
           <textarea
-            ref={textareaRef}
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={

@@ -39,7 +39,11 @@ export type EventName =
   | "category_click"
   | "related_tool_click"
   | "popular_tool_click"
-  | "new_tool_click";
+  | "new_tool_click"
+  | "ai_detect"
+  | "ai_humanize"
+  | "bio_generate"
+  | "account_check";
 
 export interface TrackParams {
   tool?: string;
