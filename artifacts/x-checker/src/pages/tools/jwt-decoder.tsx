@@ -182,6 +182,33 @@ export default function JwtDecoder() {
             </div>
           ))}
         </div>
+
+        {/* ── Common Claims Reference ── */}
+        <div className="mt-2 rounded-xl border border-border/60 bg-card/40 overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-border/40 bg-muted/20">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Common JWT Claims Reference</span>
+          </div>
+          <div className="divide-y divide-border/40">
+            {[
+              { claim: "sub",  type: "string",  desc: "Subject — who the token identifies (usually a user ID)" },
+              { claim: "iss",  type: "string",  desc: "Issuer — the authority that created the token (e.g. https://auth.example.com)" },
+              { claim: "aud",  type: "string | string[]", desc: "Audience — the intended recipient(s) of the token" },
+              { claim: "exp",  type: "number",  desc: "Expiration — Unix timestamp after which the token is invalid" },
+              { claim: "iat",  type: "number",  desc: "Issued At — Unix timestamp of when the token was created" },
+              { claim: "nbf",  type: "number",  desc: "Not Before — token must not be accepted before this Unix timestamp" },
+              { claim: "jti",  type: "string",  desc: "JWT ID — unique identifier, used to prevent token replay attacks" },
+              { claim: "name", type: "string",  desc: "Full name of the token subject (OpenID Connect)" },
+              { claim: "email",type: "string",  desc: "Email address of the subject (OpenID Connect)" },
+              { claim: "role", type: "string",  desc: "Custom claim — user role (e.g. admin, viewer). Not standardised." },
+            ].map(({ claim, type, desc }) => (
+              <div key={claim} className="flex items-start gap-3 px-4 py-2.5 text-xs">
+                <code className="font-mono text-primary/80 shrink-0 w-14">{claim}</code>
+                <code className="font-mono text-muted-foreground/60 shrink-0 w-28 hidden sm:block">{type}</code>
+                <span className="text-muted-foreground leading-relaxed">{desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </MiniToolLayout>
   );

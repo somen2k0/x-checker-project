@@ -1,9 +1,16 @@
+# robots.txt — xtoolkit.live
+# Last updated: 2026-05-14
+
+# ── General crawlers ──────────────────────────────────────────────────
 User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin
 
-# AI training crawlers — block all
+# ── AI training crawlers — block all ─────────────────────────────────
+# These bots scrape content for LLM training without providing traffic.
+# We block them to protect content value and reduce server load.
+
 User-agent: GPTBot
 Disallow: /
 
@@ -46,4 +53,24 @@ Disallow: /
 User-agent: YouBot
 Disallow: /
 
+User-agent: Diffbot
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent: magpie-crawler
+Disallow: /
+
+User-agent: Meltwater
+Disallow: /
+
+# ── Sitemap index ─────────────────────────────────────────────────────
+# Sitemap is split into sub-sitemaps for better crawl organisation:
+#   sitemap-pages.xml  — homepage, category landings, static pages
+#   sitemap-tools.xml  — all tool pages (55+)
+#   sitemap-blog.xml   — blog articles
+#   sitemap-images.xml — image sitemap for OG/preview images
+
 Sitemap: https://xtoolkit.live/sitemap.xml
+Sitemap: https://xtoolkit.live/sitemap-images.xml

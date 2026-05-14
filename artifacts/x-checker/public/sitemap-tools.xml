@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  sitemap-tools.xml
+  Scope: All live tool pages.
+  Priority hierarchy (data-driven, May 2026):
+
+  TIER 1 — Primary product pages (1.0 / daily)
+    /tools/temp-mail              ← Temp Mail hub (highest traffic)
+
+  TIER 2 — High-traffic email/privacy cluster (0.95–0.90)
+    /tools/temp-mail/tempemail    ← Disposable inbox (core product)
+    /tools/temp-mail/tempgmail    ← Temp Gmail (high search volume)
+    /tools/temp-mail/gmail-tricks ← Gmail dot/plus trick (long-tail)
+    /tools/email-privacy-checker  ← Privacy cluster flagship
+    /tools/masked-email-generator ← Privacy cluster
+
+  TIER 3 — Popular utility tools (0.85–0.80)
+    Account checker, bio generator, JSON formatter, Base64, AI detector,
+    privacy cluster, and other established tools
+
+  TIER 4 — Standard utility tools (0.75)
+    Supporting tools with moderate traffic
+
+  TIER 5 — Newer/lower-traffic tools (0.70)
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- TIER 1 — Primary product (1.0)                                 -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+
+  <url>
+    <loc>https://xtoolkit.live/tools/temp-mail</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- TIER 2 — High-engagement email / privacy cluster (0.95–0.90)   -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+
+  <url>
+    <loc>https://xtoolkit.live/tools/temp-mail/tempemail</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/temp-mail/tempgmail</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/temp-mail/gmail-tricks</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/email-privacy-checker</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/masked-email-generator</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/spam-risk-checker</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.88</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/email-leak-checker</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.88</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/alias-email-explainer</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/disposable-email-guide</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- TIER 3 — Popular utility tools (0.85–0.80)                     -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+
+  <!-- Social Media / X tools -->
+  <url>
+    <loc>https://xtoolkit.live/tools/x-account-checker</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/bio-generator</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/ai-detector</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/bio-ideas</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- Developer tools (high-engagement category) -->
+  <url>
+    <loc>https://xtoolkit.live/tools/json-formatter</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/base64</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.82</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/jwt-decoder</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.82</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/regex-tester</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.82</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/url-encoder</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/yaml-json</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/timezone-converter</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/case-converter</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- Email utility tools -->
+  <url>
+    <loc>https://xtoolkit.live/tools/email-validator</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.82</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/subject-line-generator</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/email-signature-generator</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.78</priority>
+  </url>
+
+  <!-- SEO tools -->
+  <url>
+    <loc>https://xtoolkit.live/tools/og-image-preview</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.82</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/meta-tag-generator</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.82</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/url-slug-generator</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/keyword-density</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- TIER 4 — Standard utility tools (0.75)                         -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+
+  <url>
+    <loc>https://xtoolkit.live/tools/profile-link-generator</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/at-formatter</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/username-generator</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/character-counter</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/html-formatter</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/css-minifier</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/sql-formatter</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/uuid-generator</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/email-character-counter</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/email-username-generator</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/plain-text-formatter</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/robots-txt-generator</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/sitemap-validator</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+  <!-- TIER 5 — Lower-traffic / niche tools (0.70)                    -->
+  <!-- ═══════════════════════════════════════════════════════════════ -->
+
+  <url>
+    <loc>https://xtoolkit.live/tools/funny-bios</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/professional-bios</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/aesthetic-bios</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/name-ideas</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/hashtag-formatter</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/tweet-formatter</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools/font-preview</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.65</priority>
+  </url>
+
+</urlset>

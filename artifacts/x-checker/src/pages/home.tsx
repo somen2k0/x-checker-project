@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Layout } from "@/components/layout/Layout";
 import { SeoHead } from "@/components/SeoHead";
@@ -5,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { ToolCard } from "@/components/ToolCard";
-import { CATEGORIES, LIVE_TOOLS, TOTAL_LIVE, getPopularTools, getNewTools, getToolsByCategory } from "@/lib/tools-registry";
+import { CATEGORIES, LIVE_TOOLS, TOTAL_LIVE, getPopularTools, getNewTools, getToolsByCategory, LIVE_TOOLS as ALL_TOOLS } from "@/lib/tools-registry";
 import { trackEvent } from "@/lib/analytics";
+import { getTopTools, getRecentlyViewed } from "@/hooks/use-local-analytics";
 import {
   CheckCircle2, Zap, Shield, Star, ArrowRight, Users,
+  TrendingUp, Clock, EyeOff, Mail, Flame,
 } from "lucide-react";
 
 const CATEGORY_ORDER: import("@/lib/tools-registry").CategoryKey[] = [
@@ -61,11 +64,26 @@ function StarRating({ count }: { count: number }) {
   );
 }
 
+const PRIVACY_TOOLS_SPOTLIGHT = [
+  { href: "/tools/email-privacy-checker",  label: "Email Privacy Checker",  desc: "Score your address across 7 privacy factors", icon: EyeOff,   color: "text-purple-400",  bg: "bg-purple-400/10 border-purple-400/20" },
+  { href: "/tools/masked-email-generator", label: "Masked Email Generator",  desc: "Create anonymous email aliases in seconds",  icon: Mail,    color: "text-cyan-400",    bg: "bg-cyan-400/10 border-cyan-400/20" },
+  { href: "/tools/spam-risk-checker",      label: "Spam Risk Checker",       desc: "Find out if your email triggers spam filters", icon: Shield, color: "text-amber-400",   bg: "bg-amber-400/10 border-amber-400/20" },
+  { href: "/tools/email-leak-checker",     label: "Email Leak Checker",      desc: "Check if your email address is exposed",     icon: Flame,   color: "text-red-400",     bg: "bg-red-400/10 border-red-400/20" },
+];
+
 export default function Home() {
   const popularTools = getPopularTools();
   const newTools = getNewTools();
   const socialTools = getToolsByCategory("social-media");
   const devTools = getToolsByCategory("developer");
+
+  const [trendingTools, setTrendingTools] = useState<Array<{ toolId: string; weeklyCount: number }>>([]);
+  const [recentIds, setRecentIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    setTrendingTools(getTopTools(6));
+    setRecentIds(getRecentlyViewed(4));
+  }, []);
 
   return (
     <Layout>
@@ -211,6 +229,134 @@ export default function Home() {
                 <ToolCard tool={tool} />
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Trending / Recently Viewed ── */}
+      {(trendingTools.length > 0 || recentIds.length > 0) && (
+        <section className="max-w-6xl mx-auto px-4 md:px-8 py-10 md:py-14">
+          <div className="grid md:grid-cols-2 gap-8">
+            {trendingTools.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-7 w-7 rounded-lg bg-amber-400/10 border border-amber-400/20 flex items-center justify-center">
+                    <TrendingUp className="h-3.5 w-3.5 text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-amber-400">Your usage</p>
+                    <h3 className="text-base font-bold leading-tight">Trending This Week</h3>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  {trendingTools.map(({ toolId, weeklyCount }, i) => {
+                    const tool = ALL_TOOLS.find(t => t.id === toolId);
+                    if (!tool) return null;
+                    const Icon = tool.icon;
+                    return (
+                      <Link key={toolId} href={tool.href} onClick={() => trackEvent("trending_tool_click", { tool: toolId })}>
+                        <div className="group flex items-center gap-3 px-3 py-2.5 rounded-xl border border-border/40 bg-card/40 hover:border-primary/30 hover:bg-card transition-all cursor-pointer">
+                          <span className="text-xs font-bold text-muted-foreground/40 w-4 shrink-0">#{i + 1}</span>
+                          <div className="h-7 w-7 rounded-lg bg-muted/40 border border-border/40 flex items-center justify-center shrink-0">
+                            <Icon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                          </div>
+                          <span className="text-sm font-medium flex-1 group-hover:text-primary transition-colors truncate">{tool.name}</span>
+                          <span className="text-[10px] text-muted-foreground/50 shrink-0">{weeklyCount}× this week</span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {recentIds.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-7 w-7 rounded-lg bg-blue-400/10 border border-blue-400/20 flex items-center justify-center">
+                    <Clock className="h-3.5 w-3.5 text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-blue-400">Jump back in</p>
+                    <h3 className="text-base font-bold leading-tight">Recently Viewed</h3>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {recentIds.map((toolId) => {
+                    const tool = ALL_TOOLS.find(t => t.id === toolId);
+                    if (!tool) return null;
+                    const Icon = tool.icon;
+                    return (
+                      <Link key={toolId} href={tool.href} onClick={() => trackEvent("recent_tool_click", { tool: toolId })}>
+                        <div className="group flex items-center gap-2.5 px-3 py-2.5 rounded-xl border border-border/40 bg-card/40 hover:border-primary/30 hover:bg-card transition-all cursor-pointer h-full">
+                          <div className="h-7 w-7 rounded-lg bg-muted/40 border border-border/40 flex items-center justify-center shrink-0">
+                            <Icon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                          </div>
+                          <span className="text-xs font-medium flex-1 group-hover:text-primary transition-colors leading-snug">{tool.name}</span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ── Email & Privacy Spotlight ── */}
+      <section className="border-t border-border/50 bg-muted/10">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+              <Badge variant="outline" className="border-cyan-400/30 text-cyan-400 bg-cyan-400/8 text-xs mb-4">
+                Email &amp; Privacy Tools
+              </Badge>
+              <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-4">
+                Protect your inbox from spam and data brokers
+              </h2>
+              <p className="text-muted-foreground leading-relaxed mb-6 text-sm">
+                Get a disposable inbox instantly, score your real address privacy, generate masked aliases, and understand what websites know about your email — all free, all in your browser.
+              </p>
+              <ul className="space-y-3 mb-6">
+                {[
+                  "Disposable inbox ready in under 2 seconds",
+                  "Privacy score across 7 factors for any email",
+                  "Masked alias generator — hide your real address",
+                  "Check if your email is exposed in public databases",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-sm text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/tools/temp-mail/tempemail">
+                  <Button size="sm" className="shadow-sm shadow-primary/20">
+                    Get Temp Email <ArrowRight className="h-3.5 w-3.5 ml-2" />
+                  </Button>
+                </Link>
+                <Link href="/email-tools">
+                  <Button variant="outline" size="sm" className="border-border/60">
+                    All Email Tools
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {PRIVACY_TOOLS_SPOTLIGHT.map(({ href, label, desc, icon: Icon, color, bg }) => (
+                <Link key={href} href={href} onClick={() => trackEvent("privacy_tool_click", { tool: href })}>
+                  <div className={`group relative rounded-xl border p-4 hover:shadow-sm transition-all cursor-pointer h-full ${bg}`}>
+                    <div className="h-8 w-8 rounded-lg bg-background/60 border border-border/30 flex items-center justify-center mb-3">
+                      <Icon className={`h-4 w-4 ${color}`} />
+                    </div>
+                    <p className="text-xs font-semibold mb-1 group-hover:text-primary transition-colors leading-snug">{label}</p>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed">{desc}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </section>

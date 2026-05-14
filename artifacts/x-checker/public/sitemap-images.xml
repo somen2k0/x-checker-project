@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  sitemap-images.xml
+  Scope: Image sitemap for OG/social preview images, category banners,
+  and tool preview images.
+
+  Includes:
+    - Site-wide OG image (opengraph.jpg)
+    - Per-page image associations for key landing pages
+
+  Google image sitemap spec:
+  https://developers.google.com/search/docs/crawling-indexing/sitemaps/image-sitemaps
+
+  To add per-tool preview images:
+    1. Place images under /public/images/tools/<tool-id>.jpg
+    2. Add a <url> entry below with the corresponding <image:image> block
+    3. Re-validate with sitemap-validator tool and Google Search Console
+
+  Note: opengraph.jpg is the current site-wide share image.
+  Tool-specific images should be 1200×630px for optimal OG rendering.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://xtoolkit.live/</loc>
+    <image:image>
+      <image:loc>https://xtoolkit.live/opengraph.jpg</image:loc>
+      <image:title>X Toolkit — Free Tools for X, SEO, Developers &amp; Creators</image:title>
+      <image:caption>50+ free online tools: X account checker, temp mail, JSON formatter, AI bio generator, Base64 encoder, and more. No signup required.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Temp Mail hub — primary product page -->
+  <url>
+    <loc>https://xtoolkit.live/tools/temp-mail</loc>
+    <image:image>
+      <image:loc>https://xtoolkit.live/opengraph.jpg</image:loc>
+      <image:title>Free Temp Mail — Disposable Email Inbox | X Toolkit</image:title>
+      <image:caption>Get a free temporary email address instantly. No signup, no password. Multiple domains, auto-refresh, persistent session.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Temp Mail: disposable inbox -->
+  <url>
+    <loc>https://xtoolkit.live/tools/temp-mail/tempemail</loc>
+    <image:image>
+      <image:loc>https://xtoolkit.live/opengraph.jpg</image:loc>
+      <image:title>Free Disposable Email Inbox — No Signup | X Toolkit</image:title>
+      <image:caption>Anonymous throwaway inbox with 16 domains. Auto-refresh every 15 seconds. Session persists across page refreshes.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Temp Gmail -->
+  <url>
+    <loc>https://xtoolkit.live/tools/temp-mail/tempgmail</loc>
+    <image:image>
+      <image:loc>https://xtoolkit.live/opengraph.jpg</image:loc>
+      <image:title>Temp Gmail — Free Temporary Gmail Address | X Toolkit</image:title>
+      <image:caption>Get a real temporary Gmail address for email verification. No account needed.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Email Privacy Checker -->
+  <url>
+    <loc>https://xtoolkit.live/tools/email-privacy-checker</loc>
+    <image:image>
+      <image:loc>https://xtoolkit.live/opengraph.jpg</image:loc>
+      <image:title>Email Privacy Checker — Score Your Email Address | X Toolkit</image:title>
+      <image:caption>Check your email address privacy across 7 factors. Free, runs entirely in your browser.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Email Tools category -->
+  <url>
+    <loc>https://xtoolkit.live/email-tools</loc>
+    <image:image>
+      <image:loc>https://xtoolkit.live/opengraph.jpg</image:loc>
+      <image:title>Free Email Tools — Subject Line Generator, Temp Mail, Validator | X Toolkit</image:title>
+      <image:caption>Browser-based email utilities: temp mail, privacy checker, spam risk, signature generator, validator. No signup required.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Developer Tools category -->
+  <url>
+    <loc>https://xtoolkit.live/developer-tools</loc>
+    <image:image>
+      <image:loc>https://xtoolkit.live/opengraph.jpg</image:loc>
+      <image:title>Free Developer Tools — JSON Formatter, Base64, JWT Decoder | X Toolkit</image:title>
+      <image:caption>Browser-based developer utilities: JSON formatter, Base64 encoder, JWT decoder, regex tester, SQL formatter, UUID generator.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Blog index -->
+  <url>
+    <loc>https://xtoolkit.live/blog</loc>
+    <image:image>
+      <image:loc>https://xtoolkit.live/opengraph.jpg</image:loc>
+      <image:title>Email &amp; Privacy Blog — X Toolkit</image:title>
+      <image:caption>Guides on disposable email, email privacy, temp mail services, and protecting your inbox from spam and data brokers.</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Blog articles -->
+  <url>
+    <loc>https://xtoolkit.live/blog/what-is-disposable-email</loc>
+    <image:image>
+      <image:loc>https://xtoolkit.live/opengraph.jpg</image:loc>
+      <image:title>What Is Disposable Email? Complete Guide 2025</image:title>
+      <image:caption>Everything about throwaway email addresses: how they work, when to use them, limitations, and the best free services.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/blog/best-temp-mail-services</loc>
+    <image:image>
+      <image:loc>https://xtoolkit.live/opengraph.jpg</image:loc>
+      <image:title>Best Temp Mail Services 2025 — Top Disposable Email Providers</image:title>
+      <image:caption>8 top temporary email services compared on privacy, features, reliability, and ease of use.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/blog/temp-mail-vs-gmail</loc>
+    <image:image>
+      <image:loc>https://xtoolkit.live/opengraph.jpg</image:loc>
+      <image:title>Temp Mail vs Gmail — Key Differences 2025</image:title>
+      <image:caption>Side-by-side comparison: privacy, lifespan, deliverability, spam protection. When to use each.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/blog/is-temp-mail-safe</loc>
+    <image:image>
+      <image:loc>https://xtoolkit.live/opengraph.jpg</image:loc>
+      <image:title>Is Temp Mail Safe? Security Analysis 2025</image:title>
+      <image:caption>What temporary email protects against, the real risks, and when you should never use it.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/blog/why-websites-ask-email-verification</loc>
+    <image:image>
+      <image:loc>https://xtoolkit.live/opengraph.jpg</image:loc>
+      <image:title>Why Websites Ask for Email Verification — Explained 2025</image:title>
+      <image:caption>The real business and technical reasons behind email verification walls — and what it means for your privacy.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/blog/temp-gmail-explained</loc>
+    <image:image>
+      <image:loc>https://xtoolkit.live/opengraph.jpg</image:loc>
+      <image:title>Temp Gmail Explained — Dot Trick, Plus Trick &amp; Real Temp Addresses</image:title>
+      <image:caption>How Gmail dot trick, plus trick, and real temporary Gmail addresses work — and when each is right.</image:caption>
+    </image:image>
+  </url>
+
+</urlset>

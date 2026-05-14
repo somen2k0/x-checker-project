@@ -48,6 +48,49 @@ interface OMsg { id: number; from: string; subject: string; date: string }
 interface OFullMsg extends OMsg { body?: string; htmlBody?: string; textBody?: string }
 
 const REFRESH_MS = 15000;
+const INBOX_STORAGE_KEY = "xt_inbox_session";
+
+interface PersistedInbox {
+  prov: InboxProv;
+  email: string;
+  user: string;
+  domain: string;
+  sid?: string;
+  savedAt: number;
+}
+
+const SESSION_TTL = 3 * 60 * 60 * 1000;
+
+function saveInboxSession(prov: InboxProv, session: GSession | OSession): void {
+  try {
+    const data: PersistedInbox = {
+      prov,
+      email: session.email,
+      user: "user" in session ? session.user : session.login,
+      domain: session.domain,
+      sid: "sid" in session ? session.sid : undefined,
+      savedAt: Date.now(),
+    };
+    localStorage.setItem(INBOX_STORAGE_KEY, JSON.stringify(data));
+  } catch {}
+}
+
+function loadInboxSession(): PersistedInbox | null {
+  try {
+    const raw = localStorage.getItem(INBOX_STORAGE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw) as PersistedInbox;
+    if (Date.now() - data.savedAt > SESSION_TTL) {
+      localStorage.removeItem(INBOX_STORAGE_KEY);
+      return null;
+    }
+    return data;
+  } catch { return null; }
+}
+
+function clearInboxSession(): void {
+  try { localStorage.removeItem(INBOX_STORAGE_KEY); } catch {}
+}
 
 // ── Helpers ────────────────────────────────────────────────────────
 
@@ -186,12 +229,12 @@ function UnifiedInboxSection() {
           const sd = await sr.json() as GuerrillaInbox & { error?: string };
           if (sd.email) {
             const gs = { sid: sd.sid_token ?? d.sid_token, user: sd.user ?? user, domain: sd.domain ?? d.domain, email: sd.email };
-            gSessionRef.current = gs; setGSession(gs); return gs;
+            gSessionRef.current = gs; setGSession(gs); saveInboxSession("guerrilla", gs); return gs;
           }
         }
       }
       const gs = { sid: d.sid_token, user: d.user, domain: d.domain, email: d.email };
-      gSessionRef.current = gs; setGSession(gs); return gs;
+      gSessionRef.current = gs; setGSession(gs); saveInboxSession("guerrilla", gs); return gs;
     } catch { return null; }
   }, []);
 
@@ -206,7 +249,7 @@ function UnifiedInboxSection() {
       const d = await r.json() as OSession & { error?: string };
       if (!r.ok || !d.email) return null;
       const os = { login: d.login, domain: d.domain, email: d.email, domains: d.domains ?? O_DOMAINS };
-      oSessionRef.current = os; setOSession(os); return os;
+      oSessionRef.current = os; setOSession(os); saveInboxSession("onesecmail", os); return os;
     } catch { return null; }
   }, []);
 
@@ -239,15 +282,37 @@ function UnifiedInboxSection() {
   }, [createGInbox, createOInbox, fetchGMsgs, fetchOMsgs]);
 
   const initInbox = useCallback(async () => {
+    // Try to restore a persisted session first
+    const saved = loadInboxSession();
+    if (saved) {
+      if (saved.prov === "guerrilla" && saved.sid) {
+        const gs: GSession = { sid: saved.sid, user: saved.user, domain: saved.domain, email: saved.email };
+        gSessionRef.current = gs; setGSession(gs);
+        activeProvRef.current = "guerrilla"; setActiveProv("guerrilla");
+        setCreating(false);
+        await fetchGMsgs(saved.sid);
+        startPolling();
+        return;
+      } else if (saved.prov === "onesecmail") {
+        const os: OSession = { login: saved.user, domain: saved.domain, email: saved.email, domains: O_DOMAINS };
+        oSessionRef.current = os; setOSession(os);
+        activeProvRef.current = "onesecmail"; setActiveProv("onesecmail");
+        setCreating(false);
+        await fetchOMsgs(saved.user, saved.domain);
+        startPolling();
+        return;
+      }
+    }
     setCreating(true); setError(null);
     const { domain, prov } = pickRandomDomain();
     const ok = await createOnDomain(domain, prov);
     if (!ok) { setError("Could not create inbox. Please try again."); setCreating(false); return; }
     startPolling();
     setCreating(false);
-  }, [createOnDomain, startPolling]);
+  }, [createOnDomain, startPolling, fetchGMsgs, fetchOMsgs]);
 
   const newAddress = useCallback(async () => {
+    clearInboxSession();
     setCreating(true); setError(null);
     setGMessages([]); setOMessages([]); setSelectedG(null); setSelectedO(null); setSelectedId(null);
     if (refreshTimer.current) clearInterval(refreshTimer.current);

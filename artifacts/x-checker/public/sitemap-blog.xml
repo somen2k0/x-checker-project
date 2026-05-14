@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  sitemap-blog.xml
+  Scope: Blog index and all article pages.
+  Strategy: Blog content builds topical authority for the email/privacy cluster.
+  All articles set to weekly changefreq to encourage frequent recrawl.
+  Priority: 0.85 for index, 0.80 for articles (above utility tool pages).
+  Reason: Fresh editorial content earns crawl budget faster than static tool pages.
+
+  lastmod reflects actual publish/update date — update this whenever
+  article content, FAQs, or metadata is revised.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Blog hub -->
+  <url>
+    <loc>https://xtoolkit.live/blog</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- ── Articles: ordered by expected search volume / priority ────── -->
+
+  <!-- High intent / evergreen: "what is disposable email" is a top TOFU query -->
+  <url>
+    <loc>https://xtoolkit.live/blog/what-is-disposable-email</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.82</priority>
+  </url>
+
+  <!-- Comparison content: high CTR, commercial intent -->
+  <url>
+    <loc>https://xtoolkit.live/blog/best-temp-mail-services</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.82</priority>
+  </url>
+
+  <!-- Comparison: "temp mail vs gmail" — very high search volume -->
+  <url>
+    <loc>https://xtoolkit.live/blog/temp-mail-vs-gmail</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- Trust/safety content: converts users still on the fence -->
+  <url>
+    <loc>https://xtoolkit.live/blog/is-temp-mail-safe</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+
+  <!-- Explainer: captures "why do websites ask for email" queries -->
+  <url>
+    <loc>https://xtoolkit.live/blog/why-websites-ask-email-verification</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.78</priority>
+  </url>
+
+  <!-- Temp Gmail: captures Gmail-specific temp mail queries -->
+  <url>
+    <loc>https://xtoolkit.live/blog/temp-gmail-explained</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.78</priority>
+  </url>
+
+</urlset>

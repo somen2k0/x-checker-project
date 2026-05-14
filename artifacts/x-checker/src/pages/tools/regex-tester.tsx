@@ -194,6 +194,105 @@ export default function RegexTester() {
             </div>
           ))}
         </div>
+
+        {/* ── Regex Quick Reference ── */}
+        <div className="mt-2 space-y-3">
+          <h3 className="text-sm font-semibold text-foreground/80">Regex Quick Reference</h3>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {/* Character classes */}
+            <div className="rounded-xl border border-border/60 bg-card/40 overflow-hidden">
+              <div className="px-3 py-2 bg-muted/20 border-b border-border/40">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-orange-400">Character Classes</span>
+              </div>
+              <div className="divide-y divide-border/30">
+                {[
+                  { token: "\\d",  desc: "Any digit (0–9)" },
+                  { token: "\\D",  desc: "Any non-digit" },
+                  { token: "\\w",  desc: "Word char (a–z, A–Z, 0–9, _)" },
+                  { token: "\\W",  desc: "Non-word character" },
+                  { token: "\\s",  desc: "Whitespace (space, tab, newline)" },
+                  { token: "\\S",  desc: "Non-whitespace" },
+                  { token: ".",    desc: "Any char except newline" },
+                  { token: "[abc]",desc: "One of a, b, or c" },
+                  { token: "[^abc]",desc: "Any char not in set" },
+                  { token: "[a-z]",desc: "Any lowercase letter" },
+                ].map(({ token, desc }) => (
+                  <div key={token} className="flex items-center gap-3 px-3 py-1.5 text-xs">
+                    <code className="font-mono text-primary/80 shrink-0 w-16">{token}</code>
+                    <span className="text-muted-foreground">{desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {/* Quantifiers & anchors */}
+            <div className="space-y-3">
+              <div className="rounded-xl border border-border/60 bg-card/40 overflow-hidden">
+                <div className="px-3 py-2 bg-muted/20 border-b border-border/40">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400">Quantifiers</span>
+                </div>
+                <div className="divide-y divide-border/30">
+                  {[
+                    { token: "*",    desc: "0 or more (greedy)" },
+                    { token: "+",    desc: "1 or more (greedy)" },
+                    { token: "?",    desc: "0 or 1 (optional)" },
+                    { token: "{n}",  desc: "Exactly n times" },
+                    { token: "{n,m}",desc: "Between n and m times" },
+                    { token: "*?",   desc: "0 or more (lazy)" },
+                    { token: "+?",   desc: "1 or more (lazy)" },
+                  ].map(({ token, desc }) => (
+                    <div key={token} className="flex items-center gap-3 px-3 py-1.5 text-xs">
+                      <code className="font-mono text-primary/80 shrink-0 w-16">{token}</code>
+                      <span className="text-muted-foreground">{desc}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded-xl border border-border/60 bg-card/40 overflow-hidden">
+                <div className="px-3 py-2 bg-muted/20 border-b border-border/40">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-green-400">Anchors &amp; Groups</span>
+                </div>
+                <div className="divide-y divide-border/30">
+                  {[
+                    { token: "^",       desc: "Start of string (or line with m)" },
+                    { token: "$",       desc: "End of string (or line with m)" },
+                    { token: "\\b",     desc: "Word boundary" },
+                    { token: "(abc)",   desc: "Capture group" },
+                    { token: "(?:abc)", desc: "Non-capturing group" },
+                    { token: "a|b",     desc: "a or b (alternation)" },
+                  ].map(({ token, desc }) => (
+                    <div key={token} className="flex items-center gap-3 px-3 py-1.5 text-xs">
+                      <code className="font-mono text-primary/80 shrink-0 w-20">{token}</code>
+                      <span className="text-muted-foreground">{desc}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Flags reference */}
+          <div className="rounded-xl border border-border/60 bg-card/40 overflow-hidden">
+            <div className="px-3 py-2 bg-muted/20 border-b border-border/40">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400">Flags</span>
+            </div>
+            <div className="flex flex-wrap divide-x divide-border/30">
+              {[
+                { flag: "g", name: "Global",      desc: "Find all matches, not just the first" },
+                { flag: "i", name: "Ignore case", desc: "Case-insensitive matching" },
+                { flag: "m", name: "Multiline",   desc: "^ and $ match each line boundary" },
+                { flag: "s", name: "Dot-all",     desc: ". matches newline characters too" },
+              ].map(({ flag, name, desc }) => (
+                <div key={flag} className="flex-1 min-w-[140px] px-3 py-2.5 text-xs">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <code className="font-mono text-purple-400 font-bold">{flag}</code>
+                    <span className="font-medium text-foreground/80">{name}</span>
+                  </div>
+                  <span className="text-muted-foreground leading-relaxed">{desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </MiniToolLayout>
   );

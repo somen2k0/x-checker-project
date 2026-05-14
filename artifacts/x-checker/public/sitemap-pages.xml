@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  sitemap-pages.xml
+  Scope: Homepage, category landing pages, and static/legal pages.
+  Priority hierarchy:
+    1.0  Homepage
+    0.95 Email Tools category (highest-engagement category per analytics)
+    0.90 Developer Tools, Tools index
+    0.85 Other category landings
+    0.55 About, Pricing
+    0.40 Legal (privacy, terms)
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- ── Tier 1: Homepage ─────────────────────────────────────────── -->
+  <url>
+    <loc>https://xtoolkit.live/</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <!-- hreflang-ready: add <xhtml:link> elements here when i18n launches -->
+  </url>
+
+  <!-- ── Tier 2: High-engagement category landings ────────────────── -->
+  <url>
+    <loc>https://xtoolkit.live/email-tools</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/developer-tools</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/tools</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.90</priority>
+  </url>
+
+  <!-- ── Tier 3: Remaining category landings ──────────────────────── -->
+  <url>
+    <loc>https://xtoolkit.live/social-media-tools</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/ai-writing-tools</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/text-format-tools</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/seo-tools</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Blog index -->
+  <url>
+    <loc>https://xtoolkit.live/blog</loc>
+    <lastmod>2026-05-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- ── Tier 4: Supporting static pages ──────────────────────────── -->
+  <url>
+    <loc>https://xtoolkit.live/about</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.55</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/pricing</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.55</priority>
+  </url>
+
+  <!-- ── Tier 5: Legal ─────────────────────────────────────────────── -->
+  <url>
+    <loc>https://xtoolkit.live/privacy</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.40</priority>
+  </url>
+  <url>
+    <loc>https://xtoolkit.live/terms</loc>
+    <lastmod>2026-05-13</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.40</priority>
+  </url>
+
+</urlset>
