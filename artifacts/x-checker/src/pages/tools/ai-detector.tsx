@@ -7,15 +7,12 @@ import {
   AlertCircle, ChevronDown, Wand2,
 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
-import { GroqKeyManager } from "@/components/GroqKeyManager";
-import { useGroqKeys } from "@/hooks/use-groq-keys";
 
 const FAQS = [
   { q: "What AI models does it detect?", a: "It detects text from all major AI models — ChatGPT, Claude, Gemini, Llama, Mistral, and others. It looks for universal AI writing patterns rather than model-specific fingerprints." },
   { q: "How accurate is the detection?", a: "Detection uses Llama 3.3 70B, one of the strongest open models. Accuracy is high for clearly AI-generated or clearly human text. Short or heavily edited text may score as uncertain." },
   { q: "What does the humanizer do?", a: "The humanizer rewrites AI-generated text to sound natural and human — adding contractions, varying sentence length, removing AI transition phrases, and adding personality." },
-  { q: "Do I need an API key?", a: "Yes — a free Groq API key is required. Get one in seconds at console.groq.com. It's completely free with generous limits." },
-  { q: "Is my text stored?", a: "No. Your text is sent directly to Groq's API for processing and immediately discarded. Nothing is stored on our servers." },
+  { q: "Is my text stored?", a: "No. Your text is processed instantly and immediately discarded. Nothing is stored on our servers." },
   { q: "What's the text limit?", a: "Detection supports up to 8000 characters. Humanization supports up to 6000 characters. For longer content, process it in sections." },
 ];
 
@@ -86,35 +83,19 @@ export default function AiDetector() {
   const [copiedHuman, setCopiedHuman] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { callWithRotation, hasKeys } = useGroqKeys();
-
-  const handleResponse = (res: Response, data: { error?: string }): boolean => {
-    if (res.status === 401 || data.error === "invalid_api_key") {
-      setError("Invalid API key. Check your key at console.groq.com");
-      return false;
-    }
-    if (data.error === "no_api_key") {
-      setError("Please add your Groq API key above.");
-      return false;
-    }
-    if (!res.ok) {
-      setError(data.error ?? "Something went wrong. Please try again.");
-      return false;
-    }
-    return true;
-  };
 
   const detect = async () => {
     if (!text.trim()) { toast({ title: "Enter some text first", variant: "destructive" }); return; }
-    if (!hasKeys) { setError("Please add your Groq API key above."); return; }
     setDetecting(true); setDetectResult(null); setError(null);
     trackEvent("ai_detect", { chars: text.length });
     try {
-      const result = await callWithRotation("/api/ai-detector/detect", { text: text.trim() });
-      if (result.exhausted) { setError("All API keys are rate-limited. Please wait a moment or add more keys."); return; }
-      if (result.networkError || !result.res) { setError("Network error. Please try again."); return; }
-      const data = await result.res.json() as DetectResult & { error?: string };
-      if (!handleResponse(result.res, data)) return;
+      const res = await fetch("/api/ai-detector/detect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text.trim() }),
+      });
+      const data = await res.json() as DetectResult & { error?: string };
+      if (!res.ok) { setError(data.error ?? "Something went wrong. Please try again."); return; }
       setDetectResult(data);
     } catch { setError("Network error. Please try again."); }
     finally { setDetecting(false); }
@@ -122,15 +103,16 @@ export default function AiDetector() {
 
   const humanize = async () => {
     if (!text.trim()) { toast({ title: "Enter some text first", variant: "destructive" }); return; }
-    if (!hasKeys) { setError("Please add your Groq API key above."); return; }
     setHumanizing(true); setHumanized(""); setError(null);
     trackEvent("ai_humanize", { style: humanizeStyle, chars: text.length });
     try {
-      const result = await callWithRotation("/api/ai-detector/humanize", { text: text.trim(), style: humanizeStyle });
-      if (result.exhausted) { setError("All API keys are rate-limited. Please wait a moment or add more keys."); return; }
-      if (result.networkError || !result.res) { setError("Network error. Please try again."); return; }
-      const data = await result.res.json() as { humanized?: string; error?: string };
-      if (!handleResponse(result.res, data)) return;
+      const res = await fetch("/api/ai-detector/humanize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: text.trim(), style: humanizeStyle }),
+      });
+      const data = await res.json() as { humanized?: string; error?: string };
+      if (!res.ok) { setError(data.error ?? "Something went wrong. Please try again."); return; }
       setHumanized(data.humanized ?? "");
     } catch { setError("Network error. Please try again."); }
     finally { setHumanizing(false); }
@@ -162,9 +144,6 @@ export default function AiDetector() {
       ]}
     >
       <div className="space-y-4">
-
-        {/* API Keys */}
-        <GroqKeyManager />
 
         {/* Tabs */}
         <div className="flex gap-1 p-1 rounded-xl bg-muted/40 border border-border/50">

@@ -6,46 +6,60 @@ const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const DETECT_MODEL = "llama-3.3-70b-versatile";
 const HUMANIZE_MODEL = "llama-3.3-70b-versatile";
 
+// Read comma-separated keys from env, rotate on 429
+function getGroqKeys(): string[] {
+  const raw = process.env.GROQ_API_KEY ?? "";
+  return raw.split(",").map(k => k.trim()).filter(Boolean);
+}
+
 async function callGroq(
-  apiKey: string,
   model: string,
   prompt: string,
   maxTokens: number,
   res: import("express").Response
 ): Promise<string | null> {
-  const r = await fetch(GROQ_URL, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model,
-      max_tokens: maxTokens,
-      temperature: 0.1,
-      messages: [{ role: "user", content: prompt }],
-    }),
-    signal: AbortSignal.timeout(30000),
-  });
-
-  if (!r.ok) {
-    if (r.status === 401) { res.status(401).json({ error: "invalid_api_key" }); return null; }
-    if (r.status === 429) { res.status(429).json({ error: "rate_limited" }); return null; }
-    const e = (await r.json().catch(() => ({}))) as { error?: { message?: string } };
-    res.status(500).json({ error: e?.error?.message ?? "Groq API error" });
+  const keys = getGroqKeys();
+  if (keys.length === 0) {
+    res.status(503).json({ error: "Service not configured. Please contact the administrator." });
     return null;
   }
 
-  const data = (await r.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  return data.choices?.[0]?.message?.content ?? "";
+  for (let i = 0; i < keys.length; i++) {
+    const r = await fetch(GROQ_URL, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${keys[i]}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model,
+        max_tokens: maxTokens,
+        temperature: 0.1,
+        messages: [{ role: "user", content: prompt }],
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
+
+    if (r.status === 429 && i < keys.length - 1) continue; // try next key
+
+    if (!r.ok) {
+      if (r.status === 429) { res.status(429).json({ error: "Service is rate-limited. Please try again in a moment." }); return null; }
+      if (r.status === 401) { res.status(503).json({ error: "Service misconfigured. Please contact the administrator." }); return null; }
+      const e = (await r.json().catch(() => ({}))) as { error?: { message?: string } };
+      res.status(500).json({ error: e?.error?.message ?? "Groq API error" });
+      return null;
+    }
+
+    const data = (await r.json()) as { choices?: Array<{ message?: { content?: string } }> };
+    return data.choices?.[0]?.message?.content ?? "";
+  }
+
+  res.status(429).json({ error: "Service is rate-limited. Please try again in a moment." });
+  return null;
 }
 
 router.post("/ai-detector/detect", async (req, res) => {
-  const { text, apiKey } = req.body as { text?: string; apiKey?: string };
+  const { text } = req.body as { text?: string };
 
   if (!text || text.trim().length < 30) {
     res.status(400).json({ error: "Please provide at least 30 characters of text." });
-    return;
-  }
-  if (!apiKey?.trim()) {
-    res.status(400).json({ error: "no_api_key" });
     return;
   }
   if (text.length > 8000) {
@@ -87,7 +101,7 @@ Return ONLY valid JSON (no markdown, no explanation), exactly in this format:
 Include up to 12 sentences in the sentences array. Score each sentence individually for AI probability.`;
 
   try {
-    const raw = await callGroq(apiKey.trim(), DETECT_MODEL, prompt, 1200, res);
+    const raw = await callGroq(DETECT_MODEL, prompt, 1200, res);
     if (raw === null) return;
 
     let parsed: unknown;
@@ -107,14 +121,10 @@ Include up to 12 sentences in the sentences array. Score each sentence individua
 });
 
 router.post("/ai-detector/humanize", async (req, res) => {
-  const { text, apiKey, style } = req.body as { text?: string; apiKey?: string; style?: string };
+  const { text, style } = req.body as { text?: string; style?: string };
 
   if (!text || text.trim().length < 30) {
     res.status(400).json({ error: "Please provide at least 30 characters of text." });
-    return;
-  }
-  if (!apiKey?.trim()) {
-    res.status(400).json({ error: "no_api_key" });
     return;
   }
   if (text.length > 6000) {
@@ -156,7 +166,7 @@ ${text.trim()}
 Output ONLY the rewritten text. Nothing else. No preamble, no explanation, no quotes around it.`;
 
   try {
-    const result = await callGroq(apiKey.trim(), HUMANIZE_MODEL, prompt, 2000, res);
+    const result = await callGroq(HUMANIZE_MODEL, prompt, 2000, res);
     if (result === null) return;
 
     res.json({ humanized: result.trim() });
