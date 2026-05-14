@@ -137,6 +137,7 @@ export function Footer() {
               <ul className="space-y-2">
                 {[
                   { label: "About", href: "/about" },
+                  { label: "Blog", href: "/blog" },
                   { label: "Privacy Policy", href: "/privacy" },
                   { label: "Terms of Service", href: "/terms" },
                   { label: "Contact / Feedback", action: () => setShowFeedback(true) },

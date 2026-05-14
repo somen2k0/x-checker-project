@@ -340,15 +340,6 @@ export function Navbar() {
 
             <TempMailNavItem currentPath={location} />
 
-            <Link href="/blog">
-              <button className={`px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap ${
-                location.startsWith("/blog") ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              }`}>
-                <Newspaper className="h-3.5 w-3.5" />
-                Blog
-              </button>
-            </Link>
-
             <Link href="/about">
               <button className={`px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                 location === "/about" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -488,16 +479,6 @@ export function Navbar() {
                   </div>
                 )}
               </div>
-
-              {/* Blog mobile link */}
-              <Link href="/blog" onClick={closeMenu}>
-                <button className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
-                  location.startsWith("/blog") ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                }`}>
-                  <Newspaper className="h-4 w-4 shrink-0" />
-                  Blog
-                </button>
-              </Link>
 
               <Link href="/about" onClick={closeMenu}>
                 <button className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
