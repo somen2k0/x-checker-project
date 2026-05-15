@@ -7,13 +7,9 @@ const router: IRouter = Router();
 const UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
-// Googlebot UA used for the HTML fallback — gets proper SSR from x.com
-const CRAWLER_UA =
-  "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
-
 // X's own public app bearer token (same one their website uses for logged-out visitors)
 const PUBLIC_BEARER =
-  "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I%2FeLDgiU%3DEUifiRBkKG5E2XzMDjRfl76ZoRheOfeat6k%2FqiVWrv7sdG7V0ByZ83Dw2R";
+  "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA";
 
 const BEARER = process.env.TWITTER_BEARER_TOKEN ?? PUBLIC_BEARER;
 
@@ -170,115 +166,34 @@ async function checkViaGraphQL(
   return { ...base, status: "unknown", error: "Unexpected response shape" };
 }
 
-// ─── Method 2: HTML page fetch fallback (works from any IP / cloud provider) ──
+// ─── Method 2: oEmbed fallback (works from any IP, no JS parsing needed) ─────
 //
-// x.com is a public website accessible from cloud provider IPs (it needs to be
-// crawled by Google, Bing, etc.).  X uses SSR via Next.js so the page HTML
-// contains proper <title> and <meta> tags even without JS.
-//
-// Title patterns:
-//   Active    → "Elon Musk (@elonmusk) / X"   or   "Elon Musk (@elonmusk) on X"
-//   Suspended → "Account suspended / X"
-//   Not found → "@username isn't available" or plain "X" after redirect to /
-// ─────────────────────────────────────────────────────────────────────────────
+// publish.twitter.com is Twitter's official public oEmbed endpoint, accessible
+// from any IP (designed for third-party websites to embed Twitter content).
+//   200 → active
+//   403 → suspended
+//   404 → not found
 
-function extractMeta(html: string, property: string): string | null {
-  // Handles both name= and property= attributes
-  const re = new RegExp(
-    `<meta[^>]+(?:property|name)=["']${property}["'][^>]+content=["']([^"']+)["']`,
-    "i"
-  );
-  const m = html.match(re) ??
-    html.match(new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']${property}["']`, "i"));
-  return m?.[1] ?? null;
-}
-
-async function checkViaPageFetch(username: string): Promise<AccountCheckResult> {
+async function checkViaOEmbed(username: string): Promise<AccountCheckResult> {
   const base: AccountCheckResult = {
     username, status: "unknown", displayName: null, profileImageUrl: null,
     followerCount: null, followingCount: null, isVerified: null, createdAt: null, error: null,
   };
 
   try {
-    // Fetch with redirect following — we check both the final URL and the HTML content
-    const res = await fetch(`https://x.com/${username}`, {
-      method: "GET",
-      headers: {
-        "User-Agent": CRAWLER_UA,
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Cache-Control": "no-cache",
-      },
-      redirect: "follow",
-      signal: AbortSignal.timeout(15000),
+    const url = `https://publish.twitter.com/oembed?url=${encodeURIComponent(
+      `https://twitter.com/${username}`
+    )}&omit_script=true`;
+
+    const res = await fetch(url, {
+      headers: { Accept: "application/json", "User-Agent": UA },
+      signal: AbortSignal.timeout(10000),
     });
 
-    const finalUrl = (res.url || "").toLowerCase();
-
-    // Redirect to suspended page
-    if (finalUrl.includes("/account/suspended")) {
-      return { ...base, status: "suspended" };
-    }
-
-    if (res.status === 404) {
-      return { ...base, status: "not_found" };
-    }
-
-    if (!res.ok) {
-      return { ...base, status: "unknown", error: `HTTP ${res.status}` };
-    }
-
-    // Landed on home page (e.g. redirected from a deleted account)
-    const normalizedFinal = finalUrl.replace(/\/$/, "");
-    if (normalizedFinal === "https://x.com" || normalizedFinal === "https://twitter.com") {
-      return { ...base, status: "not_found" };
-    }
-
-    const html = await res.text();
-
-    // Extract <title>
-    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-    const title = (titleMatch?.[1] ?? "").trim().toLowerCase();
-
-    // Suspended check
-    if (title.includes("account suspended")) {
-      return { ...base, status: "suspended" };
-    }
-
-    // Not found checks
-    if (
-      title.includes("isn't available") ||
-      title.includes("page doesn't exist") ||
-      title.includes("page not found") ||
-      title === "x" ||
-      title === "twitter" ||
-      title === ""
-    ) {
-      return { ...base, status: "not_found" };
-    }
-
-    // Active: title is "Display Name (@handle) / X" or "Display Name (@handle) on X"
-    const rawTitle = (titleMatch?.[1] ?? "").trim();
-    const nameMatch = rawTitle.match(/^(.+?)\s+\(@[^)]+\)\s*(?:\/|on)\s*X/i);
-    const displayName = nameMatch?.[1]?.trim() ?? null;
-
-    // Extract profile image from OG meta tag
-    const profileImageUrl = extractMeta(html, "og:image");
-
-    if (displayName || rawTitle.toLowerCase().includes(`@${username.toLowerCase()}`)) {
-      return {
-        ...base, status: "active",
-        displayName,
-        profileImageUrl: profileImageUrl?.startsWith("http") ? profileImageUrl : null,
-      };
-    }
-
-    // Final fallback: if the URL still contains the username, consider active
-    if (finalUrl.includes(`/${username.toLowerCase()}`)) {
-      return { ...base, status: "active" };
-    }
-
-    return { ...base, status: "unknown", error: "Could not determine account status" };
+    if (res.status === 200) return { ...base, status: "active" };
+    if (res.status === 403) return { ...base, status: "suspended" };
+    if (res.status === 404) return { ...base, status: "not_found" };
+    return { ...base, status: "unknown", error: `oEmbed HTTP ${res.status}` };
   } catch (err) {
     return {
       ...base, status: "unknown",
@@ -287,7 +202,7 @@ async function checkViaPageFetch(username: string): Promise<AccountCheckResult> 
   }
 }
 
-// ─── Unified check: tries GraphQL first, falls back to page fetch ─────────────
+// ─── Unified check: tries GraphQL first, falls back to oEmbed ────────────────
 
 async function checkXAccount(
   username: string,
@@ -298,13 +213,13 @@ async function checkXAccount(
       return await checkViaGraphQL(username, guestToken);
     } catch (err) {
       // GraphQL failed — most likely IP-blocked on this hosting provider.
-      // Fall through to the HTML page fetch fallback.
+      // Fall through to the oEmbed fallback.
       logger.warn({ username, err: err instanceof Error ? err.message : err },
-        "GraphQL check failed, falling back to page fetch");
+        "GraphQL check failed, falling back to oEmbed");
     }
   }
 
-  return checkViaPageFetch(username);
+  return checkViaOEmbed(username);
 }
 
 // ─── Route ────────────────────────────────────────────────────────────────────
