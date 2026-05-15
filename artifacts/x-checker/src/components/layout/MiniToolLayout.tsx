@@ -25,6 +25,8 @@ interface Faq {
 interface MiniToolLayoutProps {
   seoTitle: string;
   seoDescription: string;
+  seoKeywords?: string;
+  seoExtraSchemas?: object[];
   icon: LucideIcon;
   badge?: string;
   title: string;
@@ -40,6 +42,8 @@ const SITE_URL = "https://xtoolkit.live";
 export function MiniToolLayout({
   seoTitle,
   seoDescription,
+  seoKeywords,
+  seoExtraSchemas,
   icon: Icon,
   badge = "Free Tool",
   title,
@@ -76,14 +80,17 @@ export function MiniToolLayout({
     ],
   };
 
+  const allExtraSchemas = [breadcrumbSchema, ...(seoExtraSchemas ?? [])];
+
   return (
     <Layout>
       <SeoHead
         title={seoTitle}
         description={seoDescription}
+        keywords={seoKeywords}
         faqs={faqs}
         path={path}
-        extraSchemas={[breadcrumbSchema]}
+        extraSchemas={allExtraSchemas}
       />
 
       {/* ── Tool header banner ── */}

@@ -31,12 +31,14 @@ function formatDate(iso: string): string {
 }
 
 const FAQS = [
-  { q: "How many accounts can I check at once?", a: "Up to 100 usernames in a single batch — all checked in parallel. Results come back in seconds." },
-  { q: "Do I need an X / Twitter account to use this?", a: "No. The tool uses X's public guest API — no login, no API key, no signup required." },
-  { q: "What do the statuses mean?", a: "Active = the account is live. Suspended = X has suspended the account. Not Found = the username doesn't exist or has been deleted." },
-  { q: "Is my data stored or shared?", a: "No. Usernames are sent to our server only to proxy the X API call and are never logged or stored." },
-  { q: "Why might an account show as Unknown?", a: "X's API occasionally returns an ambiguous response — usually due to rate limits or temporary issues. Try again in a few seconds." },
-  { q: "Can I export the results?", a: "Yes — click Copy to copy the full results as tab-separated text you can paste directly into a spreadsheet." },
+  { q: "How do I check if a Twitter / X account is suspended?", a: "Paste the username (with or without @) into the box and click Check Status. The tool returns an instant result: Active, Suspended, or Not Found. You can check up to 100 accounts at once — no login required." },
+  { q: "What's the difference between Suspended, Not Found, and Active?", a: "Active means the account is live and publicly accessible. Suspended means X has suspended the account for a policy violation — the profile still exists but is locked. Not Found means the username doesn't exist or the account has been permanently deleted." },
+  { q: "Can I check if a Twitter account has been deleted or banned?", a: "Yes. Deleted accounts show as Not Found, and accounts banned by X show as Suspended. You can batch-check up to 100 usernames at once to quickly audit a large list." },
+  { q: "How many accounts can I check at once?", a: "Up to 100 usernames per batch — all checked in parallel so results return in a few seconds regardless of list size." },
+  { q: "Do I need an API key or X account to use this?", a: "No. The tool uses X's public guest API entirely server-side. There's no login, no API key, and no signup needed — it's completely free." },
+  { q: "Why might an account show as Unknown?", a: "X's API occasionally returns an ambiguous response, usually due to temporary rate limiting. Wait a few seconds and try again — it resolves on its own." },
+  { q: "Is my data stored or shared?", a: "No. Usernames are sent to our server only to proxy the X API call and are never logged, stored, or shared with third parties." },
+  { q: "Can I export the results?", a: "Yes — click Copy to copy results as tab-separated text you can paste directly into Excel, Google Sheets, or any spreadsheet app." },
 ];
 
 export default function XAccountChecker() {
@@ -107,10 +109,36 @@ export default function XAccountChecker() {
   const suspendedCount = results.filter(r => r.status === "suspended").length;
   const notFoundCount = results.filter(r => r.status === "not_found").length;
 
+  const softwareAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "X Account Checker",
+    "url": "https://xtoolkit.live/tools/x-account-checker",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Web",
+    "description": "Bulk-check up to 100 X (Twitter) accounts to instantly see if they are active, suspended, or deleted. Free, no login or API key required.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "featureList": [
+      "Bulk check up to 100 X (Twitter) usernames at once",
+      "Detect active, suspended, banned, and deleted accounts",
+      "View follower count, following count, and join date",
+      "Profile picture and display name for active accounts",
+      "Blue-check / verified status indicator",
+      "No login, no API key, no signup required",
+      "Results returned in seconds"
+    ]
+  };
+
   return (
     <MiniToolLayout
-      seoTitle="X Account Checker — Bulk Check X / Twitter Account Status Free"
-      seoDescription="Check if X (Twitter) accounts are active, suspended, or deleted. Paste up to 100 usernames and get instant results. Free, no login required."
+      seoTitle="X Account Checker — Check Twitter Account Status Free"
+      seoDescription="Check if X (Twitter) accounts are active, suspended, or deleted. Bulk-check up to 100 usernames at once — see follower counts, profile data, and more. Free, no login needed."
+      seoKeywords="X account checker, Twitter account checker, check if Twitter account is suspended, bulk Twitter account checker, Twitter account status checker, check if X account is active, suspended Twitter account, deleted Twitter account checker, X account status, batch Twitter account check"
+      seoExtraSchemas={[softwareAppSchema]}
       icon={Search}
       badge="Popular"
       title="X Account Checker"

@@ -11,11 +11,12 @@ interface SeoHeadProps {
   title: string;
   description: string;
   path?: string;
+  keywords?: string;
   faqs?: Faq[];
   extraSchemas?: object[];
 }
 
-export function SeoHead({ title, description, path, faqs, extraSchemas }: SeoHeadProps) {
+export function SeoHead({ title, description, path, keywords, faqs, extraSchemas }: SeoHeadProps) {
   useEffect(() => {
     const canonicalUrl = path ? `${SITE_URL}${path}` : SITE_URL;
 
@@ -25,6 +26,12 @@ export function SeoHead({ title, description, path, faqs, extraSchemas }: SeoHea
     const metaDesc = document.querySelector('meta[name="description"]');
     const prevDesc = metaDesc?.getAttribute("content") ?? "";
     metaDesc?.setAttribute("content", description);
+
+    const metaKeywords = document.querySelector('meta[name="keywords"]');
+    const prevKeywords = metaKeywords?.getAttribute("content") ?? "";
+    if (keywords && metaKeywords) {
+      metaKeywords.setAttribute("content", keywords);
+    }
 
     const metaOgTitle = document.querySelector('meta[property="og:title"]');
     const prevOgTitle = metaOgTitle?.getAttribute("content") ?? "";
@@ -89,6 +96,7 @@ export function SeoHead({ title, description, path, faqs, extraSchemas }: SeoHea
     return () => {
       document.title = prev;
       metaDesc?.setAttribute("content", prevDesc);
+      if (keywords && metaKeywords) metaKeywords.setAttribute("content", prevKeywords);
       metaOgTitle?.setAttribute("content", prevOgTitle);
       metaOgDesc?.setAttribute("content", prevOgDesc);
       metaOgUrl?.setAttribute("content", prevOgUrl);
@@ -97,7 +105,7 @@ export function SeoHead({ title, description, path, faqs, extraSchemas }: SeoHea
       canonicalEl?.setAttribute("href", prevCanonical);
       injectedScripts.forEach((el) => el.remove());
     };
-  }, [title, description, path, faqs, extraSchemas]);
+  }, [title, description, path, keywords, faqs, extraSchemas]);
 
   return null;
 }
