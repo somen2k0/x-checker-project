@@ -525,27 +525,23 @@ export default function AdminPage() {
 
   async function handleAuth(pw: string): Promise<{ ok: boolean; error?: string }> {
     try {
-      const res = await fetch("/api/admin/status", {
+      const status = await fetch("/api/admin/status", {
         headers: { "x-admin-password": pw },
       });
-      const body = await res.json().catch(() => ({})) as { adminEnabled?: boolean };
+      const body = await status.json().catch(() => ({})) as { adminEnabled?: boolean };
 
       if (!body.adminEnabled) {
         return { ok: false, error: "Admin panel is disabled. Add ADMIN_PASSWORD to your environment variables and redeploy." };
       }
 
-      const verify = await fetch("/api/admin/keys", {
+      const verify = await fetch("/api/admin/stats", {
         headers: { "x-admin-password": pw },
       });
 
-      if (verify.ok || verify.status === 404) {
-        sessionStorage.setItem("admin_password", pw);
-        setPassword(pw);
-        return { ok: true };
-      }
       if (verify.status === 401) {
         return { ok: false, error: "Incorrect password. Please try again." };
       }
+
       sessionStorage.setItem("admin_password", pw);
       setPassword(pw);
       return { ok: true };

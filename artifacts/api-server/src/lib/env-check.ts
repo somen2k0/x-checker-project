@@ -30,13 +30,6 @@ const OPTIONAL: EnvVar[] = [
       "Without it those tools will return 503. Get one at https://console.groq.com",
   },
   {
-    name: "RAPIDAPI_KEYS",
-    description:
-      "Comma-separated RapidAPI keys for the optional Gmailnator integration " +
-      "(gmailnator.p.rapidapi.com). The frontend Temp Gmail tool uses temp.tf instead " +
-      "and does NOT require this key. Get keys at https://rapidapi.com",
-  },
-  {
     name: "WEB3FORMS_KEY",
     description:
       "Web3Forms access key for the server-side contact form endpoint (/api/contact). " +

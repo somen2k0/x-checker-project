@@ -1,6 +1,5 @@
 import { Router, type IRouter } from "express";
 import { getGroqKeys } from "../lib/groq-keys";
-import { getRapidApiKeys } from "../lib/rapidapi-keys";
 import { getAiCacheStats } from "../middlewares/ai-protection";
 
 const router: IRouter = Router();
@@ -19,10 +18,8 @@ router.get("/healthz", (_req, res) => {
  */
 router.get("/health", (_req, res) => {
   const groqKeys    = getGroqKeys().length;
-  const rapidKeys   = getRapidApiKeys().length;
   const twitterSet  = !!process.env.TWITTER_BEARER_TOKEN;
   const groqSet     = groqKeys > 0;
-  const rapidSet    = rapidKeys > 0;
   const web3Set     = !!process.env.WEB3FORMS_KEY;
   const adminSet    = !!process.env.ADMIN_PASSWORD;
 
@@ -94,13 +91,6 @@ router.get("/health", (_req, res) => {
       },
 
       // ── Optional integrations ────────────────────────────────────────────
-      gmailnator: {
-        enabled: rapidSet,
-        label: "Gmailnator (RapidAPI)",
-        note: "Optional Gmailnator integration via RapidAPI",
-        requires: "RAPIDAPI_KEYS",
-        keyCount: rapidKeys,
-      },
       contactForm: {
         enabled: web3Set,
         label: "Contact / Feedback Form",
