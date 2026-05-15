@@ -3,6 +3,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 import {
   Lock, Eye, EyeOff, ShieldCheck, Loader2,
   Activity, Wrench, TrendingUp, Mail, ExternalLink,
@@ -195,7 +196,7 @@ function HealthStatus({ password }: { password: string }) {
 // ── Main Dashboard ─────────────────────────────────────────────────────────
 
 function AdminDashboard({ password }: { password: string }) {
-  const launchDate = new Date("2025-05-08");
+  const launchDate = new Date("2025-05-08"); // 7 days ago approx
   const today = new Date();
   const daysLive = Math.floor((today.getTime() - launchDate.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -382,9 +383,10 @@ export default function AdminPage() {
       const body = await res.json().catch(() => ({})) as { adminEnabled?: boolean };
 
       if (!body.adminEnabled) {
-        return { ok: false, error: "Admin panel is disabled. Add ADMIN_PASSWORD to your environment variables and redeploy." };
+        return { ok: false, error: "Admin panel is disabled. Add ADMIN_PASSWORD to Vercel env variables and redeploy." };
       }
 
+      // Verify password with keys endpoint
       const verify = await fetch("/api/admin/keys", {
         headers: { "x-admin-password": pw },
       });
@@ -397,6 +399,7 @@ export default function AdminPage() {
       if (verify.status === 401) {
         return { ok: false, error: "Incorrect password. Please try again." };
       }
+      // Even if keys endpoint fails, still let them in if status was ok
       sessionStorage.setItem("admin_password", pw);
       setPassword(pw);
       return { ok: true };
