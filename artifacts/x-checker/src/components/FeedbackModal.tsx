@@ -10,8 +10,6 @@ interface FeedbackModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const WEB3FORMS_KEY = import.meta.env.VITE_WEB3FORMS_KEY as string | undefined;
-
 export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -22,35 +20,29 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
 
   const handleSubmit = async () => {
     if (!message.trim()) return;
-    if (!WEB3FORMS_KEY) {
-      setError("Feedback is not configured. Please contact the site owner.");
-      return;
-    }
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("https://api.web3forms.com/submit", {
+      const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          access_key: WEB3FORMS_KEY,
-          name: name.trim() || "Anonymous",
-          email: email.trim() || "no-reply@xtoolkit.live",
+          name: name.trim() || undefined,
+          email: email.trim() || undefined,
           message: message.trim(),
-          subject: "New feedback — X Toolkit",
         }),
       });
 
-      const data = (await res.json()) as { success?: boolean; message?: string };
+      const data = (await res.json()) as { ok?: boolean; error?: string };
 
-      if (!data.success) {
-        setError(data.message ?? "Failed to send. Please try again.");
+      if (!res.ok) {
+        setError(data.error ?? "Failed to send. Please try again.");
         return;
       }
 
       setSubmitted(true);
     } catch {
-      setError("Network error. Please check your connection and try again.");
+      setError("Could not reach the server. Please try again.");
     } finally {
       setLoading(false);
     }

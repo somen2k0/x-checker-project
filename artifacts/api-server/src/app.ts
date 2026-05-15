@@ -39,9 +39,6 @@ app.use(
   }),
 );
 
-// ─── Global rate limit (100 req / IP / 15 min) ───────────────────────────────
-app.use(globalRateLimiter);
-
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 // Production: only https://xtoolkit.live
 // Development: also allow localhost origins for direct API testing
@@ -79,8 +76,8 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(xssCleanMiddleware);
 app.use(hppMiddleware);
 
-// ─── API routes (20 req / IP / min + length check + SQLi block) ──────────────
-app.use("/api", apiRateLimiter, inputLengthValidator, sqlInjectionBlocker, router);
+// ─── API routes (global 100/15min + 20/min per-route + length check + SQLi) ───
+app.use("/api", globalRateLimiter, apiRateLimiter, inputLengthValidator, sqlInjectionBlocker, router);
 
 // ─── Static frontend (production only) ───────────────────────────────────────
 if (process.env.NODE_ENV === "production") {

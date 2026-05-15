@@ -59,7 +59,10 @@ export default function XAccountChecker() {
           toast({ title: "Check complete", description: `Checked ${data.results.length} accounts.` });
         },
         onError: (error) => {
-          toast({ title: "Error", description: (error as { error?: { error?: string } }).error?.error ?? "An unexpected error occurred.", variant: "destructive" });
+          const msg = (error as { data?: { error?: string } }).data?.error
+            ?? (error as Error).message
+            ?? "An unexpected error occurred.";
+          toast({ title: "Error", description: msg, variant: "destructive" });
         },
       }
     );
@@ -360,7 +363,9 @@ export default function XAccountChecker() {
           <div className="flex items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/8 p-4">
             <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
             <p className="text-sm text-destructive">
-              {(checkAccountsMutation.error as { error?: { error?: string } } | null)?.error?.error ?? "Something went wrong. Please try again."}
+              {(checkAccountsMutation.error as { data?: { error?: string } } | null)?.data?.error
+                ?? (checkAccountsMutation.error as Error | null)?.message
+                ?? "Something went wrong. Please try again."}
             </p>
           </div>
         )}
