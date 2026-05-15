@@ -4,13 +4,16 @@ const router = Router();
 
 const WEB3FORMS_URL = "https://api.web3forms.com/submit";
 
-router.post("/contact", async (req, res) => {
-  const accessKey = process.env.WEB3FORMS_KEY;
-  if (!accessKey) {
-    res.status(503).json({ error: "Contact form is not configured." });
-    return;
-  }
+interface FeedbackEntry {
+  ts: string;
+  name: string;
+  email: string;
+  message: string;
+}
 
+export const feedbackStore: FeedbackEntry[] = [];
+
+router.post("/contact", async (req, res) => {
   const { name, email, message } = req.body as {
     name?: string;
     email?: string;
@@ -22,32 +25,38 @@ router.post("/contact", async (req, res) => {
     return;
   }
 
-  try {
-    const web3Res = await fetch(WEB3FORMS_URL, {
+  const entry: FeedbackEntry = {
+    ts: new Date().toISOString(),
+    name: name?.trim() || "Anonymous",
+    email: email?.trim() || "",
+    message: message.trim(),
+  };
+
+  feedbackStore.push(entry);
+  req.log.info({ entry }, "Feedback received");
+
+  const accessKey = process.env.WEB3FORMS_KEY;
+  if (accessKey) {
+    fetch(WEB3FORMS_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         access_key: accessKey,
-        name: name?.trim() || "Anonymous",
-        email: email?.trim() || "no-reply@xtoolkit.live",
-        message: message.trim(),
+        name: entry.name,
+        email: entry.email || "no-reply@xtoolkit.live",
+        message: entry.message,
         subject: "New feedback — X Toolkit",
       }),
+    }).catch((err) => {
+      req.log.warn({ err }, "Web3Forms delivery failed (message already stored locally)");
     });
-
-    const data = (await web3Res.json()) as { success?: boolean; message?: string };
-    const success = typeof data?.success === "boolean" ? data.success : web3Res.ok;
-
-    if (!success) {
-      res.status(502).json({ error: data?.message ?? "Failed to send message." });
-      return;
-    }
-
-    res.status(200).json({ ok: true });
-  } catch (err) {
-    req.log.error({ err }, "Contact form submission failed");
-    res.status(500).json({ error: "Something went wrong. Please try again." });
   }
+
+  res.status(200).json({ ok: true });
+});
+
+router.get("/contact/messages", (_req, res) => {
+  res.json({ count: feedbackStore.length, messages: feedbackStore });
 });
 
 export default router;
