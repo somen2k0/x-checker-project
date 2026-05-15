@@ -21,7 +21,7 @@ const UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
 const PUBLIC_BEARER =
-  "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I%2FeLDgiU%3DEUifiRBkKG5E2XzMDjRfl76ZoRheOfeat6k%2FqiVWrv7sdG7V0ByZ83Dw2R";
+  "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA";
 
 const GRAPHQL_FEATURES = JSON.stringify({
   hidden_profile_subscriptions_enabled: true,
