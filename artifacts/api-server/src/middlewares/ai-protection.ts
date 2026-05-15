@@ -12,7 +12,7 @@ import type { Request, Response, NextFunction } from "express";
 
 // ─── Daily rate limiter ───────────────────────────────────────────────────────
 
-const AI_DAILY_LIMIT = 50;
+const AI_DAILY_LIMIT = 150;
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 interface UsageEntry {
@@ -52,7 +52,7 @@ export function aiDailyRateLimiter(
 
 // ─── Input validation ─────────────────────────────────────────────────────────
 
-export const AI_MAX_INPUT_CHARS = 500;
+export const AI_MAX_INPUT_CHARS = 1500;
 
 /** Strip raw and escaped HTML tags from a string. */
 function stripHtml(str: string): string {
@@ -199,7 +199,7 @@ export function aiResponseCache(
 // ─── Usage logger + spike detector ───────────────────────────────────────────
 
 const SPIKE_WINDOW_MS = 60 * 1000; // rolling 60-second window
-const SPIKE_THRESHOLD = 20;        // alert if ≥20 AI calls in 60 s
+const SPIKE_THRESHOLD = 60;        // alert if ≥60 AI calls in 60 s
 
 // Ring buffer of recent call timestamps (global across all IPs)
 const recentCallTimestamps: number[] = [];

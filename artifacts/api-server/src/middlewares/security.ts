@@ -37,30 +37,30 @@ export const helmetMiddleware = helmet({
 
 const RATE_LIMIT_MESSAGE = { error: "Too many requests, try again later." };
 
-/** Global: 100 requests per IP per 15 minutes — applied to the entire server */
+/** Global: 300 requests per IP per 15 minutes — applied to the entire server */
 export const globalRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 300,
   standardHeaders: true,
   legacyHeaders: false,
   statusCode: 429,
   message: RATE_LIMIT_MESSAGE,
 });
 
-/** API routes: 20 requests per IP per minute — applied to all /api/* routes */
+/** API routes: 60 requests per IP per minute — applied to all /api/* routes */
 export const apiRateLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 20,
+  max: 60,
   standardHeaders: true,
   legacyHeaders: false,
   statusCode: 429,
   message: RATE_LIMIT_MESSAGE,
 });
 
-/** AI tools: 5 requests per IP per hour — applied to bio + ai-detector routes */
+/** AI tools: 15 requests per IP per hour — applied to bio + ai-detector routes */
 export const aiRateLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 5,
+  max: 15,
   standardHeaders: true,
   legacyHeaders: false,
   statusCode: 429,
@@ -148,7 +148,7 @@ export function hppMiddleware(
 // ─── Input Length Validator ──────────────────────────────────────────────────
 // Rejects requests where any string value exceeds MAX_STRING_LENGTH characters.
 
-const MAX_STRING_LENGTH = 1000;
+const MAX_STRING_LENGTH = 3000;
 
 function exceedsMaxLength(value: unknown): boolean {
   if (typeof value === "string") return value.length > MAX_STRING_LENGTH;
