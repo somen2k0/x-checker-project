@@ -28,27 +28,27 @@ router.post("/generate-bio", async (req, res) => {
   const toneText =
     tone && tone.trim().length > 0 ? tone.trim() : "professional and engaging";
 
-  const seed = Math.random().toString(36).slice(2, 8);
+  const numericSeed = Math.floor(Math.random() * 2_147_483_647);
 
-  const prompt = `Generate 3 unique X (Twitter) bios based on the following topic: "${topic.trim()}".
-The tone should be: ${toneText}.
+  const prompt = `Generate 3 unique X (Twitter) bios for: "${topic.trim()}".
+Tone: ${toneText}.
 Rules:
 - Each bio must be under 160 characters
-- Make them catchy, punchy and suited for X/Twitter
+- Catchy, punchy, and suited for X/Twitter
 - Include relevant emojis where appropriate
-- All 3 bios must be distinct from each other in wording and structure
+- All 3 bios must differ from each other in wording, structure, and angle
 - Return ONLY a JSON array of 3 strings, no extra text, no markdown, no explanation.
-Example format: ["Bio one here", "Bio two here", "Bio three here"]
-Variation: ${seed}`;
+Format: ["Bio one here", "Bio two here", "Bio three here"]`;
 
   const { res: apiRes, exhausted } = await fetchWithGroqKeyRotation((key) =>
     fetch(GROQ_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
+        model: "llama-3.3-70b-versatile",
         max_tokens: MAX_TOKENS,
         temperature: 1.0,
+        seed: numericSeed,
         messages: [{ role: "user", content: prompt }],
       }),
       signal: AbortSignal.timeout(15000),
