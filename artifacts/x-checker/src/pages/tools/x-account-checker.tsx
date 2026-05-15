@@ -14,6 +14,12 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { trackEvent } from "@/lib/analytics";
 
+function upgradeImageUrl(url: string | null): string | null {
+  if (!url) return null;
+  // Replace any Twitter size suffix (_normal, _mini, _bigger) with _400x400 for higher quality
+  return url.replace(/_(normal|mini|bigger|reasonably_small)(\.\w+)$/, "_400x400$2");
+}
+
 function formatCount(n: number): string {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
   if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
@@ -188,7 +194,7 @@ export default function XAccountChecker() {
                           title={`View @${r.username} on X`}
                         >
                           <Avatar className="h-10 w-10 border border-border/50">
-                            <AvatarImage src={r.profileImageUrl} alt={r.username} />
+                            <AvatarImage src={upgradeImageUrl(r.profileImageUrl)!} alt={r.username} />
                             <AvatarFallback className="text-xs bg-muted">{r.username[0]?.toUpperCase()}</AvatarFallback>
                           </Avatar>
                         </a>
@@ -277,7 +283,7 @@ export default function XAccountChecker() {
                                 title={`View @${r.username} on X`}
                               >
                                 <Avatar className="h-8 w-8 border border-border/50">
-                                  <AvatarImage src={r.profileImageUrl} alt={r.username} />
+                                  <AvatarImage src={upgradeImageUrl(r.profileImageUrl)!} alt={r.username} />
                                   <AvatarFallback className="text-[10px] bg-muted">{r.username[0]?.toUpperCase()}</AvatarFallback>
                                 </Avatar>
                               </a>
@@ -336,7 +342,7 @@ export default function XAccountChecker() {
                               href={`https://x.com/${r.username}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors opacity-0 group-hover:opacity-100 inline-flex"
+                              className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-muted/60 transition-colors inline-flex"
                               title="Open profile"
                             >
                               <ExternalLink className="h-3.5 w-3.5" />
