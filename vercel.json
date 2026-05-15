@@ -43,6 +43,8 @@
   ],
 
   "rewrites": [
+    { "source": "/api/check-accounts", "destination": "/api/check-accounts-edge" },
+
     { "source": "/api/:path*", "destination": "/api/[...path]" },
 
     { "source": "/.env",             "destination": "/api/blocked" },
