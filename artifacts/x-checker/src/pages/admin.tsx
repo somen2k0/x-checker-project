@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import {
   Lock, Eye, EyeOff, ShieldCheck, Loader2,
   Activity, Wrench, Mail, ExternalLink,
-  CheckCircle2, RefreshCw, Globe, Zap,
+  CheckCircle2, XCircle, RefreshCw, Globe, Zap,
   BarChart3, DollarSign, Search,
   Server, AlertTriangle, Clock, Star, TrendingUp,
+  Cpu, Database,
 } from "lucide-react";
 
 // ── Live Stats ─────────────────────────────────────────────────────────────
@@ -268,24 +269,158 @@ function QuickLink({ href, label, description, icon: Icon }: {
   );
 }
 
-// ── Task Item ──────────────────────────────────────────────────────────────
+// ── Tool Status ────────────────────────────────────────────────────────────
 
-function TaskItem({ label, priority, done }: { label: string; priority: "high" | "medium" | "low"; done?: boolean }) {
-  const colors = {
-    high: "bg-red-500/10 text-red-400 border-red-500/20",
-    medium: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-    low: "bg-green-500/10 text-green-400 border-green-500/20",
-  };
+interface ToolEntry {
+  enabled: boolean;
+  label: string;
+  note: string;
+  requires: string | null;
+  keyCount?: number;
+}
+
+interface HealthData {
+  status: string;
+  uptime: { ms: number; label: string };
+  tools: Record<string, ToolEntry>;
+  aiCache: { entries: number; totalHits: number; maxEntries: number };
+}
+
+function ToolStatus() {
+  const [data, setData] = useState<HealthData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetch_ = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/health");
+      if (res.ok) setData(await res.json() as HealthData);
+    } catch { /* silent */ }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetch_(); }, [fetch_]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+        <Loader2 className="h-4 w-4 animate-spin" /> Loading tool status…
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="rounded-lg border border-red-500/30 bg-red-500/5 px-4 py-3 text-sm text-red-400 flex gap-2">
+        <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+        Could not reach the health endpoint.
+      </div>
+    );
+  }
+
+  const tools = Object.entries(data.tools);
+  const enabledCount = tools.filter(([, t]) => t.enabled).length;
+
   return (
-    <div className={`flex items-center gap-3 py-2.5 ${done ? "opacity-50" : ""}`}>
-      {done
-        ? <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0" />
-        : <div className="w-4 h-4 rounded-full border-2 border-border flex-shrink-0" />
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <CheckCircle2 className="h-3.5 w-3.5 text-green-400" />
+        <span>{enabledCount} of {tools.length} tools fully enabled</span>
+        <Button variant="ghost" size="sm" onClick={fetch_} className="h-6 w-6 p-0 ml-auto">
+          <RefreshCw className="h-3 w-3" />
+        </Button>
+      </div>
+      <div className="rounded-xl border border-border/60 bg-card overflow-hidden divide-y divide-border/40">
+        {tools.map(([key, tool]) => (
+          <div key={key} className="flex items-center gap-3 px-4 py-3">
+            {tool.enabled
+              ? <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0" />
+              : <XCircle className="h-4 w-4 text-red-400 flex-shrink-0" />
+            }
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium">{tool.label}</p>
+              <p className="text-xs text-muted-foreground truncate">{tool.note}</p>
+            </div>
+            {tool.enabled ? (
+              <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-[10px] shrink-0">
+                {tool.keyCount != null ? `${tool.keyCount} key${tool.keyCount !== 1 ? "s" : ""}` : "Online"}
+              </Badge>
+            ) : (
+              <Badge className="bg-red-500/10 text-red-400 border-red-500/20 text-[10px] shrink-0 font-mono">
+                {tool.requires ?? "Disabled"}
+              </Badge>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── AI Cache Panel ─────────────────────────────────────────────────────────
+
+function AiCachePanel({ password }: { password: string }) {
+  const [cache, setCache] = useState<{ entries: number; totalHits: number; maxEntries: number } | null>(null);
+  const [uptime, setUptime] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+
+  const fetch_ = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/health");
+      if (res.ok) {
+        const d = await res.json() as HealthData;
+        setCache(d.aiCache);
+        setUptime(d.uptime.label);
       }
-      <span className={`flex-1 text-sm ${done ? "line-through text-muted-foreground" : ""}`}>{label}</span>
-      <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${colors[priority]}`}>
-        {priority}
-      </Badge>
+    } catch { /* silent */ }
+    setLoading(false);
+  }, [password]);
+
+  useEffect(() => { fetch_(); const id = setInterval(fetch_, 15_000); return () => clearInterval(id); }, [fetch_]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+        <Loader2 className="h-4 w-4 animate-spin" /> Loading cache stats…
+      </div>
+    );
+  }
+
+  if (!cache) return null;
+
+  const fillPct = cache.maxEntries > 0 ? Math.round((cache.entries / cache.maxEntries) * 100) : 0;
+  const savedCalls = cache.totalHits;
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="rounded-xl border border-border/60 bg-card p-4 space-y-1">
+        <div className="flex items-center gap-2 mb-1">
+          <Database className="h-3.5 w-3.5 text-purple-400" />
+          <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Cache Entries</p>
+        </div>
+        <p className="text-2xl font-bold">{cache.entries}<span className="text-sm font-normal text-muted-foreground"> / {cache.maxEntries}</span></p>
+        <div className="h-1.5 bg-muted rounded-full overflow-hidden mt-2">
+          <div className="h-full bg-purple-400/70 rounded-full transition-all" style={{ width: `${fillPct}%` }} />
+        </div>
+        <p className="text-xs text-muted-foreground">{fillPct}% full</p>
+      </div>
+      <div className="rounded-xl border border-border/60 bg-card p-4 space-y-1">
+        <div className="flex items-center gap-2 mb-1">
+          <Zap className="h-3.5 w-3.5 text-yellow-400" />
+          <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">API Calls Saved</p>
+        </div>
+        <p className="text-2xl font-bold text-yellow-400">{savedCalls.toLocaleString()}</p>
+        <p className="text-xs text-muted-foreground">cache hits since last deploy</p>
+      </div>
+      <div className="rounded-xl border border-border/60 bg-card p-4 space-y-1">
+        <div className="flex items-center gap-2 mb-1">
+          <Cpu className="h-3.5 w-3.5 text-blue-400" />
+          <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Server Uptime</p>
+        </div>
+        <p className="text-2xl font-bold text-blue-400">{uptime || "—"}</p>
+        <p className="text-xs text-muted-foreground">since last restart · refreshes every 15s</p>
+      </div>
     </div>
   );
 }
@@ -383,19 +518,16 @@ function AdminDashboard({ password }: { password: string }) {
         </div>
       </section>
 
-      {/* Growth Tasks */}
+      {/* Tool Status */}
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Growth Checklist</h2>
-        <div className="rounded-xl border border-border/60 bg-card px-4 divide-y divide-border/40">
-          <TaskItem label="Fix security vulnerabilities (pnpm audit = 0)" priority="high" done />
-          <TaskItem label="Add Helmet + rate limiting + Vercel security headers" priority="high" done />
-          <TaskItem label="Post on Reddit (r/SideProject, r/webdev, r/privacy)" priority="high" />
-          <TaskItem label="Apply for Google AdSense" priority="high" />
-          <TaskItem label="Add affiliate links to tool pages" priority="medium" />
-          <TaskItem label="Fix SoftwareApplication schema" priority="low" />
-          <TaskItem label="Product Hunt launch" priority="medium" />
-          <TaskItem label="Add more blog posts for SEO" priority="medium" />
-        </div>
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Tool Status</h2>
+        <ToolStatus />
+      </section>
+
+      {/* AI Cache */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">AI Cache & Server</h2>
+        <AiCachePanel password={password} />
       </section>
 
       {/* Quick Links */}
@@ -450,62 +582,6 @@ function AdminDashboard({ password }: { password: string }) {
             description="Launch your product"
             icon={Star}
           />
-        </div>
-      </section>
-
-      {/* Monetization Status */}
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Monetization Status</h2>
-        <div className="rounded-xl border border-border/60 bg-card divide-y divide-border/40">
-          {[
-            { label: "Google AdSense", status: "pending", note: "Not applied yet" },
-            { label: "Affiliate Links", status: "pending", note: "Not set up yet" },
-            { label: "Pro Waitlist (EmailCapture)", status: "ready", note: "Component built, collecting emails" },
-            { label: "Sticky Upgrade CTA", status: "ready", note: "Shows after 20s on tool pages" },
-          ].map(({ label, status, note }) => (
-            <div key={label} className="flex items-center gap-3 px-4 py-3">
-              {status === "ready"
-                ? <CheckCircle2 className="h-4 w-4 text-green-400 flex-shrink-0" />
-                : <AlertTriangle className="h-4 w-4 text-yellow-400 flex-shrink-0" />
-              }
-              <div className="flex-1">
-                <p className="text-sm font-medium">{label}</p>
-                <p className="text-xs text-muted-foreground">{note}</p>
-              </div>
-              <Badge
-                variant="outline"
-                className={status === "ready"
-                  ? "bg-green-500/10 text-green-400 border-green-500/20 text-[10px]"
-                  : "bg-yellow-500/10 text-yellow-400 border-yellow-500/20 text-[10px]"
-                }
-              >
-                {status === "ready" ? "Active" : "Pending"}
-              </Badge>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Tool Categories Summary */}
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Tool Categories</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {[
-            { name: "Email Tools", count: 17, traffic: "High", color: "text-blue-400" },
-            { name: "Developer Tools", count: 12, traffic: "High", color: "text-purple-400" },
-            { name: "SEO Tools", count: 8, traffic: "Medium", color: "text-green-400" },
-            { name: "Text & Formatting", count: 8, traffic: "Medium", color: "text-orange-400" },
-            { name: "AI Writing", count: 6, traffic: "High", color: "text-pink-400" },
-            { name: "Social Media", count: 6, traffic: "Medium", color: "text-cyan-400" },
-          ].map(({ name, count, traffic, color }) => (
-            <div key={name} className="rounded-lg border border-border/60 bg-card p-3 space-y-1">
-              <p className={`text-xs font-semibold ${color}`}>{name}</p>
-              <p className="text-xl font-bold">{count} <span className="text-sm font-normal text-muted-foreground">tools</span></p>
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                {traffic} traffic potential
-              </Badge>
-            </div>
-          ))}
         </div>
       </section>
 
