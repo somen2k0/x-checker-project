@@ -13,16 +13,16 @@ interface EnvVar {
   description: string;
 }
 
-const REQUIRED: EnvVar[] = [
+const REQUIRED: EnvVar[] = [];
+
+const OPTIONAL: EnvVar[] = [
   {
     name: "TWITTER_BEARER_TOKEN",
     description:
-      "Twitter/X bearer token used to authenticate all account-check requests. " +
-      "Get one at https://developer.twitter.com or use X's public app token.",
+      "Twitter/X bearer token for account-check requests. " +
+      "Falls back to X's own public app token if not set. " +
+      "Set this if the public token gets rate-limited.",
   },
-];
-
-const OPTIONAL: EnvVar[] = [
   {
     name: "GROQ_API_KEY",
     description:

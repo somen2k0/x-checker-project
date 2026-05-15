@@ -7,8 +7,12 @@ const router: IRouter = Router();
 const UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
-// Required: validated at startup in src/lib/env-check.ts
-const BEARER = process.env.TWITTER_BEARER_TOKEN!;
+// X's own public app bearer token — used as a fallback when no custom token is provided.
+// Set TWITTER_BEARER_TOKEN in your environment to use your own token instead.
+const PUBLIC_BEARER =
+  "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I%2FeLDgiU%3DEUifiRBkKG5E2XzMDjRfl76ZoRheOfeat6k%2FqiVWrv7sdG7V0ByZ83Dw2R";
+
+const BEARER = process.env.TWITTER_BEARER_TOKEN ?? PUBLIC_BEARER;
 
 const GRAPHQL_FEATURES = JSON.stringify({
   hidden_profile_subscriptions_enabled: true,
