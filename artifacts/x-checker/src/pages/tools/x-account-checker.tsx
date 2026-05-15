@@ -16,8 +16,8 @@ import { trackEvent } from "@/lib/analytics";
 
 function upgradeImageUrl(url: string | null): string | null {
   if (!url) return null;
-  // Replace any Twitter size suffix (_normal, _mini, _bigger) with _400x400 for higher quality
-  return url.replace(/_(normal|mini|bigger|reasonably_small)(\.\w+)$/, "_400x400$2");
+  // Replace any Twitter size suffix with _bigger (73px) — universally available on all accounts
+  return url.replace(/_(normal|mini|400x400|reasonably_small)(\.\w+)$/, "_bigger$2");
 }
 
 function formatCount(n: number): string {
@@ -266,7 +266,6 @@ export default function XAccountChecker() {
                       <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Followers</th>
                       <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Following</th>
                       <th className="text-left px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground hidden md:table-cell">Joined</th>
-                      <th className="w-8" />
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/40">
@@ -282,20 +281,31 @@ export default function XAccountChecker() {
                                 className="shrink-0 ring-0 hover:ring-2 hover:ring-primary/40 rounded-full transition-all"
                                 title={`View @${r.username} on X`}
                               >
-                                <Avatar className="h-8 w-8 border border-border/50">
+                                <Avatar className="h-9 w-9 border border-border/50">
                                   <AvatarImage src={upgradeImageUrl(r.profileImageUrl)!} alt={r.username} />
                                   <AvatarFallback className="text-[10px] bg-muted">{r.username[0]?.toUpperCase()}</AvatarFallback>
                                 </Avatar>
                               </a>
                             ) : (
-                              <div className="h-8 w-8 rounded-full bg-muted/60 border border-border/50 flex items-center justify-center shrink-0">
+                              <div className="h-9 w-9 rounded-full bg-muted/60 border border-border/50 flex items-center justify-center shrink-0">
                                 <span className="text-[10px] font-medium text-muted-foreground">{r.username[0]?.toUpperCase()}</span>
                               </div>
                             )}
                             <div className="min-w-0">
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center gap-1.5">
                                 <span className="font-medium truncate text-[13px]">@{r.username}</span>
                                 {r.isVerified && <BadgeCheck className="h-3.5 w-3.5 text-primary shrink-0" />}
+                                {r.status === "active" && (
+                                  <a
+                                    href={`https://x.com/${r.username}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-muted-foreground/50 hover:text-primary transition-colors shrink-0"
+                                    title="Open profile on X"
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                  </a>
+                                )}
                               </div>
                               {r.displayName && (
                                 <div className="text-xs text-muted-foreground truncate">{r.displayName}</div>
@@ -334,19 +344,6 @@ export default function XAccountChecker() {
                             </span>
                           ) : (
                             <span className="text-muted-foreground/40 text-xs">—</span>
-                          )}
-                        </td>
-                        <td className="pr-3 py-3">
-                          {r.status === "active" && (
-                            <a
-                              href={`https://x.com/${r.username}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-muted/60 transition-colors inline-flex"
-                              title="Open profile"
-                            >
-                              <ExternalLink className="h-3.5 w-3.5" />
-                            </a>
                           )}
                         </td>
                       </tr>
