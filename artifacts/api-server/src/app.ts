@@ -41,25 +41,26 @@ app.use(
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 // Production: only https://xtoolkit.live
-// Development: also allow localhost origins for direct API testing
-const ALLOWED_ORIGINS =
-  process.env.NODE_ENV === "production"
-    ? ["https://xtoolkit.live"]
-    : [
-        "https://xtoolkit.live",
-        "http://localhost:5000",
-        "http://localhost:3000",
-        "http://127.0.0.1:5000",
-      ];
+// Development: allow all origins (Replit preview, localhost, etc.)
+const PRODUCTION_ORIGINS = ["https://xtoolkit.live"];
+
+const REPLIT_ORIGIN_RE = /^https?:\/\/[a-zA-Z0-9-]+\.(replit\.dev|repl\.co|replit\.app)$/;
 
 app.use(
   cors({
     origin(origin, callback) {
-      // Allow requests with no origin (curl, Postman, server-to-server)
+      // Allow requests with no origin (curl, Postman, server-to-server proxies like Vite)
       if (!origin) return callback(null, true);
-      if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-      // Pass null (not an Error) so Express doesn't 500 — the missing
-      // Access-Control-Allow-Origin header is enough to block the browser.
+
+      if (process.env.NODE_ENV !== "production") {
+        // In development, allow all origins (Replit preview, localhost, etc.)
+        return callback(null, true);
+      }
+
+      // Production: only allow known domains
+      if (PRODUCTION_ORIGINS.includes(origin)) return callback(null, true);
+      if (REPLIT_ORIGIN_RE.test(origin)) return callback(null, true);
+
       callback(null, false);
     },
     methods: ["GET", "POST", "OPTIONS"],
