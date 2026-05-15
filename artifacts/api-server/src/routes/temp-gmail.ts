@@ -164,7 +164,7 @@ router.post("/temp-gmail/message", async (req, res) => {
 
     const item1: MsgBody | undefined = Array.isArray(d1)
       ? d1[0]
-      : (d1 as { messages?: MsgBody[] })?.messages?.[0] ?? (d1 as MsgBody) ?? undefined;
+      : (d1 as unknown as { messages?: MsgBody[] })?.messages?.[0] ?? (d1 as unknown as MsgBody) ?? undefined;
 
     const content1 = item1?.content ?? item1?.body ?? item1?.text ?? item1?.html ?? item1?.message ?? "";
     if (content1) {
@@ -193,7 +193,7 @@ router.post("/temp-gmail/message", async (req, res) => {
 
     const item2: MsgBody | undefined = Array.isArray(d2)
       ? d2[0]
-      : (d2 as { messages?: MsgBody[] })?.messages?.[0] ?? (d2 as MsgBody) ?? undefined;
+      : (d2 as unknown as { messages?: MsgBody[] })?.messages?.[0] ?? (d2 as unknown as MsgBody) ?? undefined;
 
     const content2 = item2?.content ?? item2?.body ?? item2?.text ?? item2?.html ?? item2?.message ?? "";
     if (content2) {
@@ -221,7 +221,7 @@ router.post("/temp-gmail/message", async (req, res) => {
     let d3: InboxResp | MsgBody[] | null = null;
     try { d3 = await r3.json() as typeof d3; } catch { /**/ }
 
-    const msgs3: MsgBody[] = Array.isArray(d3) ? d3 : ((d3 as InboxResp)?.messages ?? []);
+    const msgs3: MsgBody[] = Array.isArray(d3) ? d3 : ((d3 as unknown as InboxResp)?.messages ?? []);
     const first3 = msgs3[0];
     const content3 = first3?.content ?? first3?.body ?? first3?.text ?? first3?.html ?? first3?.message ?? "";
 

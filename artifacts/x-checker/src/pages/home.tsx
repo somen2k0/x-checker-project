@@ -260,7 +260,7 @@ export default function Home() {
                           <div className="h-7 w-7 rounded-lg bg-muted/40 border border-border/40 flex items-center justify-center shrink-0">
                             <Icon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
                           </div>
-                          <span className="text-sm font-medium flex-1 group-hover:text-primary transition-colors truncate">{tool.name}</span>
+                          <span className="text-sm font-medium flex-1 group-hover:text-primary transition-colors truncate">{tool.label}</span>
                           <span className="text-[10px] text-muted-foreground/50 shrink-0">{weeklyCount}× this week</span>
                         </div>
                       </Link>
@@ -292,7 +292,7 @@ export default function Home() {
                           <div className="h-7 w-7 rounded-lg bg-muted/40 border border-border/40 flex items-center justify-center shrink-0">
                             <Icon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
                           </div>
-                          <span className="text-xs font-medium flex-1 group-hover:text-primary transition-colors leading-snug">{tool.name}</span>
+                          <span className="text-xs font-medium flex-1 group-hover:text-primary transition-colors leading-snug">{tool.label}</span>
                         </div>
                       </Link>
                     );

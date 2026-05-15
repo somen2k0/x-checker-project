@@ -170,7 +170,7 @@ export default function BacklinkAnalyzer() {
                         {r.anchorText && <div className="text-xs text-muted-foreground ml-4 mt-0.5">Anchor: <span className="text-foreground/80">"{r.anchorText}"</span></div>}
                       </div>
                       <div className="flex gap-1 shrink-0">
-                        {r.hasHttps ? <CheckCircle2 className="h-3.5 w-3.5 text-green-400" title="HTTPS" /> : <XCircle className="h-3.5 w-3.5 text-red-400" title="No HTTPS" />}
+                        {r.hasHttps ? <CheckCircle2 className="h-3.5 w-3.5 text-green-400" aria-label="HTTPS" /> : <XCircle className="h-3.5 w-3.5 text-red-400" aria-label="No HTTPS" />}
                       </div>
                     </div>
                     {r.issues.length > 0 && (

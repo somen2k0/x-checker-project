@@ -176,7 +176,7 @@ export const ALL_TOOLS: Tool[] = toolsManifest.map((t) => ({
   category: t.category as CategoryKey,
   icon: ICON_MAP[t.id] ?? Globe,
   badge: t.badge as ToolBadge | undefined,
-  isComingSoon: t.isComingSoon ?? false,
+  isComingSoon: ('isComingSoon' in t ? !!(t as { isComingSoon?: boolean }).isComingSoon : false),
   tags: t.tags,
 }));
 

@@ -43,7 +43,10 @@ export type EventName =
   | "ai_detect"
   | "ai_humanize"
   | "bio_generate"
-  | "account_check";
+  | "account_check"
+  | "trending_tool_click"
+  | "recent_tool_click"
+  | "privacy_tool_click";
 
 export interface TrackParams {
   tool?: string;
