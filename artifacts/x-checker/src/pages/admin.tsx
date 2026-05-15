@@ -9,8 +9,9 @@ import {
   CheckCircle2, XCircle, RefreshCw, Globe, Zap,
   BarChart3, DollarSign, Search,
   Server, AlertTriangle, Clock, Star, TrendingUp,
-  Cpu, Database,
+  Cpu, Database, LineChart, MousePointerClick, Layers,
 } from "lucide-react";
+import { ALL_TOOLS, CATEGORIES, TOTAL_LIVE, type CategoryKey } from "@/lib/tools-registry";
 
 // ── Live Stats ─────────────────────────────────────────────────────────────
 
@@ -425,6 +426,241 @@ function AiCachePanel({ password }: { password: string }) {
   );
 }
 
+// ── Tool Categories (dynamic — derived from tools-manifest.json) ───────────
+
+function ToolCategories() {
+  const categoryKeys = Object.keys(CATEGORIES) as CategoryKey[];
+  const maxCount = Math.max(...categoryKeys.map((k) => ALL_TOOLS.filter((t) => t.category === k && !t.isComingSoon).length), 1);
+
+  return (
+    <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+          <Layers className="h-3.5 w-3.5" />
+          Tool Categories
+        </p>
+        <span className="text-xs text-muted-foreground">{TOTAL_LIVE} tools total</span>
+      </div>
+      <div className="divide-y divide-border/40">
+        {categoryKeys.map((key) => {
+          const cat = CATEGORIES[key];
+          const count = ALL_TOOLS.filter((t) => t.category === key && !t.isComingSoon).length;
+          const pct = (count / maxCount) * 100;
+          const Icon = cat.icon;
+          return (
+            <div key={key} className="flex items-center gap-3 px-4 py-3">
+              <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${cat.bg}`}>
+                <Icon className={`h-3.5 w-3.5 ${cat.color}`} />
+              </div>
+              <div className="flex-1 min-w-0 space-y-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">{cat.label}</p>
+                  <span className={`text-sm font-bold tabular-nums ${cat.color}`}>{count}</span>
+                </div>
+                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-700 ${cat.color.replace("text-", "bg-")}`}
+                    style={{ width: `${pct}%`, opacity: 0.7 }}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── Page Analytics ──────────────────────────────────────────────────────────
+
+interface AnalyticsData {
+  totalViews: number;
+  windowHours: number;
+  recordedSince: string;
+  topPages: Array<{ path: string; label: string; category: string; views: number }>;
+  byCategory: Record<string, number>;
+  hourly: Array<{ label: string; views: number }>;
+}
+
+function PageAnalytics({ password }: { password: string }) {
+  const [data, setData] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState("");
+
+  const fetch_ = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/analytics", {
+        headers: { "x-admin-password": password },
+      });
+      if (res.ok) {
+        setData(await res.json() as AnalyticsData);
+        setLastRefresh(new Date().toLocaleTimeString());
+      }
+    } catch { /* silent */ }
+    setLoading(false);
+  }, [password]);
+
+  useEffect(() => {
+    fetch_();
+    const id = setInterval(fetch_, 30_000);
+    return () => clearInterval(id);
+  }, [fetch_]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+        <Loader2 className="h-4 w-4 animate-spin" /> Loading analytics…
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/5 px-4 py-3 text-sm text-yellow-400 flex gap-2">
+        <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+        Analytics not available.
+      </div>
+    );
+  }
+
+  const maxPageViews = Math.max(...data.topPages.map((p) => p.views), 1);
+  const maxHourly = Math.max(...data.hourly.map((h) => h.views), 1);
+  const sinceDate = new Date(data.recordedSince).toLocaleString([], { dateStyle: "short", timeStyle: "short" });
+
+  const CATEGORY_COLORS: Record<string, string> = {
+    tool: "bg-blue-400",
+    blog: "bg-orange-400",
+    page: "bg-green-400",
+    email: "bg-cyan-400",
+    category: "bg-purple-400",
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Summary */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-xl border border-border/60 bg-card p-4 space-y-1">
+          <div className="flex items-center gap-1.5">
+            <MousePointerClick className="h-3.5 w-3.5 text-blue-400" />
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Page Views</p>
+          </div>
+          <p className="text-2xl font-bold">{data.totalViews.toLocaleString()}</p>
+          <p className="text-xs text-muted-foreground">last {data.windowHours}h window</p>
+        </div>
+        <div className="rounded-xl border border-border/60 bg-card p-4 space-y-1">
+          <div className="flex items-center gap-1.5">
+            <LineChart className="h-3.5 w-3.5 text-green-400" />
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Unique Pages</p>
+          </div>
+          <p className="text-2xl font-bold text-green-400">{data.topPages.length}</p>
+          <p className="text-xs text-muted-foreground">distinct routes visited</p>
+        </div>
+        <div className="rounded-xl border border-border/60 bg-card p-4 space-y-1">
+          <div className="flex items-center gap-1.5">
+            <Activity className="h-3.5 w-3.5 text-purple-400" />
+            <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Tracking Since</p>
+          </div>
+          <p className="text-lg font-bold text-purple-400 leading-tight">{sinceDate}</p>
+          <p className="text-xs text-muted-foreground">resets on restart</p>
+        </div>
+      </div>
+
+      {/* Hourly chart */}
+      <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Views per Hour (last 24h)</p>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+            refreshes every 30s
+            {lastRefresh && <span className="ml-1 opacity-60">(last: {lastRefresh})</span>}
+          </div>
+        </div>
+        <div className="px-4 py-3">
+          <div className="flex items-end gap-0.5 h-16">
+            {data.hourly.map((h, i) => {
+              const barH = maxHourly > 0 ? Math.max((h.views / maxHourly) * 100, h.views > 0 ? 8 : 0) : 0;
+              return (
+                <div key={i} className="flex-1 flex flex-col items-center justify-end gap-0.5 group" title={`${h.label}: ${h.views} view${h.views !== 1 ? "s" : ""}`}>
+                  <div
+                    className="w-full rounded-sm bg-blue-400/70 transition-all duration-500 group-hover:bg-blue-400"
+                    style={{ height: `${barH}%` }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex justify-between mt-1 text-[9px] text-muted-foreground">
+            <span>{data.hourly[0]?.label ?? ""}</span>
+            <span>{data.hourly[11]?.label ?? ""}</span>
+            <span>{data.hourly[23]?.label ?? ""}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Top pages */}
+      {data.topPages.length > 0 && (
+        <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-border/40">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Top Pages</p>
+          </div>
+          <div className="divide-y divide-border/40">
+            {data.topPages.map((page, i) => {
+              const pct = (page.views / maxPageViews) * 100;
+              const dotColor = CATEGORY_COLORS[page.category] ?? "bg-gray-400";
+              return (
+                <div key={page.path} className="flex items-center gap-3 px-4 py-2.5">
+                  <span className="text-xs text-muted-foreground w-4 text-right shrink-0">{i + 1}</span>
+                  <div className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <p className="text-sm font-medium truncate">{page.label}</p>
+                    <div className="h-1 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary/50 rounded-full transition-all duration-500"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                  <span className="text-sm font-bold tabular-nums shrink-0">{page.views.toLocaleString()}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {data.totalViews === 0 && (
+        <p className="text-sm text-muted-foreground text-center py-4">
+          No page views recorded yet — navigate around the site to see data here.
+        </p>
+      )}
+
+      {/* Views by category */}
+      {Object.keys(data.byCategory).length > 0 && (
+        <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+          <div className="px-4 py-2.5 border-b border-border/40">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Views by Section</p>
+          </div>
+          <div className="flex gap-0 divide-x divide-border/40">
+            {Object.entries(data.byCategory).sort((a, b) => b[1] - a[1]).map(([cat, count]) => {
+              const pct = data.totalViews > 0 ? Math.round((count / data.totalViews) * 100) : 0;
+              const dotColor = CATEGORY_COLORS[cat] ?? "bg-gray-400";
+              return (
+                <div key={cat} className="flex-1 px-4 py-3 text-center min-w-0">
+                  <div className={`w-2 h-2 rounded-full mx-auto mb-1.5 ${dotColor}`} />
+                  <p className="text-lg font-bold">{pct}%</p>
+                  <p className="text-[11px] text-muted-foreground capitalize">{cat}</p>
+                  <p className="text-[10px] text-muted-foreground">{count.toLocaleString()} views</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Health Check ───────────────────────────────────────────────────────────
 
 function HealthStatus({ password }: { password: string }) {
@@ -507,15 +743,33 @@ function AdminDashboard({ password }: { password: string }) {
         <LiveStats password={password} />
       </section>
 
+      {/* Page Analytics */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+          <LineChart className="h-3.5 w-3.5" />
+          Page Analytics
+        </h2>
+        <PageAnalytics password={password} />
+      </section>
+
       {/* Stats Grid */}
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Site Overview</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard icon={Wrench} label="Tools" value="55" sub="Across 6 categories" color="text-blue-400" />
+          <StatCard icon={Wrench} label="Tools" value={TOTAL_LIVE} sub={`Across ${Object.keys(CATEGORIES).length} categories`} color="text-blue-400" />
           <StatCard icon={Clock} label="Days Live" value={daysLive} sub="Built in 7 days 🚀" color="text-purple-400" />
           <StatCard icon={Activity} label="Security" value="0" sub="Vulnerabilities found" color="text-green-400" />
-          <StatCard icon={Globe} label="Deployment" value="Vercel" sub="Edge + Static" color="text-orange-400" />
+          <StatCard icon={Globe} label="Deployment" value="Replit" sub="Always-on server" color="text-orange-400" />
         </div>
+      </section>
+
+      {/* Tool Categories */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+          <Layers className="h-3.5 w-3.5" />
+          Tool Categories
+        </h2>
+        <ToolCategories />
       </section>
 
       {/* Tool Status */}

@@ -13,6 +13,7 @@ import contactRouter from "./contact";
 import tempMailRouter from "./temp-mail";
 import temptfRouter from "./temptf";
 import adminRouter from "./admin";
+import analyticsRouter from "./analytics";
 import ogPreviewRouter from "./og-preview";
 import onesecmailRouter from "./onesecmail";
 import aiDetectorRouter from "./ai-detector";
@@ -25,6 +26,7 @@ router.use(contactRouter);
 router.use(tempMailRouter);
 router.use(temptfRouter);
 router.use(adminRouter);
+router.use(analyticsRouter);
 router.use(ogPreviewRouter);
 router.use(onesecmailRouter);
 
