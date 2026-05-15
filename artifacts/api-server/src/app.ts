@@ -5,6 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { recordRequest } from "./lib/request-stats";
 import {
   helmetMiddleware,
   globalRateLimiter,
@@ -76,6 +77,12 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 // ─── Input sanitization (XSS + HPP) ─────────────────────────────────────────
 app.use(xssCleanMiddleware);
 app.use(hppMiddleware);
+
+// ─── Request stats tracker ────────────────────────────────────────────────────
+app.use((req, res, next) => {
+  res.on("finish", () => recordRequest(req.path, res.statusCode));
+  next();
+});
 
 // ─── API routes (global 100/15min + 20/min per-route + length check + SQLi) ───
 app.use("/api", globalRateLimiter, apiRateLimiter, inputLengthValidator, sqlInjectionBlocker, router);

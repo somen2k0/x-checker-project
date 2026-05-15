@@ -5,11 +5,151 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Lock, Eye, EyeOff, ShieldCheck, Loader2,
-  Activity, Wrench, TrendingUp, Mail, ExternalLink,
-  CheckCircle2, XCircle, RefreshCw, Globe, Zap,
-  BarChart3, Users, DollarSign, Search, ArrowRight,
-  Server, AlertTriangle, Clock, Star,
+  Activity, Wrench, Mail, ExternalLink,
+  CheckCircle2, RefreshCw, Globe, Zap,
+  BarChart3, DollarSign, Search,
+  Server, AlertTriangle, Clock, Star, TrendingUp,
 } from "lucide-react";
+
+// ── Live Stats ─────────────────────────────────────────────────────────────
+
+interface RouteRow {
+  path: string;
+  label: string;
+  hits: number;
+  errors: number;
+  lastHitAt: number | null;
+}
+
+interface StatsData {
+  uptime: { ms: number; label: string };
+  totalRequests: number;
+  totalErrors: number;
+  routes: RouteRow[];
+  recordedAt: string;
+}
+
+function LiveStats({ password }: { password: string }) {
+  const [data, setData] = useState<StatsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [lastRefresh, setLastRefresh] = useState("");
+
+  const fetch_ = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/stats", {
+        headers: { "x-admin-password": password },
+      });
+      if (res.ok) {
+        const json = await res.json() as StatsData;
+        setData(json);
+        setLastRefresh(new Date().toLocaleTimeString());
+      }
+    } catch { /* silent */ }
+    setLoading(false);
+  }, [password]);
+
+  useEffect(() => {
+    fetch_();
+    const id = setInterval(fetch_, 10_000);
+    return () => clearInterval(id);
+  }, [fetch_]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+        <Loader2 className="h-4 w-4 animate-spin" /> Loading stats…
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/5 px-4 py-3 text-sm text-yellow-400 flex gap-2">
+        <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+        Stats endpoint unavailable. Set ADMIN_PASSWORD to enable it.
+      </div>
+    );
+  }
+
+  const errorRate = data.totalRequests > 0
+    ? ((data.totalErrors / data.totalRequests) * 100).toFixed(1)
+    : "0.0";
+
+  const topRoutes = data.routes.slice(0, 8);
+
+  return (
+    <div className="space-y-4">
+      {/* Summary row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="rounded-xl border border-border/60 bg-card p-4 space-y-1">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Total Requests</p>
+          <p className="text-2xl font-bold">{data.totalRequests.toLocaleString()}</p>
+          <p className="text-xs text-muted-foreground">since last deploy</p>
+        </div>
+        <div className="rounded-xl border border-border/60 bg-card p-4 space-y-1">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Errors</p>
+          <p className="text-2xl font-bold text-red-400">{data.totalErrors.toLocaleString()}</p>
+          <p className="text-xs text-muted-foreground">{errorRate}% error rate</p>
+        </div>
+        <div className="rounded-xl border border-border/60 bg-card p-4 space-y-1">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Uptime</p>
+          <p className="text-2xl font-bold text-green-400">{data.uptime.label}</p>
+          <p className="text-xs text-muted-foreground">server running</p>
+        </div>
+        <div className="rounded-xl border border-border/60 bg-card p-4 space-y-1">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Active Routes</p>
+          <p className="text-2xl font-bold text-blue-400">{data.routes.length}</p>
+          <p className="text-xs text-muted-foreground">with traffic</p>
+        </div>
+      </div>
+
+      {/* Per-route breakdown */}
+      {topRoutes.length > 0 && (
+        <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-2.5 border-b border-border/40">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Top Endpoints</p>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+              Live · refreshes every 10s
+              {lastRefresh && <span className="ml-1 opacity-60">(last: {lastRefresh})</span>}
+            </div>
+          </div>
+          <div className="divide-y divide-border/40">
+            {topRoutes.map((r) => {
+              const pct = data.totalRequests > 0 ? (r.hits / data.totalRequests) * 100 : 0;
+              return (
+                <div key={r.path} className="flex items-center gap-3 px-4 py-2.5">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{r.label}</p>
+                    <p className="text-[11px] text-muted-foreground font-mono">{r.path}</p>
+                  </div>
+                  <div className="w-24 hidden sm:block">
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary/60 rounded-full transition-all duration-500"
+                        style={{ width: `${Math.min(pct, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  <span className="text-sm font-bold tabular-nums w-10 text-right">{r.hits}</span>
+                  {r.errors > 0 && (
+                    <span className="text-[11px] text-red-400 tabular-nums">{r.errors} err</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {topRoutes.length === 0 && (
+        <p className="text-sm text-muted-foreground text-center py-4">
+          No requests recorded yet — use any tool to see live stats appear here.
+        </p>
+      )}
+    </div>
+  );
+}
 
 // ── Password Gate ──────────────────────────────────────────────────────────
 
@@ -221,6 +361,15 @@ function AdminDashboard({ password }: { password: string }) {
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Server Status</h2>
         <HealthStatus password={password} />
+      </section>
+
+      {/* Live Request Stats */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+          <TrendingUp className="h-3.5 w-3.5" />
+          Live Request Stats
+        </h2>
+        <LiveStats password={password} />
       </section>
 
       {/* Stats Grid */}

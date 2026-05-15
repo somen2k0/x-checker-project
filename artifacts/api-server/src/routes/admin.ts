@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { getStats } from "../lib/request-stats";
 
 const router = Router();
 
@@ -18,6 +19,18 @@ function maskKey(key: string): string {
 
 router.get("/admin/status", (_req, res) => {
   res.json({ adminEnabled: !!process.env.ADMIN_PASSWORD });
+});
+
+router.get("/admin/stats", (req, res) => {
+  if (!process.env.ADMIN_PASSWORD) {
+    res.status(503).json({ error: "Admin panel disabled." });
+    return;
+  }
+  if (!checkAuth(req)) {
+    res.status(401).json({ error: "Invalid password." });
+    return;
+  }
+  res.json(getStats());
 });
 
 router.get("/admin/keys", (req, res) => {
