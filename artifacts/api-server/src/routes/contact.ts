@@ -13,6 +13,16 @@ interface FeedbackEntry {
 
 export const feedbackStore: FeedbackEntry[] = [];
 
+// Returns the Web3Forms access key so the browser can submit directly (client-side only)
+router.get("/contact/token", (_req, res) => {
+  const key = process.env.WEB3FORMS_KEY;
+  if (!key) {
+    res.status(503).json({ error: "Contact form not configured." });
+    return;
+  }
+  res.json({ key });
+});
+
 router.post("/contact", async (req, res) => {
   const { name, email, message } = req.body as {
     name?: string;
@@ -33,24 +43,7 @@ router.post("/contact", async (req, res) => {
   };
 
   feedbackStore.push(entry);
-  req.log.info({ entry }, "Feedback received");
-
-  const accessKey = process.env.WEB3FORMS_KEY;
-  if (accessKey) {
-    fetch(WEB3FORMS_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        access_key: accessKey,
-        name: entry.name,
-        email: entry.email || "no-reply@xtoolkit.live",
-        message: entry.message,
-        subject: "New feedback — X Toolkit",
-      }),
-    }).catch((err) => {
-      req.log.warn({ err }, "Web3Forms delivery failed (message already stored locally)");
-    });
-  }
+  req.log.info({ entry }, "Feedback received (stored locally)");
 
   res.status(200).json({ ok: true });
 });

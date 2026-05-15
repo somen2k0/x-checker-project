@@ -23,22 +23,50 @@ export function FeedbackModal({ open, onOpenChange }: FeedbackModalProps) {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/contact", {
+      // Step 1: get the Web3Forms access key from our backend
+      const tokenRes = await fetch("/api/contact/token");
+      if (!tokenRes.ok) {
+        // Fallback: store via our own backend if token not configured
+        const fallback = await fetch("/api/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: name.trim() || undefined, email: email.trim() || undefined, message: message.trim() }),
+        });
+        if (!fallback.ok) {
+          const d = (await fallback.json()) as { error?: string };
+          setError(d.error ?? "Failed to send. Please try again.");
+          return;
+        }
+        setSubmitted(true);
+        return;
+      }
+      const { key } = (await tokenRes.json()) as { key: string };
+
+      // Step 2: submit directly from the browser to Web3Forms (required for free plan)
+      const w3res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({
-          name: name.trim() || undefined,
-          email: email.trim() || undefined,
+          access_key: key,
+          name: name.trim() || "Anonymous",
+          email: email.trim() || "no-reply@xtoolkit.live",
           message: message.trim(),
+          subject: "New feedback — X Toolkit",
         }),
       });
 
-      const data = (await res.json()) as { ok?: boolean; error?: string };
-
-      if (!res.ok) {
-        setError(data.error ?? "Failed to send. Please try again.");
+      const w3data = (await w3res.json()) as { success?: boolean; message?: string };
+      if (!w3data.success) {
+        setError(w3data.message ?? "Failed to send. Please try again.");
         return;
       }
+
+      // Step 3: also store locally on our backend for the admin log
+      await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim() || undefined, email: email.trim() || undefined, message: message.trim() }),
+      }).catch(() => { /* best-effort */ });
 
       setSubmitted(true);
     } catch {
