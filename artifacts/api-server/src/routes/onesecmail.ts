@@ -95,11 +95,11 @@ router.get("/onesecmail/inbox", async (req, res) => {
       `${BASE}?action=getMessages&login=${encodeURIComponent(login)}&domain=${encodeURIComponent(domain)}`,
       { signal: AbortSignal.timeout(10000) }
     );
-    if (!r.ok) { res.json({ messages: [] }); return; }
+    if (!r.ok) { res.status(502).json({ error: "Could not reach 1secmail." }); return; }
     const data = await r.json() as Array<{ id: number; from: string; subject: string; date: string }>;
     res.json({ messages: Array.isArray(data) ? data : [] });
   } catch {
-    res.json({ messages: [] });
+    res.status(502).json({ error: "Failed to fetch inbox. Please try again." });
   }
 });
 

@@ -121,29 +121,27 @@ async function getJwt(base: string, address: string, password: string): Promise<
 }
 
 async function fetchInbox(base: string, jwt: string): Promise<NormMsg[]> {
-  try {
-    const r = await fetch(`${base}/messages`, {
-      headers: { Authorization: `Bearer ${jwt}` },
-      signal: AbortSignal.timeout(10000),
-    });
-    if (!r.ok) return [];
-    const d = await r.json() as {
-      "hydra:member"?: Array<{
-        id: string;
-        from: { address: string; name?: string };
-        subject: string;
-        createdAt: string;
-        intro?: string;
-      }>;
-    };
-    return (d["hydra:member"] ?? []).map(m => ({
-      id: m.id,
-      from: m.from?.address ?? "",
-      subject: m.subject || "(no subject)",
-      date: m.createdAt,
-      textBody: m.intro ?? "",
-    }));
-  } catch { return []; }
+  const r = await fetch(`${base}/messages`, {
+    headers: { Authorization: `Bearer ${jwt}` },
+    signal: AbortSignal.timeout(10000),
+  });
+  if (!r.ok) throw new Error(`Inbox fetch failed: ${r.status}`);
+  const d = await r.json() as {
+    "hydra:member"?: Array<{
+      id: string;
+      from: { address: string; name?: string };
+      subject: string;
+      createdAt: string;
+      intro?: string;
+    }>;
+  };
+  return (d["hydra:member"] ?? []).map(m => ({
+    id: m.id,
+    from: m.from?.address ?? "",
+    subject: m.subject || "(no subject)",
+    date: m.createdAt,
+    textBody: m.intro ?? "",
+  }));
 }
 
 async function fetchMessage(base: string, id: string, jwt: string): Promise<NormMsg | null> {
@@ -246,7 +244,7 @@ router.get("/freemail/inbox", async (req, res) => {
     res.json({ messages });
   } catch (err) {
     req.log.error({ err }, "freemail inbox error");
-    res.json({ messages: [] });
+    res.status(502).json({ error: "Failed to fetch inbox. Please try again." });
   }
 });
 
