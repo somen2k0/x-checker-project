@@ -103,7 +103,7 @@ export function InboxList({ messages, loading, error, onSelect, onRetry, emptyTe
 
   return (
     <div style={{ overflow: "auto", flex: 1 }}>
-      {messages.map((msg, idx) => {
+      {messages.map((msg) => {
         const isVerify = isVerificationEmail(msg.subject, msg.from);
         return (
           <button

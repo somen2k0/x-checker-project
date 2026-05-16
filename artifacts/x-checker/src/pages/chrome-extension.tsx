@@ -32,8 +32,8 @@ const features = [
   },
   {
     icon: Mail,
-    title: "Temp Gmail addresses",
-    desc: "Generate Gmail dot-trick and plus-trick addresses that deliver to a real temporary inbox. Also supports Outlook and Hotmail.",
+    title: "Temp Gmail & Gmail Tricks",
+    desc: "Generate a real temporary Gmail address with a live inbox. Also generate unlimited Gmail dot-trick and plus-tag variants from your own address.",
   },
   {
     icon: History,
@@ -93,7 +93,7 @@ const faqs = [
   },
   {
     q: "Can I use it alongside xtoolkit.live?",
-    a: "They are independent. The extension manages its own inbox state locally; the website runs fresh sessions. Use whichever is more convenient — both connect to the same backend.",
+    a: "Yes, and we recommend it. The extension handles quick temp mail lookups from any page, while xtoolkit.live gives you 55+ tools — X account checker, SEO tools, developer utilities, AI tools, and more. Both connect to the same backend.",
   },
 ];
 
@@ -359,6 +359,43 @@ export default function ChromeExtensionPage() {
                 <p className="text-xs text-muted-foreground leading-relaxed">{a}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Cross-promo: 55+ tools on the website ───────────────────────── */}
+      <section className="py-16 border-b border-border/40 bg-muted/10">
+        <div className="max-w-5xl mx-auto px-4 md:px-8">
+          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-8 md:p-10 text-center">
+            <div className="inline-flex items-center gap-2 text-xs font-medium text-primary bg-primary/10 border border-primary/20 rounded-full px-3 py-1 mb-5">
+              <Zap className="w-3 h-3" /> Also on xtoolkit.live
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold mb-3">
+              The extension is just the beginning
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto mb-8 text-sm leading-relaxed">
+              The website packs 55+ free tools across X/Twitter, SEO, developer utilities, AI, and email — all no-signup, all instant.
+            </p>
+            <div className="flex flex-wrap justify-center gap-2 mb-8">
+              {[
+                "X Account Checker", "AI Bio Generator", "AI Detector",
+                "JSON Formatter", "Base64 Encoder", "Email Validator",
+                "SEO Analyzer", "Password Generator", "QR Code Generator",
+              ].map((tool) => (
+                <span key={tool} className="text-xs px-3 py-1.5 rounded-full border border-border/60 bg-card text-muted-foreground">
+                  {tool}
+                </span>
+              ))}
+              <span className="text-xs px-3 py-1.5 rounded-full border border-primary/30 bg-primary/8 text-primary font-medium">
+                + 46 more
+              </span>
+            </div>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-full text-sm hover:bg-primary/90 transition-colors"
+            >
+              Explore all 55+ tools <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </div>
       </section>

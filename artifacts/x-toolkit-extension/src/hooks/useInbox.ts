@@ -3,8 +3,10 @@ import { Message, StoredState } from "../types";
 import {
   guerrillaInbox, normaliseGuerrilla,
   onesecmailInbox, normaliseOnesec,
+  freemailInbox, normaliseFreemail,
   temptfMessages, normaliseTemptf,
-  guerrillaMessage, onesecmailMessage, temptfMessages as _temptf,
+  guerrillaMessage, onesecmailMessage, freemailMessage,
+  temptfMessages as _temptf,
 } from "../lib/api";
 import { stripHtml, getIntro } from "../lib/otp";
 
@@ -18,10 +20,11 @@ export function useTempMailInbox(state: StoredState, ready: boolean) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetch = useCallback(async (isRefresh = false) => {
-    const { tempMailProvider, guerrilla, onesecmail } = state;
+    const { tempMailProvider, guerrilla, onesecmail, freemail } = state;
 
     if (tempMailProvider === "guerrilla" && !guerrilla) return;
     if (tempMailProvider === "onesecmail" && !onesecmail) return;
+    if (tempMailProvider === "freemail" && !freemail) return;
 
     isRefresh ? setRefreshing(true) : setLoading(true);
     setError(null);
@@ -40,6 +43,12 @@ export function useTempMailInbox(state: StoredState, ready: boolean) {
         msgs = data.messages.map((m) => {
           const norm = normaliseOnesec(m as Parameters<typeof normaliseOnesec>[0]);
           return { ...norm };
+        });
+      } else if (tempMailProvider === "freemail" && freemail) {
+        const data = await freemailInbox(freemail.token);
+        msgs = data.messages.map((m) => {
+          const norm = normaliseFreemail(m as Parameters<typeof normaliseFreemail>[0]);
+          return { ...norm, intro: norm.intro || getIntro(norm.intro ?? "") };
         });
       }
 
@@ -109,7 +118,7 @@ export async function fetchFullMessage(
   msgId: string,
   state: StoredState
 ): Promise<{ body: string; bodyContentType: "html" | "text" }> {
-  const { tempMailProvider, guerrilla, onesecmail } = state;
+  const { tempMailProvider, guerrilla, onesecmail, freemail } = state;
   if (tempMailProvider === "guerrilla" && guerrilla) {
     const m = await guerrillaMessage(msgId, guerrilla.sid_token);
     return { body: m.body, bodyContentType: "html" };
@@ -117,6 +126,10 @@ export async function fetchFullMessage(
   if (tempMailProvider === "onesecmail" && onesecmail) {
     const m = await onesecmailMessage(msgId, onesecmail.login, onesecmail.domain);
     return { body: m.htmlBody ?? m.textBody ?? m.body, bodyContentType: "html" };
+  }
+  if (tempMailProvider === "freemail" && freemail) {
+    const m = await freemailMessage(msgId, freemail.token);
+    return { body: m.htmlBody ?? m.textBody ?? "", bodyContentType: m.htmlBody ? "html" : "text" };
   }
   throw new Error("No active inbox");
 }

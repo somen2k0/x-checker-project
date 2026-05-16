@@ -6,6 +6,8 @@ import { HistoryTab } from "./tabs/HistoryTab";
 
 type Tab = "tempmail" | "gmail" | "history";
 
+const SITE_URL = "https://xtoolkit.live";
+
 function MailIcon({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -28,6 +30,16 @@ function ClockIcon({ size = 18 }: { size?: number }) {
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="10" />
       <polyline points="12 6 12 12 16 14" />
+    </svg>
+  );
+}
+
+function ExternalLinkIcon() {
+  return (
+    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
     </svg>
   );
 }
@@ -77,18 +89,20 @@ export function App() {
         </div>
         <span style={{ fontSize: 11, color: "#71767b", marginLeft: 2, marginTop: 1 }}>Temp Email</span>
         <div style={{ flex: 1 }} />
+        {/* Website promotion link */}
         <a
-          href="https://xtoolkit.live"
+          href={SITE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          title="Open xtoolkit.live"
-          style={{ color: "#71767b", display: "flex", alignItems: "center", cursor: "pointer", textDecoration: "none" }}
+          title="55+ free tools at xtoolkit.live"
+          style={{
+            display: "flex", alignItems: "center", gap: 4,
+            color: "#1d9bf0", textDecoration: "none",
+            fontSize: 10, fontWeight: 600,
+          }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-            <polyline points="15 3 21 3 21 9" />
-            <line x1="10" y1="14" x2="21" y2="3" />
-          </svg>
+          55+ tools
+          <ExternalLinkIcon />
         </a>
       </div>
 
@@ -136,6 +150,26 @@ export function App() {
           );
         })}
       </div>
+
+      {/* Website promo footer */}
+      <a
+        href={SITE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+          padding: "5px 12px",
+          background: "#050a10",
+          borderTop: "1px solid #0f1e2e",
+          textDecoration: "none",
+          color: "#3d5a7a",
+          fontSize: 10,
+          flexShrink: 0,
+        }}
+      >
+        <span>Want 55+ more tools?</span>
+        <span style={{ color: "#1d9bf0", fontWeight: 600 }}>Visit xtoolkit.live →</span>
+      </a>
     </div>
   );
 }

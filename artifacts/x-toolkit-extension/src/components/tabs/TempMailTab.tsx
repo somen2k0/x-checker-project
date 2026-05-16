@@ -5,7 +5,7 @@ import { EmailHeader } from "../EmailHeader";
 import { InboxList } from "../InboxList";
 import { OTPCard } from "../OTPCard";
 import { MessageView } from "../MessageView";
-import { guerrillaNew, onesecmailNew } from "../../lib/api";
+import { guerrillaNew, onesecmailNew, freemailNew } from "../../lib/api";
 
 interface Props {
   state: StoredState;
@@ -15,24 +15,32 @@ interface Props {
 }
 
 function getActiveEmail(state: StoredState): string {
-  const { tempMailProvider, guerrilla, onesecmail } = state;
+  const { tempMailProvider, guerrilla, onesecmail, freemail } = state;
   if (tempMailProvider === "guerrilla") return guerrilla?.email ?? "";
-  return onesecmail?.email ?? "";
+  if (tempMailProvider === "onesecmail") return onesecmail?.email ?? "";
+  if (tempMailProvider === "freemail") return freemail?.email ?? "";
+  return "";
 }
 
 async function createInbox(setState: (s: Partial<StoredState>) => void, history: StoredState["history"]) {
-  // Try Guerrilla first, fall back to 1secmail
+  // Try providers in order, silently falling back — no provider names exposed in UI
   try {
     const acc = await guerrillaNew();
     const entry: HistoryEntry = { address: acc.email, provider: "guerrilla", createdAt: Date.now() };
     setState({ guerrilla: acc, tempMailProvider: "guerrilla", history: [entry, ...history.slice(0, 19)] });
     return;
-  } catch {
-    // fall through to backup
-  }
-  const acc = await onesecmailNew();
-  const entry: HistoryEntry = { address: acc.email, provider: "onesecmail", createdAt: Date.now() };
-  setState({ onesecmail: acc, tempMailProvider: "onesecmail", history: [entry, ...history.slice(0, 19)] });
+  } catch { /* fall through */ }
+
+  try {
+    const acc = await onesecmailNew();
+    const entry: HistoryEntry = { address: acc.email, provider: "onesecmail", createdAt: Date.now() };
+    setState({ onesecmail: acc, tempMailProvider: "onesecmail", history: [entry, ...history.slice(0, 19)] });
+    return;
+  } catch { /* fall through */ }
+
+  const acc = await freemailNew();
+  const entry: HistoryEntry = { address: acc.email, provider: "freemail", createdAt: Date.now() };
+  setState({ freemail: acc, tempMailProvider: "freemail", history: [entry, ...history.slice(0, 19)] });
 }
 
 export function TempMailTab({ state, setState, patch: _patch, ready }: Props) {
