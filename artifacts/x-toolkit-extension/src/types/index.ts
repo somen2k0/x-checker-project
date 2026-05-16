@@ -1,4 +1,4 @@
-export type Provider = "guerrilla" | "onesecmail";
+export type Provider = "guerrilla" | "onesecmail" | "freemail";
 export type GmailProvider = "gmail" | "outlook" | "hotmail";
 
 export interface GuerrillaAccount {
@@ -14,6 +14,13 @@ export interface OnesecmailAccount {
   login: string;
   domain: string;
   domains: string[];
+}
+
+export interface FreemailAccount {
+  email: string;
+  login: string;
+  domain: string;
+  token: string;
 }
 
 export interface GmailAccount {
@@ -41,6 +48,7 @@ export interface StoredState {
   tempMailProvider: Provider;
   guerrilla: GuerrillaAccount | null;
   onesecmail: OnesecmailAccount | null;
+  freemail: FreemailAccount | null;
   gmail: GmailAccount | null;
   gmailProvider: GmailProvider;
   history: HistoryEntry[];
@@ -52,6 +60,7 @@ export const DEFAULT_STATE: StoredState = {
   tempMailProvider: "guerrilla",
   guerrilla: null,
   onesecmail: null,
+  freemail: null,
   gmail: null,
   gmailProvider: "gmail",
   history: [],

@@ -89,6 +89,42 @@ export function normaliseOnesec(m: RawOnesecMessage) {
   };
 }
 
+// ── Freemail (mail.gw) ────────────────────────────────────────────────────
+
+export async function freemailNew() {
+  return apiFetch<{ email: string; login: string; domain: string; token: string }>("/api/freemail/new");
+}
+
+export async function freemailInbox(token: string) {
+  return apiFetch<{ messages: RawFreemailMessage[] }>(`/api/freemail/inbox?token=${encodeURIComponent(token)}`);
+}
+
+export async function freemailMessage(id: string, token: string) {
+  return apiFetch<{ id: string; from: string; subject: string; date: string; htmlBody?: string; textBody?: string }>(
+    `/api/freemail/message/${encodeURIComponent(id)}?token=${encodeURIComponent(token)}`
+  );
+}
+
+interface RawFreemailMessage {
+  id: string;
+  from: string;
+  subject: string;
+  date: string;
+  textBody?: string;
+}
+
+export function normaliseFreemail(m: RawFreemailMessage) {
+  return {
+    id: m.id,
+    from: m.from ?? "",
+    subject: m.subject ?? "(no subject)",
+    date: m.date ?? "",
+    body: "",
+    bodyContentType: "text" as const,
+    intro: m.textBody ?? "",
+  };
+}
+
 // ── TempTF / Gmail ─────────────────────────────────────────────────────────
 
 export async function temptfGenerate(providers = "gmail", type = "dot") {
