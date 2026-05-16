@@ -35,8 +35,7 @@ const WHEN_TO_USE = [
 ];
 
 const PROVIDERS_TABLE = [
-  { name: "X Toolkit Temp Mail", desc: "16 domains, Guerrilla Mail + 1secMail, browser-persistent session, no signup", bestFor: "All general use", internal: true, href: "/tools/temp-mail/tempemail" },
-  { name: "Guerrilla Mail", desc: "Custom usernames, multiple domains, reply support, 1 hour lifetime", bestFor: "Development & testing", href: "https://www.guerrillamail.com" },
+  { name: "X Toolkit Temp Mail", desc: "16 domains, browser-persistent session, custom usernames, no signup required", bestFor: "All general use", internal: true, href: "/tools/temp-mail/tempemail" },
   { name: "10MinuteMail", desc: "Self-destructing inbox, simple UI, 10-minute default lifetime", bestFor: "Ultra-quick one-time use", href: "https://10minutemail.com" },
   { name: "Mailinator", desc: "Unlimited public inboxes, no creation needed, powerful API for devs", bestFor: "Developers & QA teams", href: "https://mailinator.com" },
 ];
@@ -44,8 +43,8 @@ const PROVIDERS_TABLE = [
 const faqs = [
   { q: "What is a disposable email address?", a: "A disposable (temporary) email address is a throwaway inbox you can use once or for a short time. It receives real emails like any normal inbox, but you abandon it afterward — taking the spam with it. Your real email address remains clean and private." },
   { q: "Is it legal to use a disposable email?", a: "Yes, completely. Using a disposable email is no different from having two email accounts. The only edge case: some services' terms of service prohibit creating multiple accounts, and using a new temp address to create a second account might violate those terms (not the use of the temp email itself)." },
-  { q: "How long do disposable emails last?", a: "It depends on the provider. Some (like 10MinuteMail) expire after 10 minutes. Others (like our Temp Mail tool) persist for your browser session. Guerrilla Mail inboxes last about 1 hour, while 1secmail addresses are available as long as the session is active." },
-  { q: "Can someone else read my temporary inbox?", a: "On providers using shared inboxes (like Mailinator), anyone who knows your address can access it. On providers using session-based addresses (like Guerrilla Mail), only someone with your specific session token can access it. Never send sensitive information to a temporary inbox." },
+  { q: "How long do disposable emails last?", a: "It depends on the provider. Some (like 10MinuteMail) expire after 10 minutes. Others (like our Temp Mail tool) persist for your browser session — your inbox survives a page refresh and stays available until you close the browser." },
+  { q: "Can someone else read my temporary inbox?", a: "On providers using shared inboxes (like Mailinator), anyone who knows your address can access it. Our Temp Mail tool uses session-based addresses — only someone with your session token can access your inbox. Never send sensitive information to any temporary inbox." },
   { q: "What's the difference between disposable email and alias email?", a: "Disposable emails are temporary and tied to no real account — you abandon them. Alias emails are permanent forwarding addresses that relay mail to your real inbox indefinitely, with the ability to disable specific aliases. For permanent privacy, use aliases. For one-time signups, use disposable." },
 ];
 

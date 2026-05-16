@@ -1,16 +1,11 @@
 import { useState, useCallback } from "react";
-import { StoredState, Provider, HistoryEntry } from "../../types";
-import { useStorage } from "../../hooks/useStorage";
+import { StoredState, HistoryEntry } from "../../types";
 import { useTempMailInbox, fetchFullMessage } from "../../hooks/useInbox";
 import { EmailHeader } from "../EmailHeader";
-import { ProviderSwitcher } from "../ProviderSwitcher";
 import { InboxList } from "../InboxList";
 import { OTPCard } from "../OTPCard";
 import { MessageView } from "../MessageView";
-import {
-  guerrillaNew,
-  onesecmailNew,
-} from "../../lib/api";
+import { guerrillaNew, onesecmailNew } from "../../lib/api";
 
 interface Props {
   state: StoredState;
@@ -25,7 +20,22 @@ function getActiveEmail(state: StoredState): string {
   return onesecmail?.email ?? "";
 }
 
-export function TempMailTab({ state, setState, patch, ready }: Props) {
+async function createInbox(setState: (s: Partial<StoredState>) => void, history: StoredState["history"]) {
+  // Try Guerrilla first, fall back to 1secmail
+  try {
+    const acc = await guerrillaNew();
+    const entry: HistoryEntry = { address: acc.email, provider: "guerrilla", createdAt: Date.now() };
+    setState({ guerrilla: acc, tempMailProvider: "guerrilla", history: [entry, ...history.slice(0, 19)] });
+    return;
+  } catch {
+    // fall through to backup
+  }
+  const acc = await onesecmailNew();
+  const entry: HistoryEntry = { address: acc.email, provider: "onesecmail", createdAt: Date.now() };
+  setState({ onesecmail: acc, tempMailProvider: "onesecmail", history: [entry, ...history.slice(0, 19)] });
+}
+
+export function TempMailTab({ state, setState, patch: _patch, ready }: Props) {
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -38,66 +48,14 @@ export function TempMailTab({ state, setState, patch, ready }: Props) {
     setCreating(true);
     setCreateError(null);
     setSelectedId(null);
-
     try {
-      const provider = state.tempMailProvider;
-      const historyEntry: HistoryEntry = {
-        address: "",
-        provider,
-        createdAt: Date.now(),
-      };
-
-      if (provider === "guerrilla") {
-        const acc = await guerrillaNew();
-        historyEntry.address = acc.email;
-        setState({
-          guerrilla: acc,
-          history: [historyEntry, ...state.history.slice(0, 19)],
-        });
-      } else {
-        const acc = await onesecmailNew();
-        historyEntry.address = acc.email;
-        setState({
-          onesecmail: acc,
-          history: [historyEntry, ...state.history.slice(0, 19)],
-        });
-      }
+      await createInbox(setState, state.history);
     } catch (err) {
-      setCreateError(err instanceof Error ? err.message : "Failed to create inbox");
+      setCreateError(err instanceof Error ? err.message : "Could not create inbox. Please try again.");
     } finally {
       setCreating(false);
     }
-  }, [state, setState]);
-
-  const handleProviderChange = useCallback(async (p: Provider) => {
-    patch("tempMailProvider", p);
-    setSelectedId(null);
-
-    const hasInbox =
-      (p === "guerrilla" && state.guerrilla) ||
-      (p === "onesecmail" && state.onesecmail);
-
-    if (!hasInbox) {
-      setCreating(true);
-      setCreateError(null);
-      try {
-        const historyEntry: HistoryEntry = { address: "", provider: p, createdAt: Date.now() };
-        if (p === "guerrilla") {
-          const acc = await guerrillaNew();
-          historyEntry.address = acc.email;
-          setState({ guerrilla: acc, tempMailProvider: p, history: [historyEntry, ...state.history.slice(0, 19)] });
-        } else {
-          const acc = await onesecmailNew();
-          historyEntry.address = acc.email;
-          setState({ onesecmail: acc, tempMailProvider: p, history: [historyEntry, ...state.history.slice(0, 19)] });
-        }
-      } catch (err) {
-        setCreateError(err instanceof Error ? err.message : "Failed to create inbox");
-      } finally {
-        setCreating(false);
-      }
-    }
-  }, [state, setState, patch]);
+  }, [state.history, setState]);
 
   if (selectedMsg) {
     return (
@@ -115,11 +73,6 @@ export function TempMailTab({ state, setState, patch, ready }: Props) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <ProviderSwitcher
-        provider={state.tempMailProvider}
-        onChange={handleProviderChange}
-        disabled={creating}
-      />
       <EmailHeader
         email={email}
         loading={creating}

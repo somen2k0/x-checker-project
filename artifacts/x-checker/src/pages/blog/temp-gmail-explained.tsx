@@ -74,7 +74,7 @@ export default function TempGmailExplained() {
       <p>Our <strong>Temp Gmail</strong> tool uses this approach to give you a working temporary Gmail address. The inbox is real — verification emails from services that check Gmail domains will accept it.</p>
 
       <h3>Why this matters</h3>
-      <p>Many services specifically reject non-Gmail domains. They'll accept <code>@gmail.com</code> but block <code>@guerrillamail.com</code> or <code>@1secmail.com</code>. A real temp Gmail address passes these checks.</p>
+      <p>Many services specifically reject non-Gmail domains. They'll accept <code>@gmail.com</code> but block known disposable domains. A real temp Gmail address passes these checks because it uses the actual <code>@gmail.com</code> domain.</p>
 
       <h3>Important limitation</h3>
       <p>These inboxes are <strong>shared</strong> — they're based on existing Gmail accounts using the dot trick. You should never use them for anything sensitive. They're appropriate for email verification only, not for receiving password reset emails or any private communication.</p>

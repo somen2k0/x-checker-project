@@ -53,12 +53,10 @@ We reserve the right to terminate or restrict access for any user who violates t
   {
     id: "third-party",
     title: "4. Third-Party Services",
-    content: `X Toolkit interacts with third-party services, including X's API, Groq's API, Guerrilla Mail, and 1secmail. Your use of these third-party services is governed by their respective terms:
+    content: `X Toolkit interacts with third-party services, including X's API, Groq's API, and third-party temporary email infrastructure. Your use of these third-party services is governed by their respective terms:
 
 - X (Twitter) Terms of Service: x.com/en/tos
 - Groq Terms of Service: groq.com/terms-of-service
-- Guerrilla Mail Terms: guerrillamail.com
-- 1secmail Terms: 1secmail.com
 
 We are not responsible for the availability, accuracy, or legality of third-party services. X's API may change or become unavailable at any time, which could affect the functionality of the Account Checker.`,
   },
@@ -89,7 +87,7 @@ Developer, SEO, and email formatting tools process your input client-side. Resul
   {
     id: "temp-mail",
     title: "7. Temporary Email Inboxes",
-    content: `The Temp Mail tool provides access to disposable email addresses via third-party providers (Guerrilla Mail and 1secmail). By using this feature:
+    content: `The Temp Mail tool provides access to disposable email addresses via third-party infrastructure. By using this feature:
 
 - Inboxes are temporary and will expire according to the third-party provider's policy
 - We do not control, read, store, or guarantee delivery of messages

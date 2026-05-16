@@ -11,9 +11,9 @@ interface Props {
 }
 
 const PROVIDER_LABELS: Record<string, string> = {
-  guerrilla: "Guerrilla",
-  onesecmail: "1secmail",
-  gmail: "Gmail",
+  guerrilla: "Temp Mail",
+  onesecmail: "Temp Mail",
+  gmail: "Temp Gmail",
 };
 
 function CopyIcon() {

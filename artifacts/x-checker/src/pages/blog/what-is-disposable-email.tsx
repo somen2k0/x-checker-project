@@ -33,7 +33,7 @@ export default function WhatIsDisposableEmail() {
       </p>
 
       <h2>How Does Disposable Email Work?</h2>
-      <p>When you open a disposable email service, it generates a random address — something like <code>swift.inbox.482@guerrillamail.com</code>. This address is real and can receive emails from anyone. The service displays incoming messages in a web-based inbox that only you can access (typically through a session token stored in your browser).</p>
+      <p>When you open a disposable email service, it generates a random address — something like <code>swift.inbox.482@tempmail.net</code>. This address is real and can receive emails from anyone. The service displays incoming messages in a web-based inbox that only you can access (typically through a session token stored in your browser).</p>
       <p>When you close the browser tab or the session expires, the inbox is gone. Emails received afterward are either discarded or held briefly depending on the provider.</p>
       <p>The process looks like this:</p>
       <ol>
@@ -92,7 +92,7 @@ export default function WhatIsDisposableEmail() {
         <li><strong>Custom usernames</strong> — so you can choose a memorable address</li>
         <li><strong>Fast delivery</strong> — emails arrive within seconds</li>
       </ul>
-      <p>Our <strong>Temp Mail</strong> tool supports 16 domains across two providers (Guerrilla Mail and 1secMail), lets you customize your username and switch domains, and preserves your session across refreshes — all for free, with no signup.</p>
+      <p>Our <strong>Temp Mail</strong> tool supports 16 domains, lets you customize your username and switch domains, and preserves your session across refreshes — all for free, with no signup.</p>
 
       <h2>When Should You Use Your Real Email?</h2>
       <p>Disposable email isn't right for everything. Use your real email for:</p>

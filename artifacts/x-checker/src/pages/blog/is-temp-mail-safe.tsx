@@ -52,7 +52,7 @@ export default function IsTempMailSafe() {
 
       <h3>Public Inboxes</h3>
       <p>Some providers (most notably Mailinator) operate <strong>public inboxes</strong> — any inbox is accessible to anyone who knows the address. If someone guesses or monitors your address, they can read your messages and steal verification codes.</p>
-      <p>Providers using session-based authentication (like Guerrilla Mail, which our Temp Mail tool uses) are not public by default — only someone with your session token can access the inbox.</p>
+      <p>Services using session-based authentication (like our X Toolkit Temp Mail) are not public by default — only someone with your session token can access the inbox.</p>
 
       <h3>No Account Recovery</h3>
       <p>If you use a temp address to register for a service and later lose access to that service, there's no email-based recovery path. The inbox is gone. This is a non-issue for truly throwaway accounts, but a serious problem if you accidentally use a temp address for something important.</p>
@@ -73,7 +73,7 @@ export default function IsTempMailSafe() {
       </ul>
 
       <h2>Is Our Temp Mail Tool Safe?</h2>
-      <p>Our <strong>Temp Mail</strong> tool uses session-based authentication through Guerrilla Mail and 1secMail — these are not public inboxes. Your session token is stored in your browser, so only you can access your inbox. Sessions persist across page refreshes.</p>
+      <p>Our <strong>Temp Mail</strong> tool uses session-based authentication — your inbox is not public. Your session token is stored in your browser, so only you can access your inbox. Sessions persist across page refreshes.</p>
       <p>That said, the same principle applies: don't use it for sensitive communications. It's designed for throwaway registrations, not private messaging.</p>
 
       <h2>When Temp Mail Is Not the Right Tool</h2>

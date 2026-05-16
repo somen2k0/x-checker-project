@@ -462,7 +462,7 @@ function UnifiedInboxSection() {
   const currentEmail = activeProv === "guerrilla" ? gSession?.email : oSession?.email;
   const currentUser  = activeProv === "guerrilla" ? gSession?.user  : oSession?.login;
   const currentDomain = activeProv === "guerrilla" ? gSession?.domain : oSession?.domain;
-  const currentPill  = activeProv === "guerrilla" ? { label: "Guerrilla Mail", color: "text-cyan-400", ring: "focus:ring-cyan-400/30", btn: "bg-cyan-500 hover:bg-cyan-400 text-black", dot: "bg-cyan-400" } : { label: "1secMail", color: "text-green-400", ring: "focus:ring-green-400/30", btn: "bg-green-500 hover:bg-green-400 text-black", dot: "bg-green-400" };
+  const currentPill  = { label: "Temp Mail", color: "text-cyan-400", ring: "focus:ring-cyan-400/30", btn: "bg-cyan-500 hover:bg-cyan-400 text-black", dot: "bg-cyan-400" };
 
   const gUnread = gMessages.filter(m => m.mail_read === "0").length;
   const oUnread = 0;
@@ -479,8 +479,8 @@ function UnifiedInboxSection() {
 
   // All 16 domains for the unified picker
   const ALL_DOMAINS_GROUPED = [
-    { group: "Guerrilla Mail", color: "text-cyan-400", domains: G_DOMAINS },
-    { group: "1secMail",       color: "text-green-400", domains: O_DOMAINS },
+    { group: "Group A", color: "text-cyan-400", domains: G_DOMAINS },
+    { group: "Group B", color: "text-cyan-400", domains: O_DOMAINS },
   ];
 
   return (
@@ -488,13 +488,12 @@ function UnifiedInboxSection() {
       {/* Address card */}
       <div className="rounded-xl border border-border/60 bg-card/40 p-4 space-y-3">
         <div className="flex items-start gap-3">
-          <div className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${activeProv === "guerrilla" ? "bg-cyan-400/10 border border-cyan-400/20" : "bg-green-400/10 border border-green-400/20"}`}>
+          <div className="h-9 w-9 rounded-lg flex items-center justify-center shrink-0 mt-0.5 bg-cyan-400/10 border border-cyan-400/20">
             <Mail className={`h-4 w-4 ${currentPill.color}`} />
           </div>
           <div className="flex-1 min-w-0 space-y-1">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold flex items-center gap-1.5">
               Your temporary email
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full bg-muted/60 ${currentPill.color} font-mono`}>{currentPill.label}</span>
             </p>
             {currentEmail ? (
               <div className="flex flex-wrap items-center gap-0.5 font-mono text-base font-semibold">
@@ -536,16 +535,12 @@ function UnifiedInboxSection() {
             </Button>
             {showDomainDrop && (
               <div className="absolute top-full left-0 mt-1 z-50 bg-card border border-border/60 rounded-xl shadow-xl overflow-hidden min-w-60 max-h-80 overflow-y-auto">
-                {ALL_DOMAINS_GROUPED.map(grp => (
-                  <div key={grp.group}>
-                    <div className={`px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider ${grp.color} bg-muted/30 border-b border-border/30`}>{grp.group}</div>
-                    {grp.domains.map(d => (
-                      <button key={d} onClick={() => switchDomain(d)}
-                        className={`w-full text-left px-4 py-2 text-xs hover:bg-muted/60 transition-colors font-mono border-b border-border/20 last:border-b-0 ${d === currentDomain ? `${grp.color} font-semibold bg-muted/20` : "text-foreground/80"}`}>
-                        @{d}
-                      </button>
-                    ))}
-                  </div>
+                <div className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-muted/30 border-b border-border/30">Available domains</div>
+                {ALL_DOMAINS_GROUPED.flatMap(grp => grp.domains).map(d => (
+                  <button key={d} onClick={() => switchDomain(d)}
+                    className={`w-full text-left px-4 py-2 text-xs hover:bg-muted/60 transition-colors font-mono border-b border-border/20 last:border-b-0 ${d === currentDomain ? "text-cyan-400 font-semibold bg-muted/20" : "text-foreground/80"}`}>
+                    @{d}
+                  </button>
                 ))}
               </div>
             )}
@@ -666,7 +661,7 @@ function UnifiedInboxSection() {
                 <p className="text-xs text-muted-foreground/40 mt-1">Messages appear automatically when received</p>
               </div>
               {currentEmail && (
-                <div className={`flex items-center gap-2 text-xs rounded-lg px-3 py-2 ${activeProv === "guerrilla" ? "bg-cyan-400/10 border border-cyan-400/20 text-cyan-400" : "bg-green-400/10 border border-green-400/20 text-green-400"}`}>
+                <div className="flex items-center gap-2 text-xs rounded-lg px-3 py-2 bg-cyan-400/10 border border-cyan-400/20 text-cyan-400">
                   <Clock className="h-3.5 w-3.5 shrink-0" />
                   Auto-refreshing every {REFRESH_MS / 1000}s
                 </div>
@@ -679,8 +674,8 @@ function UnifiedInboxSection() {
       <div className="flex flex-wrap gap-2">
         {[
           { label: "16 domains total" },
-          { label: "Guerrilla Mail • 9 domains" },
-          { label: "1secMail • 7 domains" },
+          { label: "Session-persistent inbox" },
+          { label: "Custom usernames supported" },
           { label: `Auto-refresh ${REFRESH_MS / 1000}s` },
         ].map(({ label }) => (
           <div key={label} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground bg-muted/40 border border-border/50 rounded-full px-3 py-1">
