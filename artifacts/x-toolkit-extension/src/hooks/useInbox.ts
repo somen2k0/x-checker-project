@@ -42,13 +42,13 @@ export function useTempMailInbox(state: StoredState, ready: boolean) {
         const data = await onesecmailInbox(onesecmail.login, onesecmail.domain);
         msgs = data.messages.map((m) => {
           const norm = normaliseOnesec(m as Parameters<typeof normaliseOnesec>[0]);
-          return { ...norm };
+          return { ...norm, intro: getIntro(norm.subject) };
         });
       } else if (tempMailProvider === "freemail" && freemail) {
         const data = await freemailInbox(freemail.token);
         msgs = data.messages.map((m) => {
           const norm = normaliseFreemail(m as Parameters<typeof normaliseFreemail>[0]);
-          return { ...norm, intro: norm.intro || getIntro(norm.intro ?? "") };
+          return { ...norm, intro: norm.intro };
         });
       }
 
@@ -121,15 +121,17 @@ export async function fetchFullMessage(
   const { tempMailProvider, guerrilla, onesecmail, freemail } = state;
   if (tempMailProvider === "guerrilla" && guerrilla) {
     const m = await guerrillaMessage(msgId, guerrilla.sid_token);
-    return { body: m.body, bodyContentType: "html" };
+    return { body: m.body || "", bodyContentType: "html" };
   }
   if (tempMailProvider === "onesecmail" && onesecmail) {
     const m = await onesecmailMessage(msgId, onesecmail.login, onesecmail.domain);
-    return { body: m.htmlBody ?? m.textBody ?? m.body, bodyContentType: "html" };
+    // Use || not ?? so an empty string falls through to the next field
+    return { body: m.htmlBody || m.textBody || m.body || "", bodyContentType: "html" };
   }
   if (tempMailProvider === "freemail" && freemail) {
     const m = await freemailMessage(msgId, freemail.token);
-    return { body: m.htmlBody ?? m.textBody ?? "", bodyContentType: m.htmlBody ? "html" : "text" };
+    // Use || not ?? so an empty string falls through to the next field
+    return { body: m.htmlBody || m.textBody || "", bodyContentType: m.htmlBody ? "html" : "text" };
   }
   throw new Error("No active inbox");
 }
