@@ -1,0 +1,108 @@
+Build a production-ready Chrome Extension (Manifest V3) for X Toolkit focused specifically on Temp Email + Temp Gmail workflows.
+
+Goal:
+Create a fast disposable email extension that lets users instantly generate, copy, monitor, and manage temporary inboxes directly from the browser toolbar without opening xtoolkit.live manually.
+
+Core providers to support:
+
+/api/temp-mail/*
+/api/temp-gmail/*
+/api/onesecmail/*
+/api/temptf/*
+
+Tech stack:
+
+React + Vite
+TypeScript
+Manifest V3
+Tailwind/shadcn styling
+Reuse existing backend APIs
+Optimized for Chromium browsers
+
+Main extension features:
+
+Instant temp inbox generation
+Generate email automatically when popup opens
+Auto-copy option
+“New Email” button
+Domain/provider switcher
+Temp Gmail mode
+Dedicated Gmail-style temporary inbox tab
+Gmail-style UI treatment
+OTP code extraction/highlighting
+Verification email prioritization
+Inbox management
+Auto-refresh inbox every 10–15 seconds
+Unread badge counter
+Read full email content
+Sender + subject + timestamp
+Search inbox messages
+Delete inbox session locally
+Smart verification helper
+Detect OTP/verification codes automatically
+One-click copy OTP
+Highlight login/signup emails
+“Latest code” quick section
+Browser integration
+Toolbar popup UI
+Notification when new email arrives
+Badge update when unread mail exists
+Optional right-click menu:
+“Generate temp email”
+Local persistence
+Store active inbox locally
+Restore inbox after browser restart
+Save last used provider
+Save recent inbox history
+UI/UX
+Match xtoolkit.live branding
+Dark mode default
+Fast lightweight popup
+Skeleton loaders
+Error/retry states
+Smooth animations
+Mobile-like modern UX
+Security/privacy
+No user accounts
+No tracking beyond existing analytics
+Minimal extension permissions
+No unnecessary background scripts
+
+Manifest permissions:
+
+storage
+notifications
+alarms
+contextMenus (optional)
+host permissions only for xtoolkit.live APIs
+
+Architecture requirements:
+
+Separate extension folder/app
+Shared API utility layer
+Reusable inbox components
+Clean polling lifecycle
+Avoid memory leaks
+Prepare for future:
+autofill temp email
+content script signup helper
+quick OTP paste
+
+Deliverables:
+
+Full extension source code
+Manifest V3 config
+Production build setup
+Chrome install instructions
+Chrome Web Store packaging instructions
+Icons/placeholders
+README documentation
+
+Bonus features if possible:
+
+Keyboard shortcut to copy active email
+Animated unread badge
+Quick OTP copy button
+Compact mode
+Mini inbox preview in notifications
+“Open in xtoolkit.live” deep link

@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "X Toolkit – Temp Email",
+  "short_name": "X Toolkit",
+  "version": "1.0.0",
+  "description": "Instant disposable email inboxes. Generate, monitor and copy temp emails without leaving your browser.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "src/popup/index.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "X Toolkit – Temp Email"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["storage", "notifications", "alarms", "contextMenus", "clipboardWrite"],
+  "host_permissions": ["https://xtoolkit.live/*"],
+  "commands": {
+    "copy-active-email": {
+      "suggested_key": { "default": "Alt+Shift+C" },
+      "description": "Copy active temp email address"
+    }
+  }
+}
