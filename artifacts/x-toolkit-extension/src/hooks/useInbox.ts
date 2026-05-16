@@ -52,10 +52,14 @@ export function useTempMailInbox(state: StoredState, ready: boolean) {
         });
       }
 
-      setMessages(msgs);
+      // On a background refresh, never wipe existing messages with an empty
+      // result — empty usually means the provider session expired or a
+      // transient upstream error, not that the inbox was actually cleared.
+      setMessages(prev =>
+        isRefresh && msgs.length === 0 && prev.length > 0 ? prev : msgs
+      );
     } catch (err) {
-      // On a background refresh failure, keep existing messages visible so the
-      // inbox doesn't appear to vanish due to a transient network/API error.
+      // On a background refresh failure, keep existing messages visible.
       if (!isRefresh) {
         setError(err instanceof Error ? err.message : "Failed to fetch inbox");
       }
@@ -97,7 +101,9 @@ export function useGmailInbox(state: StoredState, ready: boolean) {
         const norm = normaliseTemptf(m as Parameters<typeof normaliseTemptf>[0]);
         return { ...norm, intro: norm.intro || getIntro(stripHtml(norm.body)) };
       });
-      setMessages(msgs);
+      setMessages(prev =>
+        isRefresh && msgs.length === 0 && prev.length > 0 ? prev : msgs
+      );
     } catch (err) {
       // On a background refresh failure, keep existing messages visible.
       if (!isRefresh) {
