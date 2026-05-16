@@ -30,3 +30,9 @@ id = "u3XJY5ejdVqs6p4Miba7l"
 uri = "file://x-toolkit-extension-v1.0.0.zip"
 type = "unspecified"
 title = "X Toolkit Extension v1.0.0 (inbox fixes)"
+
+[[outputs]]
+id = "O-K4EbCAK0c4vr61A9VP2"
+uri = "file://x-toolkit-extension.zip"
+type = "unspecified"
+title = "X-Toolkit Chrome Extension"
