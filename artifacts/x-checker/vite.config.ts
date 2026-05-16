@@ -13,25 +13,6 @@ if (Number.isNaN(port) || port <= 0) {
 
 const basePath = process.env.BASE_PATH ?? "/";
 
-const CLARITY_SNIPPET = `<script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "wrmqhawevf");
-</script>`;
-
-const clarityPlugin = {
-  name: "inject-clarity",
-  transformIndexHtml: {
-    order: "pre" as const,
-    handler(html: string, ctx: { command: string }) {
-      if (ctx.command !== "build") return html;
-      return html.replace("</head>", `${CLARITY_SNIPPET}\n  </head>`);
-    },
-  },
-};
-
 export default defineConfig({
   base: basePath,
 
@@ -39,7 +20,6 @@ export default defineConfig({
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
-    clarityPlugin,
 
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
