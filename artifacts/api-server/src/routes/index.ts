@@ -44,7 +44,16 @@ const aiProtection = [
   logAiUsage,
 ];
 
-router.use(...aiProtection, bioRouter);
+// Bio generation must NOT be cached — every request must hit Groq to return
+// unique bios. Caching is intentionally omitted from this stack.
+const aiProtectionNoCache = [
+  aiRateLimiter,
+  aiDailyRateLimiter,
+  aiInputValidator,
+  logAiUsage,
+];
+
+router.use(...aiProtectionNoCache, bioRouter);
 router.use(...aiProtection, aiDetectorRouter);
 
 export default router;
