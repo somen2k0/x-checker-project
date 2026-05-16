@@ -373,6 +373,10 @@ export function Navbar() {
                 Extension
               </button>
             </Link>
+            <div className="hidden xl:flex items-center gap-1.5 text-xs text-muted-foreground">
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[11px]">Operational</span>
+            </div>
             <Button
               variant="outline"
               size="sm"
