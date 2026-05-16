@@ -4,15 +4,13 @@ const router = Router();
 
 // ── Provider base URLs ─────────────────────────────────────────────────────
 const PROVIDERS = [
-  { prefix: "mgw", base: "https://api.mail.gw",  fallback: ["oakon.com"] },
-  { prefix: "mtm", base: "https://api.mail.tm",   fallback: ["wshu.net"] },
+  { prefix: "mgw", base: "https://api.mail.gw", fallback: ["oakon.com"] },
 ] as const;
-type Prefix = "mgw" | "mtm";
+type Prefix = "mgw";
 
 // ── Domain cache (10-min TTL per provider) ────────────────────────────────
 const domainCache: Record<Prefix, { domains: string[]; expiry: number }> = {
   mgw: { domains: [], expiry: 0 },
-  mtm: { domains: [], expiry: 0 },
 };
 
 async function fetchProviderDomains(prefix: Prefix, base: string, fallback: readonly string[]): Promise<string[]> {
