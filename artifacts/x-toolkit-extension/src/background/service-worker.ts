@@ -1,6 +1,5 @@
 import { StoredState, DEFAULT_STATE } from "../types";
 import {
-  mailtmMessages, normaliseMailTm,
   guerrillaInbox, normaliseGuerrilla,
   onesecmailInbox, normaliseOnesec,
   temptfMessages, normaliseTemptf,
@@ -107,15 +106,14 @@ async function getState(): Promise<StoredState> {
 }
 
 function getActiveEmail(state: StoredState): string {
-  const { tempMailProvider, mailtm, guerrilla, onesecmail } = state;
-  if (tempMailProvider === "mailtm") return mailtm?.address ?? "";
+  const { tempMailProvider, guerrilla, onesecmail } = state;
   if (tempMailProvider === "guerrilla") return guerrilla?.email ?? "";
   return onesecmail?.email ?? "";
 }
 
 async function pollInbox(): Promise<void> {
   const state = await getState();
-  const { tempMailProvider, mailtm, guerrilla, onesecmail, gmail, seenMessageIds } = state;
+  const { tempMailProvider, guerrilla, onesecmail, gmail, seenMessageIds } = state;
 
   const allSeen = new Set(seenMessageIds ?? []);
   const newMessages: Array<{ from: string; subject: string; body: string }> = [];
@@ -124,10 +122,7 @@ async function pollInbox(): Promise<void> {
   try {
     let msgs: Array<{ id: string; from: string; subject: string; body?: string; bodyContentType?: string }> = [];
 
-    if (tempMailProvider === "mailtm" && mailtm) {
-      const data = await mailtmMessages(mailtm.token);
-      msgs = data.messages.map(normaliseMailTm);
-    } else if (tempMailProvider === "guerrilla" && guerrilla) {
+    if (tempMailProvider === "guerrilla" && guerrilla) {
       const data = await guerrillaInbox(guerrilla.sid_token);
       msgs = data.messages.map((m) => normaliseGuerrilla(m as Parameters<typeof normaliseGuerrilla>[0]));
     } else if (tempMailProvider === "onesecmail" && onesecmail) {

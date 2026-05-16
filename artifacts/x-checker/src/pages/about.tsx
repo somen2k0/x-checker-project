@@ -55,7 +55,7 @@ const categories = [
   {
     icon: Mail,
     name: "Email Tools",
-    desc: "Temporary email inboxes (Guerrilla Mail & mail.tm), email validator, email signature generator, subject line generator, and more.",
+    desc: "Temporary email inboxes (Guerrilla Mail & 1secmail), email validator, email signature generator, subject line generator, and more.",
   },
 ];
 

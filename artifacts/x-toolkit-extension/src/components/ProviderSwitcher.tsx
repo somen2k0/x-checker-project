@@ -7,7 +7,6 @@ interface ProviderSwitcherProps {
 }
 
 const PROVIDERS: { id: Provider; label: string; desc: string }[] = [
-  { id: "mailtm", label: "mail.tm", desc: "Reliable, many domains" },
   { id: "guerrilla", label: "Guerrilla", desc: "Fast, no signup" },
   { id: "onesecmail", label: "1secmail", desc: "Instant, simple" },
 ];

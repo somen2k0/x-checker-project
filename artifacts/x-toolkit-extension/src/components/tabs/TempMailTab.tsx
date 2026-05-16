@@ -8,7 +8,6 @@ import { InboxList } from "../InboxList";
 import { OTPCard } from "../OTPCard";
 import { MessageView } from "../MessageView";
 import {
-  mailtmCreate,
   guerrillaNew,
   onesecmailNew,
 } from "../../lib/api";
@@ -21,8 +20,7 @@ interface Props {
 }
 
 function getActiveEmail(state: StoredState): string {
-  const { tempMailProvider, mailtm, guerrilla, onesecmail } = state;
-  if (tempMailProvider === "mailtm") return mailtm?.address ?? "";
+  const { tempMailProvider, guerrilla, onesecmail } = state;
   if (tempMailProvider === "guerrilla") return guerrilla?.email ?? "";
   return onesecmail?.email ?? "";
 }
@@ -49,14 +47,7 @@ export function TempMailTab({ state, setState, patch, ready }: Props) {
         createdAt: Date.now(),
       };
 
-      if (provider === "mailtm") {
-        const acc = await mailtmCreate();
-        historyEntry.address = acc.address;
-        setState({
-          mailtm: acc,
-          history: [historyEntry, ...state.history.slice(0, 19)],
-        });
-      } else if (provider === "guerrilla") {
+      if (provider === "guerrilla") {
         const acc = await guerrillaNew();
         historyEntry.address = acc.email;
         setState({
@@ -83,7 +74,6 @@ export function TempMailTab({ state, setState, patch, ready }: Props) {
     setSelectedId(null);
 
     const hasInbox =
-      (p === "mailtm" && state.mailtm) ||
       (p === "guerrilla" && state.guerrilla) ||
       (p === "onesecmail" && state.onesecmail);
 
@@ -92,11 +82,7 @@ export function TempMailTab({ state, setState, patch, ready }: Props) {
       setCreateError(null);
       try {
         const historyEntry: HistoryEntry = { address: "", provider: p, createdAt: Date.now() };
-        if (p === "mailtm") {
-          const acc = await mailtmCreate();
-          historyEntry.address = acc.address;
-          setState({ mailtm: acc, tempMailProvider: p, history: [historyEntry, ...state.history.slice(0, 19)] });
-        } else if (p === "guerrilla") {
+        if (p === "guerrilla") {
           const acc = await guerrillaNew();
           historyEntry.address = acc.email;
           setState({ guerrilla: acc, tempMailProvider: p, history: [historyEntry, ...state.history.slice(0, 19)] });

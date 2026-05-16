@@ -12,53 +12,6 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-// ── mail.tm ────────────────────────────────────────────────────────────────
-
-export async function mailtmDomains(): Promise<{ domains: string[] }> {
-  return apiFetch("/api/temp-mail/domains");
-}
-
-export async function mailtmCreate(username?: string, domain?: string) {
-  return apiFetch<{ id: string; address: string; token: string }>("/api/temp-mail/create", {
-    method: "POST",
-    body: JSON.stringify({ username, domain }),
-  });
-}
-
-export async function mailtmMessages(token: string) {
-  return apiFetch<{ messages: RawMailTmMessage[] }>("/api/temp-mail/messages", {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-}
-
-export async function mailtmMessage(id: string, token: string) {
-  return apiFetch<RawMailTmMessage>(`/api/temp-mail/messages/${id}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-}
-
-interface RawMailTmMessage {
-  id: string;
-  from?: { address?: string; name?: string };
-  subject?: string;
-  intro?: string;
-  createdAt?: string;
-  text?: string;
-  html?: string[];
-}
-
-export function normaliseMailTm(m: RawMailTmMessage) {
-  return {
-    id: m.id,
-    from: m.from?.address ?? m.from?.name ?? "",
-    subject: m.subject ?? "(no subject)",
-    date: m.createdAt ?? "",
-    body: (m.html?.[0] ?? m.text) ?? "",
-    bodyContentType: (m.html?.length ? "html" : "text") as "html" | "text",
-    intro: m.intro ?? "",
-  };
-}
-
 // ── Guerrilla Mail ─────────────────────────────────────────────────────────
 
 export async function guerrillaNew() {

@@ -11,7 +11,6 @@ interface Props {
 }
 
 const PROVIDER_LABELS: Record<string, string> = {
-  mailtm: "mail.tm",
   guerrilla: "Guerrilla",
   onesecmail: "1secmail",
   gmail: "Gmail",

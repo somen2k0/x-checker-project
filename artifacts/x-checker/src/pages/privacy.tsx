@@ -53,7 +53,7 @@ All data in transit is encrypted via HTTPS/TLS. We use industry-standard securit
 
 - **X (Twitter) API** — used to check account status. Usernames are sent to X's API servers to retrieve status information. This is subject to X's own Privacy Policy.
 - **Groq API** — used to power the Bio Generator. Your requests are sent to Groq's servers using the API key you provide. This is subject to Groq's Privacy Policy.
-- **mail.tm & Guerrilla Mail** — used for the Temp Mail tool to create disposable inboxes. These are third-party services with their own privacy policies.
+- **Guerrilla Mail & 1secmail** — used for the Temp Mail tool to create disposable inboxes. These are third-party services with their own privacy policies.
 - **Google Analytics** — used in aggregate, anonymized form to understand how tools are used. No personally identifiable information is shared.
 
 We have no control over the data practices of these third-party services.`,

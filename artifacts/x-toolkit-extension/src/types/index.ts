@@ -1,11 +1,5 @@
-export type Provider = "mailtm" | "guerrilla" | "onesecmail";
+export type Provider = "guerrilla" | "onesecmail";
 export type GmailProvider = "gmail" | "outlook" | "hotmail";
-
-export interface MailTmAccount {
-  id: string;
-  address: string;
-  token: string;
-}
 
 export interface GuerrillaAccount {
   email: string;
@@ -45,7 +39,6 @@ export interface HistoryEntry {
 
 export interface StoredState {
   tempMailProvider: Provider;
-  mailtm: MailTmAccount | null;
   guerrilla: GuerrillaAccount | null;
   onesecmail: OnesecmailAccount | null;
   gmail: GmailAccount | null;
@@ -56,8 +49,7 @@ export interface StoredState {
 }
 
 export const DEFAULT_STATE: StoredState = {
-  tempMailProvider: "mailtm",
-  mailtm: null,
+  tempMailProvider: "guerrilla",
   guerrilla: null,
   onesecmail: null,
   gmail: null,

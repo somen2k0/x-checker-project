@@ -13,7 +13,7 @@ const features = [
   {
     icon: Zap,
     title: "Instant inbox generation",
-    desc: "Opens to a ready-to-use temp email the moment you click the icon. Three providers: mail.tm, Guerrilla Mail, and 1secmail.",
+    desc: "Opens to a ready-to-use temp email the moment you click the icon. Two providers: Guerrilla Mail and 1secmail.",
   },
   {
     icon: Key,
@@ -115,7 +115,7 @@ export default function ChromeExtensionPage() {
             operatingSystem: "Chrome",
             offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
             description:
-              "A free Chrome extension for generating and monitoring disposable email inboxes directly from the browser toolbar. Supports mail.tm, Guerrilla Mail, 1secmail, and temp Gmail addresses.",
+              "A free Chrome extension for generating and monitoring disposable email inboxes directly from the browser toolbar. Supports Guerrilla Mail, 1secmail, and temp Gmail addresses.",
             author: { "@type": "Organization", name: "X Toolkit", url: "https://xtoolkit.live" },
           },
         ]}
@@ -186,7 +186,7 @@ export default function ChromeExtensionPage() {
 
               {/* Provider tabs */}
               <div className="flex gap-1 px-3 py-2 border-b border-[#1e2a3a]">
-                {["mail.tm", "Guerrilla", "1secmail"].map((p, i) => (
+                {["Guerrilla", "1secmail"].map((p, i) => (
                   <div key={p} className={`flex-1 text-center py-1 rounded-md text-[10px] font-medium border ${i === 0 ? "border-primary/60 bg-primary/10 text-primary" : "border-[#1e2a3a] text-[#71767b]"}`}>
                     {p}
                   </div>

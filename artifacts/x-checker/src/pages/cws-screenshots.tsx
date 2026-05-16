@@ -121,7 +121,7 @@ function Screenshot1() {
       <PopupShell activeTab={0}>
         {/* Provider tabs */}
         <div className="flex gap-1 px-3 py-2 border-b border-[#1e2a3a] shrink-0">
-          {["mail.tm", "Guerrilla", "1secmail"].map((p, i) => (
+          {["Guerrilla", "1secmail"].map((p, i) => (
             <div key={p} className={`flex-1 text-center py-1 rounded-md text-[10px] font-medium border ${i === 0 ? "border-[#6366f1]/60 bg-[#6366f1]/10 text-[#6366f1]" : "border-[#1e2a3a] text-[#71767b]"}`}>
               {p}
             </div>
