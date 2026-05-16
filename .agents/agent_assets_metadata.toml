@@ -24,3 +24,9 @@ id = "BqRXsGpoVT9Vz5skqrtdm"
 uri = "file://screenshots/cws-screenshot-3.jpg"
 type = "image"
 title = "Screenshot 3 — Gmail tab with generated address variants"
+
+[[outputs]]
+id = "u3XJY5ejdVqs6p4Miba7l"
+uri = "file://x-toolkit-extension-v1.0.0.zip"
+type = "unspecified"
+title = "X Toolkit Chrome Extension v1.0.0"
