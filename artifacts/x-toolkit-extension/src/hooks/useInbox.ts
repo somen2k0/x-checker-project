@@ -13,6 +13,11 @@ import { stripHtml, getIntro } from "../lib/otp";
 const REFRESH_INTERVAL = 15_000;
 
 export function useTempMailInbox(state: StoredState, ready: boolean) {
+  // Extract only the values this hook actually needs so that unrelated storage
+  // changes (e.g. seenMessageIds, lastPollAt written by the service worker)
+  // do NOT recreate `fetch` and restart the interval with a full initial load.
+  const { tempMailProvider, guerrilla, onesecmail, freemail } = state;
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -20,8 +25,6 @@ export function useTempMailInbox(state: StoredState, ready: boolean) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetch = useCallback(async (isRefresh = false) => {
-    const { tempMailProvider, guerrilla, onesecmail, freemail } = state;
-
     if (tempMailProvider === "guerrilla" && !guerrilla) return;
     if (tempMailProvider === "onesecmail" && !onesecmail) return;
     if (tempMailProvider === "freemail" && !freemail) return;
@@ -67,7 +70,10 @@ export function useTempMailInbox(state: StoredState, ready: boolean) {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [state]);
+  // Only depend on the specific credentials, NOT the whole `state` object.
+  // The full `state` changes every 15s when the service worker writes storage,
+  // which would restart this effect and do a full initial load each time.
+  }, [tempMailProvider, guerrilla, onesecmail, freemail]);
 
   useEffect(() => {
     if (!ready) return;
@@ -82,6 +88,9 @@ export function useTempMailInbox(state: StoredState, ready: boolean) {
 }
 
 export function useGmailInbox(state: StoredState, ready: boolean) {
+  // Extract only gmail so unrelated storage writes don't restart this hook.
+  const { gmail } = state;
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -89,7 +98,6 @@ export function useGmailInbox(state: StoredState, ready: boolean) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetch = useCallback(async (isRefresh = false) => {
-    const { gmail } = state;
     if (!gmail) return;
 
     isRefresh ? setRefreshing(true) : setLoading(true);
@@ -113,7 +121,7 @@ export function useGmailInbox(state: StoredState, ready: boolean) {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [state]);
+  }, [gmail]);
 
   useEffect(() => {
     if (!ready) return;
@@ -138,12 +146,10 @@ export async function fetchFullMessage(
   }
   if (tempMailProvider === "onesecmail" && onesecmail) {
     const m = await onesecmailMessage(msgId, onesecmail.login, onesecmail.domain);
-    // Use || not ?? so an empty string falls through to the next field
     return { body: m.htmlBody || m.textBody || m.body || "", bodyContentType: "html" };
   }
   if (tempMailProvider === "freemail" && freemail) {
     const m = await freemailMessage(msgId, freemail.token);
-    // Use || not ?? so an empty string falls through to the next field
     return { body: m.htmlBody || m.textBody || "", bodyContentType: m.htmlBody ? "html" : "text" };
   }
   throw new Error("No active inbox");
