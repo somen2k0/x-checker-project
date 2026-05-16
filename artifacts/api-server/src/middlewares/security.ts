@@ -12,6 +12,7 @@ export const helmetMiddleware = helmet({
         "'self'",
         "'unsafe-inline'",
         "https://www.clarity.ms",
+        "https://*.clarity.ms",
         "https://www.googletagmanager.com",
         "https://www.google-analytics.com",
       ],
@@ -26,7 +27,8 @@ export const helmetMiddleware = helmet({
       ],
       connectSrc: [
         "'self'",
-        "https://e.clarity.ms",
+        "https://www.clarity.ms",
+        "https://*.clarity.ms",
         "https://www.google-analytics.com",
         "https://analytics.google.com",
         "https://region1.google-analytics.com",
