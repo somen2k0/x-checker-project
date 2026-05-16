@@ -83,6 +83,7 @@ import TempMailVsGmail from "@/pages/blog/temp-mail-vs-gmail";
 import IsTempMailSafe from "@/pages/blog/is-temp-mail-safe";
 import WhyWebsitesAskEmailVerification from "@/pages/blog/why-websites-ask-email-verification";
 import TempGmailExplained from "@/pages/blog/temp-gmail-explained";
+import HowToUseTempEmailExtension from "@/pages/blog/how-to-use-temp-email-extension";
 // Category pages
 import AiWritingTools from "@/pages/categories/ai-writing-tools";
 import SocialMediaTools from "@/pages/categories/social-media-tools";
@@ -181,6 +182,7 @@ function TrackedRouter() {
       <Route path="/blog/is-temp-mail-safe" component={IsTempMailSafe} />
       <Route path="/blog/why-websites-ask-email-verification" component={WhyWebsitesAskEmailVerification} />
       <Route path="/blog/temp-gmail-explained" component={TempGmailExplained} />
+      <Route path="/blog/how-to-use-temp-email-extension" component={HowToUseTempEmailExtension} />
 
       {/* Previously coming-soon — now live */}
       <Route path="/tools/follower-analyzer" component={FollowerAnalyzer} />

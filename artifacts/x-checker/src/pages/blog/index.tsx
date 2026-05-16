@@ -2,9 +2,20 @@ import { Link } from "wouter";
 import { Layout } from "@/components/layout/Layout";
 import { SeoHead } from "@/components/SeoHead";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Clock, ArrowRight, Mail, Shield, HelpCircle, Star, ArrowLeftRight } from "lucide-react";
+import { BookOpen, Clock, ArrowRight, Mail, Shield, HelpCircle, Star, ArrowLeftRight, Chrome } from "lucide-react";
 
 const ARTICLES = [
+  {
+    slug: "how-to-use-temp-email-extension",
+    href: "/blog/how-to-use-temp-email-extension",
+    title: "How to Use a Temp Email Chrome Extension",
+    description: "Step-by-step guide: install, generate a disposable inbox, auto-copy OTP codes, use temp Gmail, and get background notifications — all from your toolbar.",
+    readTime: "7 min",
+    category: "Guide",
+    icon: Chrome,
+    color: "text-violet-400",
+    bg: "bg-violet-400/10 border-violet-400/20",
+  },
   {
     slug: "what-is-disposable-email",
     href: "/blog/what-is-disposable-email",

@@ -22,6 +22,14 @@
 
   <!-- ── Articles: ordered by expected search volume / priority ────── -->
 
+  <!-- High commercial intent: "how to use temp email extension" — targets downloaders -->
+  <url>
+    <loc>https://xtoolkit.live/blog/how-to-use-temp-email-extension</loc>
+    <lastmod>2026-05-16</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.83</priority>
+  </url>
+
   <!-- High intent / evergreen: "what is disposable email" is a top TOFU query -->
   <url>
     <loc>https://xtoolkit.live/blog/what-is-disposable-email</loc>
