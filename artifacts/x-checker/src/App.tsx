@@ -9,6 +9,7 @@ import NotFound from "@/pages/not-found";
 import AdminPage from "@/pages/admin";
 import Home from "@/pages/home";
 import ChromeExtension from "@/pages/chrome-extension";
+import CwsScreenshots from "@/pages/cws-screenshots";
 import Tools from "@/pages/tools";
 import About from "@/pages/about";
 import Privacy from "@/pages/privacy";
@@ -207,6 +208,7 @@ function TrackedRouter() {
       <Route path="/email-tools" component={EmailTools} />
 
       <Route path="/chrome-extension" component={ChromeExtension} />
+      <Route path="/cws-screenshots" component={CwsScreenshots} />
       <Route path="/admin" component={AdminPage} />
       <Route component={NotFound} />
     </Switch>
