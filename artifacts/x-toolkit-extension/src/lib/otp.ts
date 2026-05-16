@@ -37,7 +37,16 @@ export function isVerificationEmail(subject: string, from: string): boolean {
 
 export function formatDate(dateStr: string): string {
   try {
-    const d = new Date(dateStr);
+    if (!dateStr) return "—";
+    // Guerrilla Mail (and some others) return Unix timestamps as numeric strings.
+    // If the whole string is a number, treat it as seconds-since-epoch.
+    const asNumber = Number(dateStr);
+    const d = !isNaN(asNumber) && dateStr.trim() !== ""
+      ? new Date(asNumber * 1000)
+      : new Date(dateStr);
+
+    if (isNaN(d.getTime())) return "—";
+
     const now = new Date();
     const diffMs = now.getTime() - d.getTime();
     const diffMin = Math.floor(diffMs / 60000);
@@ -47,7 +56,7 @@ export function formatDate(dateStr: string): string {
     if (diffHr < 24) return `${diffHr}h ago`;
     return d.toLocaleDateString();
   } catch {
-    return dateStr;
+    return "—";
   }
 }
 

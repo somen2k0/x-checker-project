@@ -54,7 +54,11 @@ export function useTempMailInbox(state: StoredState, ready: boolean) {
 
       setMessages(msgs);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch inbox");
+      // On a background refresh failure, keep existing messages visible so the
+      // inbox doesn't appear to vanish due to a transient network/API error.
+      if (!isRefresh) {
+        setError(err instanceof Error ? err.message : "Failed to fetch inbox");
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -95,7 +99,10 @@ export function useGmailInbox(state: StoredState, ready: boolean) {
       });
       setMessages(msgs);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch inbox");
+      // On a background refresh failure, keep existing messages visible.
+      if (!isRefresh) {
+        setError(err instanceof Error ? err.message : "Failed to fetch inbox");
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);

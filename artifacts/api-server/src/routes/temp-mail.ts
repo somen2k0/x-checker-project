@@ -131,7 +131,7 @@ router.get("/guerrilla/inbox", async (req, res) => {
   if (!sid_token) { res.status(400).json({ error: "sid_token required." }); return; }
   try {
     const r = await gFetch({ f: "check_email", seq: "0" }, sid_token);
-    if (!r.ok) { res.json({ messages: [] }); return; }
+    if (!r.ok) { res.status(502).json({ error: "Could not reach Guerrilla Mail." }); return; }
     const d = await r.json() as { list?: unknown };
     const raw = Array.isArray(d.list) ? d.list : [];
     // Filter out the Guerrilla Mail placeholder entry (mail_id "0") which is
@@ -143,7 +143,7 @@ router.get("/guerrilla/inbox", async (req, res) => {
     res.json({ messages });
   } catch (err) {
     req.log.error({ err }, "guerrilla inbox error");
-    res.json({ messages: [] });
+    res.status(502).json({ error: "Failed to fetch inbox. Please try again." });
   }
 });
 
