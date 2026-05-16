@@ -1,27 +1,63 @@
 import { Router } from "express";
 
 const router = Router();
-const MAILGW_BASE = "https://api.mail.gw";
 
-// ── Domain cache (10-min TTL) ──────────────────────────────────────────────
-let cachedDomains: string[] = [];
-let cacheExpiry = 0;
+// ── Provider base URLs ─────────────────────────────────────────────────────
+const PROVIDERS = [
+  { prefix: "mgw", base: "https://api.mail.gw",  fallback: ["oakon.com"] },
+  { prefix: "mtm", base: "https://api.mail.tm",   fallback: ["wshu.net"] },
+] as const;
+type Prefix = "mgw" | "mtm";
 
-async function getMailgwDomains(): Promise<string[]> {
-  if (Date.now() < cacheExpiry && cachedDomains.length > 0) return cachedDomains;
+// ── Domain cache (10-min TTL per provider) ────────────────────────────────
+const domainCache: Record<Prefix, { domains: string[]; expiry: number }> = {
+  mgw: { domains: [], expiry: 0 },
+  mtm: { domains: [], expiry: 0 },
+};
+
+async function fetchProviderDomains(prefix: Prefix, base: string, fallback: readonly string[]): Promise<string[]> {
+  const cache = domainCache[prefix];
+  if (Date.now() < cache.expiry && cache.domains.length > 0) return cache.domains;
   try {
-    const r = await fetch(`${MAILGW_BASE}/domains`, { signal: AbortSignal.timeout(8000) });
-    if (!r.ok) return cachedDomains.length ? cachedDomains : ["oakon.com"];
-    const d = await r.json() as { "hydra:member"?: Array<{ domain: string; isActive: boolean }> };
-    const domains = (d["hydra:member"] ?? []).filter(x => x.isActive).map(x => x.domain);
+    const r = await fetch(`${base}/domains`, { signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return cache.domains.length ? cache.domains : [...fallback];
+    const d = await r.json() as { "hydra:member"?: Array<{ domain: string; isActive: boolean; isPrivate?: boolean }> };
+    const domains = (d["hydra:member"] ?? [])
+      .filter(x => x.isActive && !x.isPrivate)
+      .map(x => x.domain);
     if (domains.length > 0) {
-      cachedDomains = domains;
-      cacheExpiry = Date.now() + 10 * 60 * 1000;
+      cache.domains = domains;
+      cache.expiry = Date.now() + 10 * 60 * 1000;
     }
-    return cachedDomains.length ? cachedDomains : ["oakon.com"];
+    return cache.domains.length ? cache.domains : [...fallback];
   } catch {
-    return cachedDomains.length ? cachedDomains : ["oakon.com"];
+    return cache.domains.length ? cache.domains : [...fallback];
   }
+}
+
+async function getAllDomains(): Promise<{ domain: string; prefix: Prefix }[]> {
+  const results = await Promise.allSettled(
+    PROVIDERS.map(p => fetchProviderDomains(p.prefix, p.base, p.fallback).then(ds => ds.map(d => ({ domain: d, prefix: p.prefix }))))
+  );
+  return results.flatMap(r => r.status === "fulfilled" ? r.value : []);
+}
+
+function baseForPrefix(prefix: Prefix): string {
+  return PROVIDERS.find(p => p.prefix === prefix)?.base ?? PROVIDERS[0].base;
+}
+
+function prefixForDomain(domain: string, tagged: { domain: string; prefix: Prefix }[]): Prefix {
+  return tagged.find(x => x.domain === domain)?.prefix ?? "mgw";
+}
+
+// ── Token encoding — prefix:JWT ───────────────────────────────────────────
+function encodeToken(prefix: Prefix, jwt: string): string { return `${prefix}:${jwt}`; }
+function decodeToken(raw: string): { prefix: Prefix; jwt: string } | null {
+  const colon = raw.indexOf(":");
+  if (colon < 0) return null;
+  const prefix = raw.slice(0, colon) as Prefix;
+  if (!PROVIDERS.find(p => p.prefix === prefix)) return null;
+  return { prefix, jwt: raw.slice(colon + 1) };
 }
 
 // ── Username generator ─────────────────────────────────────────────────────
@@ -59,22 +95,22 @@ interface NormMsg {
   textBody?: string;
 }
 
-// ── mail.gw API helpers ────────────────────────────────────────────────────
-async function mailgwCreateAccount(address: string, password: string): Promise<boolean> {
+// ── Shared API helpers (both providers use identical REST shape) ───────────
+async function createAccount(base: string, address: string, password: string): Promise<boolean> {
   try {
-    const r = await fetch(`${MAILGW_BASE}/accounts`, {
+    const r = await fetch(`${base}/accounts`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ address, password }),
       signal: AbortSignal.timeout(10000),
     });
-    return r.ok || r.status === 422;
+    return r.ok; // only true on 2xx — 422 means taken, password unknown
   } catch { return false; }
 }
 
-async function mailgwGetToken(address: string, password: string): Promise<string | null> {
+async function getJwt(base: string, address: string, password: string): Promise<string | null> {
   try {
-    const r = await fetch(`${MAILGW_BASE}/token`, {
+    const r = await fetch(`${base}/token`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ address, password }),
@@ -86,10 +122,10 @@ async function mailgwGetToken(address: string, password: string): Promise<string
   } catch { return null; }
 }
 
-async function mailgwInbox(token: string): Promise<NormMsg[]> {
+async function fetchInbox(base: string, jwt: string): Promise<NormMsg[]> {
   try {
-    const r = await fetch(`${MAILGW_BASE}/messages`, {
-      headers: { Authorization: `Bearer ${token}` },
+    const r = await fetch(`${base}/messages`, {
+      headers: { Authorization: `Bearer ${jwt}` },
       signal: AbortSignal.timeout(10000),
     });
     if (!r.ok) return [];
@@ -112,10 +148,10 @@ async function mailgwInbox(token: string): Promise<NormMsg[]> {
   } catch { return []; }
 }
 
-async function mailgwMessage(id: string, token: string): Promise<NormMsg | null> {
+async function fetchMessage(base: string, id: string, jwt: string): Promise<NormMsg | null> {
   try {
-    const r = await fetch(`${MAILGW_BASE}/messages/${encodeURIComponent(id)}`, {
-      headers: { Authorization: `Bearer ${token}` },
+    const r = await fetch(`${base}/messages/${encodeURIComponent(id)}`, {
+      headers: { Authorization: `Bearer ${jwt}` },
       signal: AbortSignal.timeout(10000),
     });
     if (!r.ok) return null;
@@ -141,65 +177,77 @@ async function mailgwMessage(id: string, token: string): Promise<NormMsg | null>
 // ── Routes ─────────────────────────────────────────────────────────────────
 
 router.get("/freemail/domains", async (_req, res) => {
-  const domains = await getMailgwDomains();
-  res.json({ domains });
+  const tagged = await getAllDomains();
+  res.json({ domains: tagged.map(x => x.domain) });
 });
 
 router.get("/freemail/new", async (req, res) => {
-  const domains = await getMailgwDomains();
+  const tagged = await getAllDomains();
+  if (tagged.length === 0) { res.status(503).json({ error: "No domains available." }); return; }
+
   const reqDomain = (req.query.domain as string | undefined)?.toLowerCase().trim();
-  const domain = (reqDomain && domains.includes(reqDomain))
-    ? reqDomain
-    : domains[Math.floor(Math.random() * domains.length)];
+  const entry = (reqDomain && tagged.find(x => x.domain === reqDomain))
+    ?? tagged[Math.floor(Math.random() * tagged.length)];
 
-  if (!domain) { res.status(503).json({ error: "No domains available." }); return; }
-
-  const login = randomLogin();
-  const address = `${login}@${domain}`;
+  const { domain, prefix } = entry;
+  const base = baseForPrefix(prefix);
   const password = randomPassword();
 
-  const created = await mailgwCreateAccount(address, password);
-  if (!created) { res.status(503).json({ error: "Failed to create mailbox." }); return; }
+  let login = randomLogin();
+  let jwt: string | null = null;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    if (attempt > 0) login = randomLogin();
+    const created = await createAccount(base, `${login}@${domain}`, password);
+    if (!created) continue;
+    jwt = await getJwt(base, `${login}@${domain}`, password);
+    if (jwt) break;
+  }
 
-  const token = await mailgwGetToken(address, password);
-  if (!token) { res.status(503).json({ error: "Failed to authenticate." }); return; }
+  if (!jwt) { res.status(503).json({ error: "Failed to create mailbox — all attempts failed." }); return; }
 
-  res.json({ login, domain, email: address, token });
+  res.json({ login, domain, email: `${login}@${domain}`, token: encodeToken(prefix, jwt) });
 });
 
 router.post("/freemail/set-address", async (req, res) => {
   const { login: rawLogin, domain: rawDomain } = req.body as { login?: string; domain?: string };
-  const domains = await getMailgwDomains();
-  const domain = (rawDomain && domains.includes(rawDomain.toLowerCase()))
-    ? rawDomain.toLowerCase()
-    : domains[Math.floor(Math.random() * domains.length)];
+  const tagged = await getAllDomains();
+  if (tagged.length === 0) { res.status(503).json({ error: "No domains available." }); return; }
 
-  if (!domain) { res.status(503).json({ error: "No domains available." }); return; }
+  const entry = (rawDomain && tagged.find(x => x.domain === rawDomain.toLowerCase()))
+    ?? tagged[Math.floor(Math.random() * tagged.length)];
 
-  const login = rawLogin
-    ? rawLogin.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0, 30) || randomLogin()
-    : randomLogin();
-
-  const address = `${login}@${domain}`;
+  const { domain, prefix } = entry;
+  const base = baseForPrefix(prefix);
   const password = randomPassword();
+  const requestedLogin = rawLogin
+    ? rawLogin.trim().toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0, 30) || null
+    : null;
 
-  const created = await mailgwCreateAccount(address, password);
-  if (!created) { res.status(503).json({ error: "Failed to create mailbox." }); return; }
+  let login = requestedLogin ?? randomLogin();
+  let jwt: string | null = null;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    if (attempt > 0) login = randomLogin(); // fall back to random if requested name is taken
+    const created = await createAccount(base, `${login}@${domain}`, password);
+    if (!created) continue;
+    jwt = await getJwt(base, `${login}@${domain}`, password);
+    if (jwt) break;
+  }
 
-  const token = await mailgwGetToken(address, password);
-  if (!token) { res.status(503).json({ error: "Failed to authenticate." }); return; }
+  if (!jwt) { res.status(503).json({ error: "Failed to create mailbox — all attempts failed." }); return; }
 
-  res.json({ login, domain, email: address, token });
+  res.json({ login, domain, email: `${login}@${domain}`, token: encodeToken(prefix, jwt) });
 });
 
 router.get("/freemail/inbox", async (req, res) => {
   const { token } = req.query as { token?: string };
   if (!token) { res.status(400).json({ error: "token required." }); return; }
+  const decoded = decodeToken(token);
+  if (!decoded) { res.status(400).json({ error: "Invalid token format." }); return; }
   try {
-    const messages = await mailgwInbox(token);
+    const messages = await fetchInbox(baseForPrefix(decoded.prefix), decoded.jwt);
     res.json({ messages });
   } catch (err) {
-    req.log.error({ err }, "mailgw inbox error");
+    req.log.error({ err }, "freemail inbox error");
     res.json({ messages: [] });
   }
 });
@@ -208,14 +256,22 @@ router.get("/freemail/message/:id", async (req, res) => {
   const { token } = req.query as { token?: string };
   const { id } = req.params;
   if (!token) { res.status(400).json({ error: "token required." }); return; }
+  const decoded = decodeToken(token);
+  if (!decoded) { res.status(400).json({ error: "Invalid token format." }); return; }
   try {
-    const msg = await mailgwMessage(id, token);
+    const msg = await fetchMessage(baseForPrefix(decoded.prefix), id, decoded.jwt);
     if (!msg) { res.status(404).json({ error: "Message not found." }); return; }
     res.json(msg);
   } catch (err) {
-    req.log.error({ err }, "mailgw message error");
+    req.log.error({ err }, "freemail message error");
     res.status(500).json({ error: "Failed to fetch message." });
   }
+});
+
+// ── Helper used by domain picker display (prefix per domain) ──────────────
+router.get("/freemail/domains-tagged", async (_req, res) => {
+  const tagged = await getAllDomains();
+  res.json({ domains: tagged });
 });
 
 export default router;
