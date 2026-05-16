@@ -351,14 +351,6 @@ export function Navbar() {
 
             <TempMailNavItem currentPath={location} />
 
-            <Link href="/chrome-extension">
-              <button className={`px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-1.5 ${
-                location === "/chrome-extension" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              }`}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Extension
-              </button>
-            </Link>
             <Link href="/about">
               <button className={`px-2.5 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
                 location === "/about" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -371,18 +363,24 @@ export function Navbar() {
           {/* Right side */}
           <div className="flex items-center gap-1.5 shrink-0">
             <NavSearchDialog />
-            <div className="hidden xl:flex items-center gap-1.5 text-xs text-muted-foreground">
-              <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[11px]">All systems operational</span>
-            </div>
+            <Link href="/chrome-extension">
+              <button className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors whitespace-nowrap border ${
+                location === "/chrome-extension"
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-primary/10 text-primary border-primary/30 hover:bg-primary/20"
+              }`}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Extension
+              </button>
+            </Link>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowFeedback(true)}
-              className="hidden lg:flex text-xs border-border/60 hover:bg-muted/50 gap-1.5 h-8"
+              className="hidden xl:flex text-xs border-border/60 hover:bg-muted/50 gap-1.5 h-8"
             >
               <MessageSquare className="h-3.5 w-3.5" />
-              <span className="hidden xl:inline">Feedback</span>
+              Feedback
             </Button>
             {/* Mobile hamburger */}
             <button
