@@ -32,6 +32,16 @@
     </image:image>
   </url>
 
+  <!-- Chrome Extension — high-intent product/download page -->
+  <url>
+    <loc>https://xtoolkit.live/chrome-extension</loc>
+    <image:image>
+      <image:loc>https://xtoolkit.live/opengraph.jpg</image:loc>
+      <image:title>X Toolkit Chrome Extension — Free Temp Email &amp; OTP Detector</image:title>
+      <image:caption>Free Chrome extension for instant disposable email inboxes, automatic OTP code detection, Gmail tricks, and background notifications. No account needed.</image:caption>
+    </image:image>
+  </url>
+
   <!-- Temp Mail hub — primary product page -->
   <url>
     <loc>https://xtoolkit.live/tools/temp-mail</loc>

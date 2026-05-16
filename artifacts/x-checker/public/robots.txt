@@ -1,8 +1,19 @@
 # robots.txt — xtoolkit.live
-# Last updated: 2026-05-14
+# Last updated: 2026-05-16
 
 # ── General crawlers ──────────────────────────────────────────────────
 User-agent: *
+Allow: /
+Allow: /chrome-extension
+Disallow: /api/
+Disallow: /admin
+
+# ── Googlebot — explicit priority hints ───────────────────────────────
+# The /chrome-extension page is a key product page with rich structured
+# data (SoftwareApplication, WebPage, BreadcrumbList, HowTo, FAQPage).
+# Explicit Allow ensures it is never shadowed by the /api/ Disallow rule.
+User-agent: Googlebot
+Allow: /chrome-extension
 Allow: /
 Disallow: /api/
 Disallow: /admin
