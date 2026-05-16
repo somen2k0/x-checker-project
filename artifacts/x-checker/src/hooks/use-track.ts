@@ -1,6 +1,5 @@
 import { useEffect, useCallback, useRef } from "react";
 import { trackEvent, trackPageView, type EventName, type TrackParams } from "@/lib/analytics";
-import { clarityTrackPage } from "@/lib/clarity";
 import { useLocation } from "wouter";
 
 export function useTrack(tool: string) {
@@ -23,9 +22,6 @@ export function usePageTracking() {
 
     // Send to GA4 (consent-gated)
     trackPageView(location);
-
-    // Send to Microsoft Clarity (production-only, no-op otherwise)
-    clarityTrackPage(location);
 
     // Send to our own backend (always — no PII stored)
     fetch("/api/track", {
