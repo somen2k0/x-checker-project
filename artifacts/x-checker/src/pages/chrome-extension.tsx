@@ -72,28 +72,52 @@ const steps = [
 
 const faqs = [
   {
+    q: "What is the X Toolkit Chrome extension?",
+    a: "X Toolkit is a free Chrome extension that gives you an instant disposable email inbox directly in your browser toolbar. It auto-generates a temporary email address, polls for new messages every 15 seconds, detects OTP verification codes automatically, and lets you generate temp Gmail addresses — all without visiting any website.",
+  },
+  {
+    q: "How do I install the X Toolkit temp email Chrome extension?",
+    a: "Click 'Add to Chrome' from the Chrome Web Store listing, then click the puzzle-piece icon in your toolbar, find X Toolkit, and pin it. A temp email inbox is generated automatically the first time you open it — no account, no signup.",
+  },
+  {
     q: "Is the X Toolkit Chrome extension free?",
     a: "Yes, completely free. There are no premium tiers, no subscriptions, and no feature limits. The extension connects to the same free API that powers xtoolkit.live.",
   },
   {
-    q: "Which browsers does it work on?",
-    a: "The extension is built for Chromium-based browsers: Chrome, Brave, Edge, Arc, and Opera. Firefox support is planned for a future release.",
+    q: "Which browsers does the disposable email extension work on?",
+    a: "The extension works on all Chromium-based browsers: Google Chrome, Brave, Microsoft Edge, Arc, and Opera. It uses Manifest V3 and is compatible with any browser that supports it. Firefox support is planned for a future release.",
   },
   {
-    q: "What data does the extension collect?",
-    a: "None. The extension stores your active inbox credentials and history locally using Chrome's storage API. Nothing is sent to our servers beyond the API calls needed to generate and check your inbox.",
+    q: "How does the automatic OTP and verification code detection work?",
+    a: "The extension scans incoming email subjects and body text for 4–8 digit numeric codes. When it finds one, it shows a highlighted card at the top of your inbox with a single 'Copy' button — so you never have to manually read through the email to find your code.",
   },
   {
-    q: "What permissions does it need and why?",
-    a: "storage (to remember your inbox across sessions), notifications (to alert you of new emails), alarms (for background polling every 15 seconds), contextMenus (for the right-click \"Copy active email\" option), and clipboardWrite (to copy addresses and OTP codes). It only connects to xtoolkit.live.",
+    q: "Can I generate a temp Gmail address with the extension?",
+    a: "Yes. The Gmail tab inside the extension generates a real temporary @gmail.com address using the Gmail dot-trick — emails sent to it actually arrive in a live inbox you can read right inside the popup. You can also generate unlimited Gmail dot-trick and plus-tag variants from your own address.",
   },
   {
-    q: "Does it work when the popup is closed?",
-    a: "Yes. A Manifest V3 service worker polls your inbox every 15 seconds in the background and sends a desktop notification when new mail arrives.",
+    q: "What data does the extension collect or store?",
+    a: "None of your data is collected or tracked. The extension stores your active inbox session and address history locally on your device using Chrome's storage API. Nothing beyond the API calls needed to generate and check your inbox is ever sent to any server.",
   },
   {
-    q: "Can I use it alongside xtoolkit.live?",
-    a: "Yes, and we recommend it. The extension handles quick temp mail lookups from any page, while xtoolkit.live gives you 55+ tools — X account checker, SEO tools, developer utilities, AI tools, and more. Both connect to the same backend.",
+    q: "What permissions does the temp email extension need and why?",
+    a: "storage (to remember your inbox across sessions), notifications (to alert you when new mail arrives), alarms (for background polling every 15 seconds), contextMenus (for the right-click 'Copy active email' option), and clipboardWrite (to copy addresses and OTP codes with one click). It only connects to xtoolkit.live — no other domains.",
+  },
+  {
+    q: "Does the extension check my inbox when the popup is closed?",
+    a: "Yes. A lightweight Manifest V3 service worker runs in the background, polling your inbox every 15 seconds and sending a desktop notification the moment new mail arrives — even if you haven't opened the extension popup.",
+  },
+  {
+    q: "What is the keyboard shortcut to copy my temp email address?",
+    a: "Press Alt+Shift+C anywhere in your browser to instantly copy your active temp email address to the clipboard — without opening the popup. You can reassign this shortcut in Chrome's extension keyboard shortcut settings (chrome://extensions/shortcuts).",
+  },
+  {
+    q: "Can I use the extension without visiting the xtoolkit.live website?",
+    a: "Exactly — that's the whole point. The extension gives you a full temp email inbox from any tab or page, without ever navigating away. For 55+ additional tools (JSON formatter, X account checker, AI bio generator, SEO tools, and more), visit xtoolkit.live.",
+  },
+  {
+    q: "Is it safe to use a Chrome temp email extension?",
+    a: "Yes. The extension is open about every permission it requests, collects zero personal data, requires no account, and only communicates with xtoolkit.live — which you can verify in the Chrome Web Store's 'Privacy practices' tab. Disposable inboxes are public by design, so avoid using them for sensitive communications.",
   },
 ];
 
@@ -101,22 +125,95 @@ export default function ChromeExtensionPage() {
   return (
     <Layout>
       <SeoHead
-        title="X Toolkit Chrome Extension — Free Temp Email in Your Browser"
-        description="Install the free X Toolkit Chrome Extension to generate disposable email inboxes, auto-detect OTP codes, and get notified of new emails — directly from your browser toolbar."
+        title="X Toolkit Chrome Extension — Free Temp Email & OTP Detector"
+        description="Free Chrome extension for instant disposable email inboxes, automatic OTP code detection, temp Gmail address generation & background notifications. No account needed — works instantly."
         path="/chrome-extension"
-        keywords="temp email chrome extension, disposable email extension, temp mail browser extension, temporary email chrome, otp detector extension, x toolkit temp mail"
+        keywords="temp email chrome extension, disposable email extension chrome, temporary email chrome extension free, throwaway email browser extension, fake email chrome extension, otp auto copy chrome extension, temp mail extension, x toolkit chrome extension, gmail tricks extension, anonymous email chrome, burner email extension, disposable inbox chrome, privacy email extension, chrome temp email generator, otp detector extension, temp gmail chrome extension, x toolkit extension download, free disposable email browser extension"
         faqs={faqs}
         extraSchemas={[
           {
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            name: "X Toolkit – Temp Email",
+            "@id": "https://xtoolkit.live/chrome-extension#software",
+            name: "X Toolkit – Free Temp Email Chrome Extension",
+            alternateName: ["X Toolkit Extension", "X Toolkit Temp Email", "XToolkit Chrome Extension", "Disposable Email Chrome Extension"],
             applicationCategory: "BrowserApplication",
-            operatingSystem: "Chrome",
-            offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+            applicationSubCategory: "Privacy",
+            operatingSystem: ["Chrome", "Brave", "Microsoft Edge", "Opera", "Arc"],
+            softwareVersion: VERSION,
+            offers: {
+              "@type": "Offer",
+              price: "0",
+              priceCurrency: "USD",
+              availability: "https://schema.org/InStock",
+            },
             description:
-              "A free Chrome extension for generating and monitoring disposable email inboxes directly from the browser toolbar. Supports 16 domains and temp Gmail addresses — no signup required.",
+              "A free Chrome extension for generating instant disposable email inboxes, automatically detecting OTP verification codes, creating temp Gmail addresses with live inbox, and receiving background email notifications — no account or signup required.",
+            featureList: [
+              "Instant disposable temp email inbox generation",
+              "Automatic OTP and verification code detection",
+              "Background email notifications via service worker",
+              "Auto-refresh inbox every 15 seconds",
+              "Temp Gmail address generation with live inbox",
+              "Gmail dot-trick and plus-tag variant generator",
+              "Inbox address history with recall",
+              "Alt+Shift+C keyboard shortcut to copy active email",
+              "Zero data collection — fully local storage",
+              "No account or signup required",
+            ],
+            downloadUrl: "https://chrome.google.com/webstore",
+            screenshot: "https://xtoolkit.live/opengraph.jpg",
+            isAccessibleForFree: true,
             author: { "@type": "Organization", name: "X Toolkit", url: "https://xtoolkit.live" },
+            publisher: { "@type": "Organization", name: "X Toolkit", url: "https://xtoolkit.live" },
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "@id": "https://xtoolkit.live/chrome-extension",
+            url: "https://xtoolkit.live/chrome-extension",
+            name: "X Toolkit Chrome Extension — Free Temp Email & OTP Detector",
+            description:
+              "Free Chrome extension for instant disposable email inboxes, automatic OTP code detection, temp Gmail address generation and background notifications.",
+            isPartOf: { "@type": "WebSite", "@id": "https://xtoolkit.live/" },
+            about: { "@type": "SoftwareApplication", "@id": "https://xtoolkit.live/chrome-extension#software" },
+            keywords:
+              "temp email chrome extension, disposable email extension, otp detector chrome, gmail tricks extension, throwaway email browser",
+            breadcrumb: {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Home", item: "https://xtoolkit.live/" },
+                { "@type": "ListItem", position: 2, name: "Chrome Extension", item: "https://xtoolkit.live/chrome-extension" },
+              ],
+            },
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "HowTo",
+            name: "How to install the X Toolkit Chrome Extension",
+            description: "Install the free X Toolkit temp email Chrome extension in 3 steps.",
+            step: [
+              {
+                "@type": "HowToStep",
+                position: 1,
+                name: "Open the Chrome Web Store",
+                text: "Click 'Add to Chrome' on the X Toolkit Chrome Web Store listing page.",
+              },
+              {
+                "@type": "HowToStep",
+                position: 2,
+                name: "Pin the extension",
+                text: "Click the puzzle-piece icon, find X Toolkit, and click the pin icon so it stays visible in your toolbar.",
+              },
+              {
+                "@type": "HowToStep",
+                position: 3,
+                name: "Open and use",
+                text: "Click the X Toolkit icon. A disposable email inbox is generated automatically — copy the address and use it anywhere.",
+              },
+            ],
+            totalTime: "PT1M",
+            tool: [{ "@type": "HowToTool", name: "Google Chrome or any Chromium browser" }],
           },
         ]}
       />
@@ -133,8 +230,7 @@ export default function ChromeExtensionPage() {
             <span className="text-primary">right in your toolbar</span>
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed">
-            The X Toolkit Chrome Extension gives you instant disposable email inboxes, automatic OTP
-            detection, and background notifications — without opening any website.
+            The free X Toolkit Chrome Extension gives you instant disposable email inboxes, automatic OTP code detection, temp Gmail address generation, and background notifications — without leaving whatever tab you're on.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-10">
@@ -357,6 +453,51 @@ export default function ChromeExtensionPage() {
               <div key={q} className="p-4 rounded-xl border border-border/60 bg-card">
                 <h3 className="font-semibold text-sm mb-2">{q}</h3>
                 <p className="text-xs text-muted-foreground leading-relaxed">{a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── SEO: Why use a temp email extension ──────────────────────────── */}
+      <section className="py-16 border-b border-border/40">
+        <div className="max-w-4xl mx-auto px-4 md:px-8">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-center">
+            Why use a disposable email Chrome extension?
+          </h2>
+          <p className="text-muted-foreground text-sm text-center max-w-2xl mx-auto mb-10 leading-relaxed">
+            A temp email extension lets you generate a throwaway inbox in one click — no new tab, no website, no signup. Here's why tens of thousands of people use one daily.
+          </p>
+          <div className="grid md:grid-cols-2 gap-6">
+            {[
+              {
+                heading: "Stop spam before it starts",
+                body: "Every time you hand over your real email to sign up for a trial, download a file, or join a forum, you risk spam and data breaches. A Chrome temp email extension creates a disposable inbox in seconds — use it, then discard it.",
+              },
+              {
+                heading: "Copy OTP codes without switching tabs",
+                body: "The extension auto-scans every incoming message for 4–8 digit verification codes and surfaces them with a single 'Copy' button. No more switching tabs and squinting at an email to find your OTP.",
+              },
+              {
+                heading: "Works on any website, from any tab",
+                body: "Unlike visiting a temp mail website, the extension popup is always one click away regardless of what page you're on — perfect for mid-checkout signups, form fills, or site registrations.",
+              },
+              {
+                heading: "Temp Gmail address with a real inbox",
+                body: "The Gmail tab generates a real @gmail.com address using Gmail's dot-trick. Emails sent to it arrive in a genuine inbox you can read inside the extension — great for services that block known throwaway domains.",
+              },
+              {
+                heading: "Background notifications keep you informed",
+                body: "A lightweight service worker polls your inbox every 15 seconds and fires a desktop notification the moment new mail lands — no need to keep the popup open.",
+              },
+              {
+                heading: "Works on Chrome, Brave, Edge, Arc & Opera",
+                body: "Built on Manifest V3, the extension runs in every major Chromium-based browser. Install it once and it works across all your devices signed in to the same browser profile.",
+              },
+            ].map(({ heading, body }) => (
+              <div key={heading} className="p-5 rounded-xl border border-border/60 bg-card">
+                <h3 className="font-semibold text-sm mb-2">{heading}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{body}</p>
               </div>
             ))}
           </div>
