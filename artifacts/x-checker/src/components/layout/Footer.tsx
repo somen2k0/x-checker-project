@@ -138,6 +138,7 @@ export function Footer() {
                 {[
                   { label: "About", href: "/about" },
                   { label: "Blog", href: "/blog" },
+                  { label: "Chrome Extension", href: "/chrome-extension" },
                   { label: "Privacy Policy", href: "/privacy" },
                   { label: "Terms of Service", href: "/terms" },
                   { label: "Contact / Feedback", action: () => setShowFeedback(true) },

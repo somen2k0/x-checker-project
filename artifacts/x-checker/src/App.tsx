@@ -8,6 +8,7 @@ import { usePageTracking } from "@/hooks/use-track";
 import NotFound from "@/pages/not-found";
 import AdminPage from "@/pages/admin";
 import Home from "@/pages/home";
+import ChromeExtension from "@/pages/chrome-extension";
 import Tools from "@/pages/tools";
 import About from "@/pages/about";
 import Privacy from "@/pages/privacy";
@@ -205,6 +206,7 @@ function TrackedRouter() {
       <Route path="/seo-tools" component={SeoTools} />
       <Route path="/email-tools" component={EmailTools} />
 
+      <Route path="/chrome-extension" component={ChromeExtension} />
       <Route path="/admin" component={AdminPage} />
       <Route component={NotFound} />
     </Switch>

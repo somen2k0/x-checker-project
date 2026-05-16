@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "n1_gsqhJYge2FNbuaqo_C"
+uri = "file://x-toolkit-extension-cws.zip"
+type = "unspecified"
+title = "X Toolkit Extension – Chrome Web Store Package"
