@@ -7,8 +7,9 @@ import {
   Mail, RefreshCw, Copy, Inbox, ArrowLeft,
   Clock, Loader2, MailOpen, AlertCircle, Shuffle,
   Plus, Hash, CheckCircle2, ExternalLink, ChevronDown,
-  Zap, Settings2,
+  Zap, Settings2, Download,
 } from "lucide-react";
+import { Link } from "wouter";
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -1309,6 +1310,29 @@ const TAB_CONFIG: Record<Tab, { seoTitle: string; seoDescription: string; icon: 
   },
 };
 
+// ── Extension promo banner ─────────────────────────────────────────
+
+function ExtensionBanner() {
+  return (
+    <div className="rounded-2xl border border-primary/25 bg-gradient-to-r from-primary/8 via-primary/5 to-transparent p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <div className="h-10 w-10 rounded-xl bg-primary/15 border border-primary/25 flex items-center justify-center shrink-0">
+        <Download className="h-5 w-5 text-primary" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-sm mb-0.5">Want temp email right in your browser toolbar?</p>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          The X Toolkit Chrome extension gives you instant inbox access, auto-detects OTP codes, and sends notifications when new mail arrives — without opening any website.
+        </p>
+      </div>
+      <Link href="/chrome-extension">
+        <Button size="sm" className="shrink-0 gap-1.5 whitespace-nowrap shadow-sm shadow-primary/20">
+          <Download className="h-3.5 w-3.5" /> Get the Extension
+        </Button>
+      </Link>
+    </div>
+  );
+}
+
 // ── Main Page ──────────────────────────────────────────────────────
 
 export default function TempMail({ defaultTab = "disposable" }: { defaultTab?: Tab }) {
@@ -1327,9 +1351,12 @@ export default function TempMail({ defaultTab = "disposable" }: { defaultTab?: T
       relatedTools={relatedTools}
       affiliateCategory="growth"
     >
-      {defaultTab === "disposable" && <UnifiedInboxSection />}
-      {defaultTab === "tempgmail" && <TempGmailTab />}
-      {defaultTab === "gmail" && <GmailTricksTab />}
+      <div className="space-y-6">
+        {defaultTab === "disposable" && <UnifiedInboxSection />}
+        {defaultTab === "tempgmail" && <TempGmailTab />}
+        {defaultTab === "gmail" && <GmailTricksTab />}
+        <ExtensionBanner />
+      </div>
     </MiniToolLayout>
   );
 }
